@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-22T23:44:22.345284+00:00",
+  "generated_at": "2026-06-22T23:51:06.366021+00:00",
   "wave": 0,
   "summary": {
     "agents": 17,
@@ -8,7 +8,7 @@
     "simulators": 3,
     "router_capabilities": 12,
     "tool_manifest_capabilities": 8,
-    "tests": 63,
+    "tests": 64,
     "source_directories": [
       "agents",
       "attestation",
@@ -527,10 +527,10 @@
     }
   ],
   "components": {
-    "total": 33,
+    "total": 34,
     "by_status": {
       "planned": 31,
-      "present": 2
+      "present": 3
     },
     "by_trust_zone": {
       "detection": 7,
@@ -538,12 +538,13 @@
       "evidence": 4,
       "execution": 3,
       "identity": 8,
-      "management": 6,
+      "management": 7,
       "observability": 1
     },
     "present": [
       "policy_engine",
-      "repo_inventory"
+      "repo_inventory",
+      "schema_registry"
     ]
   },
   "tests": [
@@ -591,6 +592,7 @@
     "tests/test_roots_of_trust.py",
     "tests/test_router.py",
     "tests/test_router_contract_execution.py",
+    "tests/test_schemas.py",
     "tests/test_scope.py",
     "tests/test_shadow_guardian.py",
     "tests/test_signing.py",

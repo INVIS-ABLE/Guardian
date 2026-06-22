@@ -1,0 +1,894 @@
+{
+  "$defs": {
+    "AssetRef": {
+      "additionalProperties": false,
+      "description": "A reference into the security knowledge graph / digital twin (\u00a75, \u00a714).",
+      "properties": {
+        "identifier": {
+          "title": "Identifier",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "schema_version": {
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "identifier"
+      ],
+      "title": "AssetRef",
+      "type": "object"
+    },
+    "CaseStatus": {
+      "description": "Explicit lifecycle of a case \u2014 including explicit abort/halt states (\u00a71).",
+      "enum": [
+        "intake",
+        "planning",
+        "collecting",
+        "analysing",
+        "challenging",
+        "awaiting_approval",
+        "executing",
+        "observing",
+        "completed",
+        "halted",
+        "aborted"
+      ],
+      "title": "CaseStatus",
+      "type": "string"
+    },
+    "CaseTrigger": {
+      "additionalProperties": false,
+      "description": "What opened the case (an alert, a scheduled run, a human request, a webhook).",
+      "properties": {
+        "detail": {
+          "default": "",
+          "maxLength": 4000,
+          "title": "Detail",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "received_at": {
+          "format": "date-time",
+          "title": "Received At",
+          "type": "string"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "source"
+      ],
+      "title": "CaseTrigger",
+      "type": "object"
+    },
+    "Classification": {
+      "description": "Data-classification label that must *propagate* through every transformation.\n\nThe coarse tiers mirror docs/governance/DATA_CLASSIFICATION.md\n(PUBLIC | INTERNAL | CONFIDENTIAL | RESTRICTED). ``PII``/``HEALTH`` are finer\nlabels for the RESTRICTED tier; ``MESSAGE_PLAINTEXT`` and ``DECRYPTION_KEY`` are\ntracked so the privacy boundary can refuse to let them near a model or long-term\nmemory (policy_gate BLOCKED_ACTIONS enforce the act; the label lets us detect and\nrefuse *content* too).",
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "restricted",
+        "pii",
+        "health",
+        "message_plaintext",
+        "decryption_key"
+      ],
+      "title": "Classification",
+      "type": "string"
+    },
+    "EvidenceItem": {
+      "additionalProperties": false,
+      "description": "One immutable piece of evidence with full provenance, trust and classification.\n\nThe ``summary`` is a short human/model-readable description; ``source_hash`` and\n``content_hash`` make the item content-addressable and tamper-evident. Raw\nartifacts live in the raw-evidence store (\u00a79) and are referenced by hash, not\ninlined, so this object stays bounded.",
+      "properties": {
+        "assets": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/AssetRef"
+          },
+          "title": "Assets",
+          "type": "array"
+        },
+        "classification": {
+          "$ref": "#/$defs/Classification",
+          "default": "internal"
+        },
+        "content_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Content Hash"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "schema_version": {
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "source_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Hash"
+        },
+        "summary": {
+          "maxLength": 4000,
+          "title": "Summary",
+          "type": "string"
+        },
+        "trust_level": {
+          "$ref": "#/$defs/TrustLevel",
+          "default": "untrusted_evidence"
+        },
+        "validation_state": {
+          "$ref": "#/$defs/ValidationState",
+          "default": "unvalidated"
+        }
+      },
+      "required": [
+        "kind",
+        "summary",
+        "provenance"
+      ],
+      "title": "EvidenceItem",
+      "type": "object"
+    },
+    "ExecutionBudgets": {
+      "additionalProperties": false,
+      "description": "Hard limits on a case: depth, iterations, time, cost, tokens, tool calls (\u00a71).\n\nBudgets are checked by the graph before each step; exceeding any of them is a\nbounded, recorded stop \u2014 not an open-ended loop.",
+      "properties": {
+        "max_cost_usd": {
+          "default": 25.0,
+          "minimum": 0.0,
+          "title": "Max Cost Usd",
+          "type": "number"
+        },
+        "max_depth": {
+          "default": 12,
+          "minimum": 1,
+          "title": "Max Depth",
+          "type": "integer"
+        },
+        "max_iterations": {
+          "default": 50,
+          "minimum": 1,
+          "title": "Max Iterations",
+          "type": "integer"
+        },
+        "max_model_tokens": {
+          "default": 2000000,
+          "minimum": 0,
+          "title": "Max Model Tokens",
+          "type": "integer"
+        },
+        "max_tool_calls": {
+          "default": 200,
+          "minimum": 0,
+          "title": "Max Tool Calls",
+          "type": "integer"
+        },
+        "max_wall_seconds": {
+          "default": 3600,
+          "minimum": 1,
+          "title": "Max Wall Seconds",
+          "type": "integer"
+        },
+        "used_cost_usd": {
+          "default": 0.0,
+          "minimum": 0.0,
+          "title": "Used Cost Usd",
+          "type": "number"
+        },
+        "used_iterations": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Used Iterations",
+          "type": "integer"
+        },
+        "used_model_tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Used Model Tokens",
+          "type": "integer"
+        },
+        "used_tool_calls": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Used Tool Calls",
+          "type": "integer"
+        },
+        "used_wall_seconds": {
+          "default": 0.0,
+          "minimum": 0.0,
+          "title": "Used Wall Seconds",
+          "type": "number"
+        }
+      },
+      "title": "ExecutionBudgets",
+      "type": "object"
+    },
+    "Finding": {
+      "additionalProperties": false,
+      "description": "A normalised, deduplicated finding traceable to evidence and an asset (\u00a74).",
+      "properties": {
+        "asset": {
+          "$ref": "#/$defs/AssetRef"
+        },
+        "classification": {
+          "$ref": "#/$defs/Classification",
+          "default": "internal"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 8000,
+          "title": "Description",
+          "type": "string"
+        },
+        "evidence_ids": {
+          "default": [],
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "hypothesis_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Hypothesis Id"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "schema_version": {
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "severity": {
+          "default": "info",
+          "enum": [
+            "info",
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 500,
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "asset",
+        "provenance"
+      ],
+      "title": "Finding",
+      "type": "object"
+    },
+    "Hypothesis": {
+      "additionalProperties": false,
+      "description": "A claim with explicit supporting AND contradicting evidence (\u00a74).\n\nConfidence is never asserted on its own: a high-confidence ``confirmed``\nhypothesis with an incomplete evidence graph is exactly what the Brain must\nrefuse to produce. ``uncertainty_reasons`` and ``falsification_tests`` force the\nmodel to show its work and to say what would change its mind.",
+      "properties": {
+        "affected_assets": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/AssetRef"
+          },
+          "title": "Affected Assets",
+          "type": "array"
+        },
+        "attack_techniques": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Attack Techniques",
+          "type": "array"
+        },
+        "confidence": {
+          "default": 0.0,
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "contradicting_evidence_ids": {
+          "default": [],
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Contradicting Evidence Ids",
+          "type": "array"
+        },
+        "falsification_tests": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/TestProposal"
+          },
+          "title": "Falsification Tests",
+          "type": "array"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "statement": {
+          "maxLength": 4000,
+          "title": "Statement",
+          "type": "string"
+        },
+        "status": {
+          "default": "unverified",
+          "enum": [
+            "unverified",
+            "supported",
+            "contradicted",
+            "inconclusive",
+            "confirmed"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "supporting_evidence_ids": {
+          "default": [],
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Supporting Evidence Ids",
+          "type": "array"
+        },
+        "uncertainty_reasons": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Uncertainty Reasons",
+          "type": "array"
+        }
+      },
+      "required": [
+        "statement"
+      ],
+      "title": "Hypothesis",
+      "type": "object"
+    },
+    "PolicyDecisionRecord": {
+      "additionalProperties": false,
+      "description": "An immutable record of a deterministic policy decision for the case.",
+      "properties": {
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "allow": {
+          "title": "Allow",
+          "type": "boolean"
+        },
+        "decided_at": {
+          "format": "date-time",
+          "title": "Decided At",
+          "type": "string"
+        },
+        "denies": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Denies",
+          "type": "array"
+        },
+        "mode": {
+          "title": "Mode",
+          "type": "string"
+        },
+        "policy_digest": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Policy Digest"
+        },
+        "schema_version": {
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "action",
+        "mode",
+        "allow"
+      ],
+      "title": "PolicyDecisionRecord",
+      "type": "object"
+    },
+    "ProposedAction": {
+      "additionalProperties": false,
+      "description": "A remediation/containment option the Brain proposes \u2014 never self-executes.\n\nA model may *propose* this; only deterministic policy + recorded human approval\ncan authorise it (target architecture \u00a71: \"a model must never decide whether it\nhas authority to proceed\").",
+      "properties": {
+        "finding_ids": {
+          "default": [],
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Finding Ids",
+          "type": "array"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "requires_approval": {
+          "default": true,
+          "title": "Requires Approval",
+          "type": "boolean"
+        },
+        "residual_risk": {
+          "default": "",
+          "title": "Residual Risk",
+          "type": "string"
+        },
+        "rollback_plan": {
+          "default": "",
+          "title": "Rollback Plan",
+          "type": "string"
+        },
+        "schema_version": {
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "summary": {
+          "maxLength": 4000,
+          "title": "Summary",
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/$defs/AssetRef"
+        }
+      },
+      "required": [
+        "kind",
+        "summary",
+        "target"
+      ],
+      "title": "ProposedAction",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "description": "Where a piece of evidence came from and how it was transformed.\n\nEvery finding must be traceable to original raw evidence, the tool + version +\ndigest that produced it, when it was acquired, the asset/commit it concerns, the\nparser that read it, its transformation history, and the analyst/model that\ninterpreted it (target architecture \u00a74).",
+      "properties": {
+        "acquired_at": {
+          "format": "date-time",
+          "title": "Acquired At",
+          "type": "string"
+        },
+        "asset": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Asset"
+        },
+        "commit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Commit"
+        },
+        "interpreted_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Interpreted By"
+        },
+        "parser_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parser Version"
+        },
+        "schema_version": {
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_digest": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tool Digest"
+        },
+        "tool_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tool Version"
+        },
+        "transformations": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Transformations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "tool"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "TestProposal": {
+      "additionalProperties": false,
+      "description": "A falsification test that would confirm or disprove a hypothesis.",
+      "properties": {
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "expected_if_false": {
+          "title": "Expected If False",
+          "type": "string"
+        },
+        "expected_if_true": {
+          "title": "Expected If True",
+          "type": "string"
+        },
+        "safe_to_run": {
+          "default": false,
+          "title": "Safe To Run",
+          "type": "boolean"
+        },
+        "schema_version": {
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "description",
+        "expected_if_true",
+        "expected_if_false"
+      ],
+      "title": "TestProposal",
+      "type": "object"
+    },
+    "TrustLevel": {
+      "description": "Context-firewall trust classes (target architecture \u00a78).\n\nOrdered loosely from most to least authoritative. The firewall's core rule:\ninstructions found inside UNTRUSTED_EVIDENCE / TOOL_OUTPUT / RETRIEVED_MEMORY /\nMODEL_GENERATED content are *data*, never commands, and a low-trust input can\nnever silently be promoted to drive policy or another agent's instructions.",
+      "enum": [
+        "system_policy",
+        "trusted_config",
+        "verified_evidence",
+        "untrusted_evidence",
+        "user_instruction",
+        "tool_output",
+        "retrieved_memory",
+        "model_generated"
+      ],
+      "title": "TrustLevel",
+      "type": "string"
+    },
+    "ValidationState": {
+      "enum": [
+        "unvalidated",
+        "validated",
+        "rejected"
+      ],
+      "title": "ValidationState",
+      "type": "string"
+    },
+    "VerificationResult": {
+      "additionalProperties": false,
+      "description": "The verdict of an independent verifier over a finding or proposed action.",
+      "properties": {
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        },
+        "reasons": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Reasons",
+          "type": "array"
+        },
+        "schema_version": {
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "subject_id": {
+          "format": "uuid",
+          "title": "Subject Id",
+          "type": "string"
+        },
+        "verified_at": {
+          "format": "date-time",
+          "title": "Verified At",
+          "type": "string"
+        },
+        "verifier": {
+          "title": "Verifier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "subject_id",
+        "verifier",
+        "passed"
+      ],
+      "title": "VerificationResult",
+      "type": "object"
+    },
+    "VerifiedScope": {
+      "additionalProperties": false,
+      "description": "The verified authority boundary for a case \u2014 derived from a scope file.\n\nA model never populates this: scope/identity/ownership verification is\ndeterministic (target architecture \u00a71). ``ownership_verified`` defaults to\n``False`` and must be set by a real verifier, mirroring the fail-closed default\nnow used by the policy gate.",
+      "properties": {
+        "allowed_domains": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Domains",
+          "type": "array"
+        },
+        "allowed_modes": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Modes",
+          "type": "array"
+        },
+        "allowed_repos": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Repos",
+          "type": "array"
+        },
+        "asset": {
+          "title": "Asset",
+          "type": "string"
+        },
+        "environment": {
+          "title": "Environment",
+          "type": "string"
+        },
+        "ownership_verified": {
+          "default": false,
+          "title": "Ownership Verified",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "asset",
+        "environment"
+      ],
+      "title": "VerifiedScope",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "The complete, typed, immutable state of one Guardian investigation (\u00a73).\n\nNodes return a :class:`CaseStateDelta`; :meth:`apply` produces a *new* state.\nNothing mutates this object in place, so provenance stays intact and a node\ncannot corrupt another node's contribution.",
+  "properties": {
+    "budgets": {
+      "$ref": "#/$defs/ExecutionBudgets"
+    },
+    "case_id": {
+      "format": "uuid",
+      "title": "Case Id",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "evidence": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/EvidenceItem"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "findings": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Finding"
+      },
+      "title": "Findings",
+      "type": "array"
+    },
+    "hypotheses": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Hypothesis"
+      },
+      "title": "Hypotheses",
+      "type": "array"
+    },
+    "policy_decisions": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/PolicyDecisionRecord"
+      },
+      "title": "Policy Decisions",
+      "type": "array"
+    },
+    "proposed_actions": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/ProposedAction"
+      },
+      "title": "Proposed Actions",
+      "type": "array"
+    },
+    "schema_version": {
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "scope": {
+      "$ref": "#/$defs/VerifiedScope"
+    },
+    "status": {
+      "$ref": "#/$defs/CaseStatus",
+      "default": "intake"
+    },
+    "tenant_id": {
+      "format": "uuid",
+      "title": "Tenant Id",
+      "type": "string"
+    },
+    "trigger": {
+      "$ref": "#/$defs/CaseTrigger"
+    },
+    "verification_results": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/VerificationResult"
+      },
+      "title": "Verification Results",
+      "type": "array"
+    }
+  },
+  "required": [
+    "tenant_id",
+    "scope",
+    "trigger"
+  ],
+  "title": "GuardianCaseState",
+  "type": "object"
+}

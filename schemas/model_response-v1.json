@@ -1,0 +1,225 @@
+{
+  "$defs": {
+    "Classification": {
+      "description": "Data-classification label that must *propagate* through every transformation.\n\nThe coarse tiers mirror docs/governance/DATA_CLASSIFICATION.md\n(PUBLIC | INTERNAL | CONFIDENTIAL | RESTRICTED). ``PII``/``HEALTH`` are finer\nlabels for the RESTRICTED tier; ``MESSAGE_PLAINTEXT`` and ``DECRYPTION_KEY`` are\ntracked so the privacy boundary can refuse to let them near a model or long-term\nmemory (policy_gate BLOCKED_ACTIONS enforce the act; the label lets us detect and\nrefuse *content* too).",
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "restricted",
+        "pii",
+        "health",
+        "message_plaintext",
+        "decryption_key"
+      ],
+      "title": "Classification",
+      "type": "string"
+    },
+    "ModelCallRecord": {
+      "additionalProperties": false,
+      "description": "Immutable audit record of a single model call. Frozen and strict.",
+      "properties": {
+        "case_id": {
+          "format": "uuid",
+          "title": "Case Id",
+          "type": "string"
+        },
+        "cost_usd": {
+          "default": 0.0,
+          "minimum": 0.0,
+          "title": "Cost Usd",
+          "type": "number"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "data_classification": {
+          "$ref": "#/$defs/Classification",
+          "default": "internal"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error"
+        },
+        "eval_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Eval Version"
+        },
+        "external_processing_permitted": {
+          "default": false,
+          "title": "External Processing Permitted",
+          "type": "boolean"
+        },
+        "input_evidence_ids": {
+          "default": [],
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Input Evidence Ids",
+          "type": "array"
+        },
+        "input_tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "model_id": {
+          "title": "Model Id",
+          "type": "string"
+        },
+        "output_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Output Hash"
+        },
+        "output_tokens": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        },
+        "prompt_template_hash": {
+          "title": "Prompt Template Hash",
+          "type": "string"
+        },
+        "prompt_template_version": {
+          "title": "Prompt Template Version",
+          "type": "string"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "retry_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Retry Count",
+          "type": "integer"
+        },
+        "routing_reason": {
+          "title": "Routing Reason",
+          "type": "string"
+        },
+        "succeeded": {
+          "default": true,
+          "title": "Succeeded",
+          "type": "boolean"
+        },
+        "tenant_id": {
+          "format": "uuid",
+          "title": "Tenant Id",
+          "type": "string"
+        },
+        "timeout_s": {
+          "default": 0.0,
+          "title": "Timeout S",
+          "type": "number"
+        },
+        "tool_schema_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tool Schema Version"
+        },
+        "work_class": {
+          "title": "Work Class",
+          "type": "string"
+        }
+      },
+      "required": [
+        "model_id",
+        "provider",
+        "routing_reason",
+        "work_class",
+        "prompt_template_version",
+        "prompt_template_hash",
+        "tenant_id",
+        "case_id"
+      ],
+      "title": "ModelCallRecord",
+      "type": "object"
+    },
+    "TrustLevel": {
+      "description": "Context-firewall trust classes (target architecture \u00a78).\n\nOrdered loosely from most to least authoritative. The firewall's core rule:\ninstructions found inside UNTRUSTED_EVIDENCE / TOOL_OUTPUT / RETRIEVED_MEMORY /\nMODEL_GENERATED content are *data*, never commands, and a low-trust input can\nnever silently be promoted to drive policy or another agent's instructions.",
+      "enum": [
+        "system_policy",
+        "trusted_config",
+        "verified_evidence",
+        "untrusted_evidence",
+        "user_instruction",
+        "tool_output",
+        "retrieved_memory",
+        "model_generated"
+      ],
+      "title": "TrustLevel",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "The gateway's answer: model text plus the firewall verdict and the audit record.\n\n``trust_level`` is always ``MODEL_GENERATED`` \u2014 model output can never become\nverified evidence or trusted memory without separate validation (\u00a78). ``high_risk``\nflags output the output firewall thinks must not reach a tool unreviewed.",
+  "properties": {
+    "firewall_findings": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Firewall Findings",
+      "type": "array"
+    },
+    "high_risk": {
+      "default": false,
+      "title": "High Risk",
+      "type": "boolean"
+    },
+    "record": {
+      "$ref": "#/$defs/ModelCallRecord"
+    },
+    "text": {
+      "title": "Text",
+      "type": "string"
+    },
+    "trust_level": {
+      "$ref": "#/$defs/TrustLevel",
+      "default": "model_generated"
+    }
+  },
+  "required": [
+    "text",
+    "record"
+  ],
+  "title": "ModelResponse",
+  "type": "object"
+}

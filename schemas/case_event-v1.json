@@ -1,0 +1,102 @@
+{
+  "additionalProperties": false,
+  "description": "The common Guardian event envelope (mesh family ``guardian.*``).\n\nMirrors the master-map \u00a727 envelope. ``payload_sha256`` binds the payload; build\ninstances through :meth:`create` so the hash is always computed consistently.",
+  "properties": {
+    "actor": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Actor",
+      "type": "string"
+    },
+    "asset_refs": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Asset Refs",
+      "type": "array"
+    },
+    "case_id": {
+      "anyOf": [
+        {
+          "format": "uuid",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Case Id"
+    },
+    "classification": {
+      "default": "internal",
+      "title": "Classification",
+      "type": "string"
+    },
+    "event_id": {
+      "format": "uuid",
+      "title": "Event Id",
+      "type": "string"
+    },
+    "event_type": {
+      "maxLength": 200,
+      "minLength": 1,
+      "title": "Event Type",
+      "type": "string"
+    },
+    "occurred_at": {
+      "format": "date-time",
+      "title": "Occurred At",
+      "type": "string"
+    },
+    "payload": {
+      "additionalProperties": true,
+      "title": "Payload",
+      "type": "object"
+    },
+    "payload_sha256": {
+      "default": "",
+      "title": "Payload Sha256",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "signature": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Signature"
+    },
+    "trace_id": {
+      "default": "",
+      "title": "Trace Id",
+      "type": "string"
+    },
+    "version": {
+      "default": 1,
+      "title": "Version",
+      "type": "integer"
+    },
+    "workflow_id": {
+      "default": "",
+      "title": "Workflow Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "event_type",
+    "actor"
+  ],
+  "title": "CaseEvent",
+  "type": "object"
+}

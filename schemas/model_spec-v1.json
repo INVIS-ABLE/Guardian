@@ -1,0 +1,67 @@
+{
+  "$defs": {
+    "ModelClass": {
+      "description": "The capability tier a concrete model provides.",
+      "enum": [
+        "fast",
+        "local",
+        "strong_reasoning",
+        "strong_coding",
+        "judge",
+        "none"
+      ],
+      "title": "ModelClass",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "A pinned, registered model the gateway is allowed to call.\n\n``model_id`` is an exact pinned snapshot (Anthropic publishes pinned snapshot IDs,\nnot moving aliases). ``performs_external_processing`` drives the privacy boundary:\na model that ships data off-box may not receive sensitive content unless the caller\nexplicitly permits it. Prices are *estimates* for budget accounting and can be\noverridden via configuration \u2014 they are not authoritative billing figures.",
+  "properties": {
+    "family": {
+      "title": "Family",
+      "type": "string"
+    },
+    "input_price_per_mtok": {
+      "default": 0.0,
+      "minimum": 0.0,
+      "title": "Input Price Per Mtok",
+      "type": "number"
+    },
+    "max_output_tokens": {
+      "default": 4096,
+      "minimum": 1,
+      "title": "Max Output Tokens",
+      "type": "integer"
+    },
+    "model_class": {
+      "$ref": "#/$defs/ModelClass"
+    },
+    "model_id": {
+      "title": "Model Id",
+      "type": "string"
+    },
+    "output_price_per_mtok": {
+      "default": 0.0,
+      "minimum": 0.0,
+      "title": "Output Price Per Mtok",
+      "type": "number"
+    },
+    "performs_external_processing": {
+      "title": "Performs External Processing",
+      "type": "boolean"
+    },
+    "provider": {
+      "title": "Provider",
+      "type": "string"
+    }
+  },
+  "required": [
+    "model_id",
+    "provider",
+    "model_class",
+    "family",
+    "performs_external_processing"
+  ],
+  "title": "ModelSpec",
+  "type": "object"
+}
