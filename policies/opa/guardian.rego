@@ -5,6 +5,8 @@
 # reviewers who approved production_scan.
 package guardian.authz
 
+import future.keywords.contains
+import future.keywords.if
 import future.keywords.in
 
 blocked_actions := {
@@ -41,15 +43,21 @@ bound_ok(a) if {
 	target_ok(a)
 }
 
-commit_ok(a) if a.commit == null
-commit_ok(a) if a.commit == input.commit
+# An absent binding key means "unbound" (wildcard) — mirror Python's `None`, which
+# `object.get(..., null)` yields, rather than `a.commit` which is *undefined* when absent.
+commit_ok(a) if object.get(a, "commit", null) == null
 
-workflow_ok(a) if a.workflow_run == null
-workflow_ok(a) if a.workflow_run == input.workflow_run
+commit_ok(a) if object.get(a, "commit", null) == input.commit
 
-target_ok(a) if a.target == null
-target_ok(a) if a.target == input.domain
-target_ok(a) if a.target == input.repo
+workflow_ok(a) if object.get(a, "workflow_run", null) == null
+
+workflow_ok(a) if object.get(a, "workflow_run", null) == input.workflow_run
+
+target_ok(a) if object.get(a, "target", null) == null
+
+target_ok(a) if object.get(a, "target", null) == input.domain
+
+target_ok(a) if object.get(a, "target", null) == input.repo
 
 valid_approval(a) if {
 	unexpired(a)
@@ -84,6 +92,7 @@ deny contains "ownership_unverified" if {
 }
 
 has_target if input.domain != null
+
 has_target if input.repo != null
 
 deny contains msg if {
@@ -99,6 +108,7 @@ deny contains msg if {
 }
 
 gated if input.action in global_approval_required
+
 gated if input.action in {x | some x in input.approval_required}
 
 deny contains msg if {
