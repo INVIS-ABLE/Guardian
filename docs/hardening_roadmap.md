@@ -26,7 +26,7 @@ plugs into that single decision point.
 | - | ---- | -------- | ------ | ----- |
 | 1 | Policy & authorisation | OPA, conftest | ✅ keystone | `core/policy_gate.py`, `policies/opa/*.rego`, `docs/authorization.md` |
 | 2 | Ownership verification | PyGithub, dnspython | ⬜ | inject a real verifier into `Guardrails.ownership_verifier`; expiring evidence |
-| 3 | Durable workflows & approvals | Temporal + sdk-python | ⬜ | two-reviewer signal flow, re-ask OPA before execute |
+| 3 | Durable workflows & approvals | Temporal + sdk-python | 🟡 | state machine + engine shipped (`orchestration/`): monotonic states, two-reviewer approvals, replay protection, kill switches, budgets, **re-ask policy before execute**; Temporal cluster wiring pending |
 | 4 | Secrets & keys | OpenBao, SOPS | ⬜ | short-lived per-workflow creds; encrypt in-Git config |
 | 5 | Immutable audit & evidence | immudb, in-toto/witness, cosign | 🟡 | denials already audited (hash chain); immudb + signed attestations next |
 | 6 | Findings management | DefectDojo | ⬜ | unified findings ledger; Guardian orchestrates, doesn't re-home findings |
