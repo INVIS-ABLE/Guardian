@@ -33,7 +33,7 @@ security/
 | AEAD / KDF / boxes / signatures | `libsodium-wrappers-sumo` 0.7.15 | Audited libsodium (jedisct1) as WASM — same code in Node and the PWA. |
 | Access tokens | `jose` 5.9.6 | Modern, audited JWS/JWT; algorithm pinning prevents alg-confusion. |
 | Cookies | `cookie` 1.0.2 | RFC 6265 serialization; we layer hardened defaults on top. |
-| Optional Signal E2EE | `@signalapp/libsignal-client` 0.62.0 | Official X3DH + Double Ratchet for full forward secrecy. |
+| Optional Signal E2EE | `@signalapp/libsignal-client` (installed on demand) | Official X3DH + Double Ratchet for full forward secrecy. Not a default dep — `e2eeMessaging` lazy-loads it — because its transitive `uuid<11` carries a CVE; pin a patched version when you enable E2EE. |
 
 Crypto libraries are **exact-pinned**; the policy checker (module 9) fails CI if a `^`/`~`
 range sneaks in. Bumps go through review + scanning.

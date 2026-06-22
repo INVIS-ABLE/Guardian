@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "description": "INVISABLE Guardian + PWA encryption/hashing layer — established libraries only, no custom crypto.",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
@@ -20,13 +22,14 @@
     "jose": "5.9.6",
     "libsodium-wrappers-sumo": "0.7.15"
   },
-  "optionalDependencies": {
-    "@signalapp/libsignal-client": "0.62.0"
-  },
+  "//optionalDependencies": "E2EE via @signalapp/libsignal-client is installed ON DEMAND when E2EE is enabled (e2eeMessaging.ts lazy-loads it). It is not a default dependency because its transitive uuid<11 pulls a known CVE; pin a patched version when you add it.",
   "devDependencies": {
     "@types/node": "22.10.2",
     "tsx": "4.19.2",
     "typescript": "5.7.2",
-    "vitest": "2.1.8"
+    "vitest": "4.1.9"
+  },
+  "overrides": {
+    "esbuild": ">=0.25.0"
   }
 }
