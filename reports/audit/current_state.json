@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-22T23:36:53.107388+00:00",
+  "generated_at": "2026-06-22T23:44:22.345284+00:00",
   "wave": 0,
   "summary": {
     "agents": 17,
@@ -8,7 +8,7 @@
     "simulators": 3,
     "router_capabilities": 12,
     "tool_manifest_capabilities": 8,
-    "tests": 60,
+    "tests": 63,
     "source_directories": [
       "agents",
       "attestation",
@@ -467,6 +467,39 @@
       ]
     },
     {
+      "file": "core/twin/federate.py",
+      "markers": [
+        {
+          "line": 26,
+          "marker": "placeholder"
+        },
+        {
+          "line": 73,
+          "marker": "placeholder"
+        },
+        {
+          "line": 120,
+          "marker": "placeholder"
+        },
+        {
+          "line": 130,
+          "marker": "placeholder"
+        },
+        {
+          "line": 131,
+          "marker": "placeholder"
+        },
+        {
+          "line": 136,
+          "marker": "placeholder"
+        },
+        {
+          "line": 137,
+          "marker": "placeholder"
+        }
+      ]
+    },
+    {
       "file": "core/twin/ingest.py",
       "markers": [
         {
@@ -571,7 +604,10 @@
     "tests/test_trust_producers.py",
     "tests/test_twin.py",
     "tests/test_twin_assessment.py",
+    "tests/test_twin_cartography.py",
     "tests/test_twin_changemap.py",
+    "tests/test_twin_federate.py",
+    "tests/test_twin_forecast.py",
     "tests/test_typed_state.py",
     "tests/test_verifier.py"
   ]
