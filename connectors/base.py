@@ -63,14 +63,10 @@ class BaseConnector:
         return result
 
     def run(self, *, repo: str | None = None, target: str | None = None, **kwargs: Any) -> ConnectorResult:
-        # Gate: connectors operate only on in-scope, owned assets in an allowed mode.
-        self.guardrails.assert_mode_allowed(self.mode)
-        self.guardrails.assert_not_blocked(self.action)
-        self.guardrails.assert_approved(self.action)
-        if repo is not None:
-            self.guardrails.assert_owned(repo=repo)
-        if target is not None:
-            self.guardrails.assert_owned(domain=target)
+        # Connectors never decide authorization themselves — one central policy call.
+        self.guardrails.authorize(
+            mode=self.mode, action=self.action, domain=target, repo=repo
+        )
 
         command = self.build_command(repo=repo, target=target, **kwargs)
         result = ConnectorResult(tool=self.tool, command=command, dry_run=self.dry_run)
