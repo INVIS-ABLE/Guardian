@@ -51,6 +51,7 @@ def build_policy_input(
         action=action,
         mode=mode,
         environment=scope.environment,
+        tenant_id=scope.tenant,
         allowed_modes=scope.allowed_modes,
         blocked_actions=scope.blocked_actions,
         approval_required=scope.approval_required,

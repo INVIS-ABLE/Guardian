@@ -28,14 +28,17 @@ runtime behaviour without an explicit, separate decision.
 - `Scope.tenant` accessor + optional `tenant:` schema field.
 - `tests/test_tenancy.py` (22 tests). No enforcement change.
 
-### Phase B — tenant-aware enforcement (next, feature-flagged)
-- Add `tenant_id` to `PolicyInput` (`core/policy_gate.py`), defaulting to the scope's
-  tenant. Place `authorise_target()` **before** `decide()`: target legitimacy first,
-  action policy second.
-- Add a tenant dimension to the target root in `core/roots_of_trust.py` (ownership is
-  verified *for this tenant's* authorising identity).
-- Flag: `guardian.tenancy.enforce` (default `false`); when off, behaviour is exactly
-  today's.
+### Phase B — tenant-aware enforcement (shipped, feature-flagged) ✅
+- `PolicyInput` gains `tenant_id` (defaults to the scope's tenant via
+  `Scope.tenant`), plus `capability`, `asset_id`, `grants`, `verify_grant_key`.
+- `evaluate()` applies `authorise_target()` as an **outer AND** over the action
+  policy (`_tenant_denies()` → `_evaluate_core()`): target legitimacy first, action
+  policy second. It lives outside `decide()`, so OPA/embedded parity is untouched.
+- Flag: `GUARDIAN_TENANCY_ENFORCE` (default `false`); when off, behaviour is exactly
+  today's. (See D-0004.)
+- *Deferred to Phase C:* the tenant dimension on the target root in
+  `core/roots_of_trust.py` (ownership verified *for this tenant's* authorising
+  identity).
 
 ### Phase C — data-plane tenant scoping
 - Add `tenant_id` to `ActionRequest` (`connectors/contract.py`) and `EvidenceItem`
