@@ -18,6 +18,24 @@ silent production change (all fixes are pull requests), and human approval befor
 | **Runtime monitoring** | OpenTelemetry, Prometheus, Grafana, Loki, Sentry, Wazuh, Falco | Runtime Monitoring agent; `guardian.config.yaml::monitoring` |
 | **Safe rollback** | Argo Rollouts, feature flags, Git revert automation | `self_healing.deploy.auto_rollback_on_safety_failure` |
 
+## Upstream sources
+
+| Tool | Layer | Upstream |
+| ---- | ----- | -------- |
+| OpenRewrite | Automated code remediation | https://github.com/openrewrite/rewrite |
+| Temporal | Workflow engine | https://github.com/temporalio/temporal |
+| Dapr | Workflow engine | https://github.com/dapr/dapr |
+| Argo CD | GitOps deployment | https://github.com/argoproj/argo-cd |
+| Argo Rollouts | Progressive deploy / safe rollback | https://github.com/argoproj/argo-rollouts |
+| Flux (flux2) | GitOps deployment | https://github.com/fluxcd/flux2 |
+| Flagger | Progressive deploy | https://github.com/fluxcd/flagger |
+| Open Policy Agent (OPA) | Policy-as-code | https://github.com/open-policy-agent/opa |
+| Kyverno | Policy-as-code | https://github.com/kyverno/kyverno |
+
+Semgrep/CodeQL autofix, the test-orchestration tools, the supply-chain tools (SLSA,
+Cosign, Syft, Grype), and the runtime-monitoring tools are listed with their upstream
+sources in [tooling_catalogue.md](tooling_catalogue.md).
+
 ## How the layers gate each other
 
 ```
