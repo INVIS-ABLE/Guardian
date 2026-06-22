@@ -73,6 +73,17 @@ Defence in depth on "defensive-only" = `core/policy_gate.py` + `core/guardrails.
 `policies/guardrails/nemo/` (NeMo rails on the reasoning model). Behaviour is checked by
 the `eval/` harness (DeepEval / Promptfoo / Ragas).
 
+## The Privacy Fabric boundary
+
+The INVISABLE Privacy Fabric ([docs/privacy_fabric/](privacy_fabric/)) places the
+cryptographic boundary **above** the infrastructure Guardian defends. Guardian protects
+infrastructure, code, identities, and availability — and is structurally forbidden from
+reading inside the crypto system. The "Guardian must never" list
+([policies/privacy_invariants.yaml](../policies/privacy_invariants.yaml)) — decrypt private
+content, copy it to memory, hold keys, train on it, create a master key, etc. — is enforced
+as globally **blocked actions** in `core/policy_gate.py` and the Rego twin, and proven by
+`tests/test_privacy_invariants.py`.
+
 ## RAG memory & models
 
 Configured in `guardian.config.yaml`: a reasoning model (Claude/GPT-compatible), an

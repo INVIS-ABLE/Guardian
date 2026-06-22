@@ -22,6 +22,26 @@ test_blocked_action_denied if {
 	}
 }
 
+# Privacy Fabric: Guardian may never decrypt private content — globally blocked.
+test_privacy_decrypt_denied if {
+	not allow with input as {
+		"action": "decrypt_private_content", "mode": "code_review", "environment": "staging",
+		"ownership_verified": true, "allowed_modes": ["code_review"],
+		"blocked_actions": [], "approval_required": [], "allowed_test_accounts": [],
+		"approvals": [], "now": 1000,
+	}
+}
+
+# Privacy Fabric: Guardian may never train on user content — globally blocked.
+test_privacy_train_on_user_content_denied if {
+	not allow with input as {
+		"action": "train_on_user_content", "mode": "code_review", "environment": "staging",
+		"ownership_verified": true, "allowed_modes": ["code_review"],
+		"blocked_actions": [], "approval_required": [], "allowed_test_accounts": [],
+		"approvals": [], "now": 1000,
+	}
+}
+
 # Production with a single approver is denied (two-person rule).
 test_production_single_approver_denied if {
 	not allow with input as {

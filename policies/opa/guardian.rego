@@ -10,6 +10,10 @@ import future.keywords.in
 blocked_actions := {
 	"third_party_scan", "real_user_data_access", "credential_theft", "stealth",
 	"persistence", "exploit_deployment", "hack_back", "destructive_testing",
+	# Privacy Fabric invariants — Guardian protects the crypto system, never reads inside it.
+	"decrypt_private_content", "access_message_plaintext", "copy_private_content_to_memory",
+	"send_private_content_to_model", "store_decryption_keys", "silent_moderation_participant",
+	"create_master_access_key", "plaintext_in_observability", "train_on_user_content",
 }
 
 global_approval_required := {

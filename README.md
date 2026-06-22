@@ -143,6 +143,8 @@ OWASP **WSTG**, **ASVS 5.0**, **SAMM**, **MASVS/MASTG**; **NIST SSDF**; **SLSA**
 - [docs/hardening_roadmap.md](docs/hardening_roadmap.md) — 12-area hardening blueprint → 10/10 acceptance gate
 - [docs/architecture/target_stack.md](docs/architecture/target_stack.md) — target production stack ([components.yaml](docs/architecture/components.yaml))
 - [docs/governance/](docs/governance/) — threat model, invariants, exception process, IR/DR plans
+- [docs/privacy_fabric/](docs/privacy_fabric/) — INVISABLE Privacy Fabric: five-ring firewall, messaging crypto (Signal/MLS), key transparency, sealed sender, retention/DPIA, epics
+- [policies/privacy_invariants.yaml](policies/privacy_invariants.yaml) — Guardian's enforced privacy boundary (protector, never reader)
 - [docs/tool_independence.md](docs/tool_independence.md) — defensive vendor/pin + detection-learning plan
 - [policies/mobile_guardian_modules.yaml](policies/mobile_guardian_modules.yaml) — mobile/PWA defence modules (MASVS/MASTG)
 - **Encryption & hashing layer** — [security/README.md](security/README.md),

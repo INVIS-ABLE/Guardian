@@ -1,0 +1,65 @@
+# INVISABLE Privacy Fabric — Guardian boundary invariants
+#
+# Guardian protects the cryptographic system; it is NEVER a reader inside it.
+# This file is the single, machine-readable statement of what Guardian may and may not
+# do with respect to private user content. The `never` actions are mirrored as globally
+# BLOCKED_ACTIONS in core/policy_gate.py and policies/opa/guardian.rego, so any request
+# for them is denied by the central authority (default-deny, fail-closed).
+#
+# See docs/privacy_fabric/ for the full architecture.
+
+version: "1.0.0"
+
+principle: >
+  Even a full backend compromise must not automatically expose the vulnerable people who
+  trusted INVISABLE. Guardian defends infrastructure, code, identities and availability —
+  it never decrypts conversations, never holds message keys, and never trains on user
+  content. The cryptographic boundary is above Guardian, not inside it.
+
+# What Guardian is permitted to monitor — all of it operates on metadata, infrastructure
+# signals, and ciphertext, never on decrypted private content.
+guardian_may_monitor:
+  - authentication_attacks
+  - account_enumeration
+  - spam_and_automation_patterns
+  - rate_limit_abuse
+  - malicious_uploads_while_encrypted        # scan ciphertext / sandbox, never plaintext
+  - infrastructure_compromise
+  - unusual_service_to_service_traffic
+  - key_directory_tampering                  # the Guardian Verifier role
+  - unexpected_device_registration
+  - supply_chain_compromise
+  - backend_code_vulnerabilities
+  - availability_attacks
+  - privileged_administrator_activity
+
+# What Guardian must NEVER do. Each maps to a globally blocked action enforced by the
+# central policy gate. Requesting any of these is refused and audited.
+guardian_must_never:
+  - id: decrypt_private_content
+    rule: Decrypt private conversations or any E2EE payload.
+  - id: access_message_plaintext
+    rule: Read decrypted message, media, or attachment plaintext.
+  - id: copy_private_content_to_memory
+    rule: Copy private user content into vector/RAG memory.
+  - id: send_private_content_to_model
+    rule: Send private messages or media to any model provider.
+  - id: store_decryption_keys
+    rule: Store, escrow, or cache conversation/message decryption keys.
+  - id: silent_moderation_participant
+    rule: Silently add a moderation participant to a conversation.
+  - id: create_master_access_key
+    rule: Create a universal company recovery/master access key.
+  - id: plaintext_in_observability
+    rule: Place plaintext content in logs, traces, or crash reports.
+  - id: train_on_user_content
+    rule: Train Guardian or any model on user conversations.
+
+# The Guardian Verifier is the one privacy-relevant active role: it INDEPENDENTLY monitors
+# the append-only key-transparency directory for tampering. It reads public verifiable
+# proofs and signed checkpoints only — never private content or keys.
+guardian_verifier:
+  monitors: key_transparency_directory
+  reads: [inclusion_proofs, consistency_proofs, signed_checkpoints, device_key_history]
+  never_reads: [message_plaintext, media_plaintext, conversation_keys]
+  alerts_on: [silent_key_replacement, checkpoint_inconsistency, unexpected_device_registration]

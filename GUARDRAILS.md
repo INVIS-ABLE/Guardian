@@ -30,6 +30,21 @@ The following are **always blocked**, in every mode, in every scope:
 - `hack_back`
 - `destructive_testing`
 
+### Privacy Fabric invariants — Guardian protects the crypto system, never reads inside it
+
+Also always blocked (see [docs/privacy_fabric/](docs/privacy_fabric/) and
+[policies/privacy_invariants.yaml](policies/privacy_invariants.yaml)):
+
+- `decrypt_private_content`
+- `access_message_plaintext`
+- `copy_private_content_to_memory`
+- `send_private_content_to_model`
+- `store_decryption_keys`
+- `silent_moderation_participant`
+- `create_master_access_key`
+- `plaintext_in_observability`
+- `train_on_user_content`
+
 ## 3. Approval gates (human-in-the-loop)
 
 These actions are refused unless an explicit, recorded **human approval** exists for the
