@@ -24,6 +24,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
+from ..roots_of_trust import RootsOfTrust, TrustContext, require_roots
 from .capability import CapabilityToken, TokenStore, hash_args, issue_token
 from .manifest import ToolManifest
 from .registry import RefusalReason, ToolRefusal, ToolRegistry
@@ -75,10 +76,11 @@ class ToolExecutor:
     """Resolves, authorises, tokenises and runs a capability under its manifest."""
 
     def __init__(self, registry: ToolRegistry, *, token_store: TokenStore | None = None,
-                 runner: ToolRunner | None = None) -> None:
+                 runner: ToolRunner | None = None, roots: RootsOfTrust | None = None) -> None:
         self._registry = registry
         self._tokens = token_store or TokenStore()
         self._runner = runner or DryRunRunner()
+        self._roots = roots
 
     def execute(
         self,
@@ -89,6 +91,7 @@ class ToolExecutor:
         environment: str,
         approved: bool = False,
         input_artifact_hashes: tuple[str, ...] = (),
+        trust: TrustContext | None = None,
     ) -> ToolExecution | ToolRefusal:
         resolved = self._registry.resolve(capability, environment=environment)
         if isinstance(resolved, ToolRefusal):
@@ -100,6 +103,22 @@ class ToolExecutor:
                 capability=capability, reason=RefusalReason.APPROVAL_REQUIRED,
                 detail="capability requires a recorded human approval",
             )
+
+        # Six roots of trust: verify BEFORE issuing a capability. Enforced when a gate is
+        # configured or the posture demands it (staging/production); fail closed.
+        if self._roots is not None or require_roots():
+            gate = self._roots or RootsOfTrust()
+            if trust is None:
+                return ToolRefusal(
+                    capability=capability, reason=RefusalReason.ROOTS_OF_TRUST_FAILED,
+                    detail="no trust context; the six roots of trust are required here",
+                )
+            report = gate.verify(trust, environment=environment)
+            if not report.allow:
+                return ToolRefusal(
+                    capability=capability, reason=RefusalReason.ROOTS_OF_TRUST_FAILED,
+                    detail=f"failed roots: {report.reasons()}",
+                )
 
         token = issue_token(
             manifest, case_id=case_id, args=args, environment=environment,

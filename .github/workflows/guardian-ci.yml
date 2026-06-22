@@ -54,6 +54,23 @@ jobs:
       - name: Verify audit chain
         run: python -m core.cli audit-verify
 
+  dependency-lock:
+    name: Dependency lock (uv) in sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: uv lock --check (blocking)
+        run: |
+          # Installed via pip (no new third-party Action to pin). The lockfile must
+          # already match pyproject.toml — CI never silently re-resolves dependencies.
+          pip install uv==0.8.17
+          uv lock --check
+
   workflow-audit:
     name: Workflow security audit (zizmor)
     runs-on: ubuntu-latest

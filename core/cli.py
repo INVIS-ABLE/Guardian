@@ -114,5 +114,80 @@ def brain_cmd(scope_file: str, no_dry_run: bool, approve: tuple[str, ...],
                       detail={"approved": run.approved, "halted_at": run.halted_at})
 
 
+@main.command("twin-blast")
+@click.argument("spec_file", type=click.Path(exists=True))
+@click.argument("asset_id")
+@click.option("--max-depth", type=int, default=None, help="Limit propagation depth.")
+def twin_blast_cmd(spec_file: str, asset_id: str, max_depth: int | None) -> None:
+    """Digital twin: what is affected if ASSET_ID is compromised?"""
+    from .twin import load_twin
+
+    twin = load_twin(spec_file)
+    radius = twin.blast_radius(asset_id, max_depth=max_depth)
+    origin = twin.asset(asset_id)
+    click.echo(f"Blast radius of {origin.kind.value} '{origin.name}' ({asset_id}):")
+    if not radius.impacted:
+        click.echo("  (no downstream assets — isolated)")
+    for item in radius.impacted:
+        trail = " → ".join(f"{s.via.value}:{s.asset}" for s in item.path)
+        click.echo(f"  [{item.distance}] {item.asset.kind.value:16s} {item.asset.id}   ({trail})")
+    AuditLog().record("twin-blast", actor="cli", scope=asset_id, decision="allowed",
+                      detail={"impacted": len(radius.impacted)})
+
+
+@main.command("twin-path")
+@click.argument("spec_file", type=click.Path(exists=True))
+@click.argument("source")
+@click.argument("target")
+def twin_path_cmd(spec_file: str, source: str, target: str) -> None:
+    """Digital twin: shortest attack path SOURCE → TARGET."""
+    from .twin import load_twin
+
+    twin = load_twin(spec_file)
+    path = twin.attack_path(source, target)
+    if path is None:
+        click.echo(f"No path from {source} to {target}.")
+        raise SystemExit(1)
+    trail = source + "".join(f" → {s.via.value} → {s.asset}" for s in path)
+    click.echo(trail)
+    AuditLog().record("twin-path", actor="cli", scope=f"{source}->{target}",
+                      decision="allowed", detail={"hops": len(path)})
+
+
+@main.command("twin-assess")
+@click.argument("spec_file", type=click.Path(exists=True))
+@click.option("--changed", required=True,
+              help="Comma-separated asset ids the change touches (e.g. repo:guardian,svc:x).")
+@click.option("--fail-on", default="high", show_default=True,
+              help="Severity that fails the gate: low|medium|high|critical.")
+@click.option("--max-depth", type=int, default=None, help="Limit propagation depth.")
+def twin_assess_cmd(spec_file: str, changed: str, fail_on: str, max_depth: int | None) -> None:
+    """Digital twin: PR-time blast-radius gate for a set of changed assets.
+
+    Exits non-zero (gating CI) when a changed asset's compromise would reach a sink at or
+    above the --fail-on severity. Read-only analysis — it proposes a verdict, authorises nothing.
+    """
+    from .twin import Severity, assess_change, load_twin
+
+    threshold = Severity.from_label(fail_on)
+    twin = load_twin(spec_file)
+    ids = [c.strip() for c in changed.split(",") if c.strip()]
+    result = assess_change(twin, ids, max_depth=max_depth)
+
+    for a in result.assessments:
+        click.echo(f"{a.origin.id} ({a.origin.kind.value}): {a.severity.label.upper()} "
+                   f"— {a.impacted_count} impacted, {len(a.hits)} sensitive")
+        for h in a.hits:
+            trail = " → ".join(f"{s.via.value}:{s.asset}" for s in h.path)
+            click.echo(f"    [{h.severity.label:8s}] {h.reason}  ({trail})")
+    breached = result.breaches(threshold)
+    click.echo(f"\nblast-radius gate: {result.severity.label.upper()} "
+               f"(fail-on={threshold.label}) → {'FAIL' if breached else 'PASS'}")
+    AuditLog().record("twin-assess", actor="cli", scope=changed,
+                      decision="denied" if breached else "allowed",
+                      detail={"severity": result.severity.label, "fail_on": threshold.label})
+    raise SystemExit(1 if breached else 0)
+
+
 if __name__ == "__main__":  # pragma: no cover
     main()
