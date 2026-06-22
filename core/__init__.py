@@ -18,6 +18,7 @@ __all__ = [
     "policy_gate",
     "brain",
     "verifier",
+    "twin",
 ]
 
 VERSION = "0.1.0"

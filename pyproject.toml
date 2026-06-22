@@ -58,6 +58,7 @@ packages = [
     "core.brain",
     "core.evidence",
     "core.tools",
+    "core.twin",
     "agents",
     "agents.specialists",
     "connectors",

@@ -1,0 +1,34 @@
+# Sample digital-twin sub-graph for the INVISABLE estate.
+#
+# Demonstrates the canonical blast-radius chain from docs/sovereign_ops_plane.md:
+#   leaked CI token → write access to a repo → image build → signed production image →
+#   messaging service → encrypted mailbox store → message ciphertext (metadata only).
+#
+# Run:  guardian twin-blast twin/invisable-sample.yaml id:ci-token
+#       guardian twin-path  twin/invisable-sample.yaml id:ci-token data:ciphertext
+#
+# NOTE: every node is metadata only — "data:ciphertext" is a data *category*, never content;
+# "key:signing" is a key *identifier*, never key material. The twin is structurally outside
+# private content (classification message_plaintext/decryption_key is refused).
+assets:
+  - { id: "id:human-dev",       kind: identity,        subtype: human,   name: "Developer", owner: eng }
+  - { id: "id:ci-token",        kind: identity,        subtype: machine, name: "CI deploy token", owner: platform }
+  - { id: "repo:guardian",      kind: repository,      name: "INVIS-ABLE/Guardian", owner: secops }
+  - { id: "key:signing",        kind: encryption_key,  name: "Image signing key (id)", owner: secops }
+  - { id: "img:messaging",      kind: container_image, name: "messaging:prod" }
+  - { id: "svc:messaging-relay", kind: service,        name: "Messaging relay", owner: platform }
+  - { id: "api:messaging",      kind: api,             name: "Messaging API" }
+  - { id: "db:mailbox",         kind: database,        name: "Encrypted mailbox store", owner: platform }
+  - { id: "data:ciphertext",    kind: data_class,      name: "Message ciphertext", classification: confidential }
+  - { id: "ctrl:sigstore",      kind: security_control, name: "Sigstore admission (image signatures)" }
+
+relationships:
+  - { src: "id:human-dev",       dst: "id:ci-token",        kind: has_role }
+  - { src: "id:ci-token",        dst: "repo:guardian",      kind: can_write }
+  - { src: "repo:guardian",      dst: "img:messaging",      kind: builds }
+  - { src: "key:signing",        dst: "img:messaging",      kind: signs }
+  - { src: "img:messaging",      dst: "svc:messaging-relay", kind: deploys }
+  - { src: "svc:messaging-relay", dst: "api:messaging",     kind: exposes }
+  - { src: "svc:messaging-relay", dst: "db:mailbox",        kind: reads }
+  - { src: "db:mailbox",         dst: "data:ciphertext",    kind: stores }
+  - { src: "ctrl:sigstore",      dst: "img:messaging",      kind: protects }

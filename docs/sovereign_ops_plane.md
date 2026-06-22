@@ -68,7 +68,7 @@ The authoritative, machine-checked list is
 ### Wave 1 — Omniscience (total awareness)
 | # | System | Gives Guardian |
 | - | ------ | -------------- |
-| 1 | **Live cyber digital twin** (Cartography / CloudQuery) | a continuously-updated graph of every repo/service/identity/cloud/k8s/key/dependency/data-class — answer instantly *"what is affected if this is compromised?"* |
+| 1 | **Live cyber digital twin** (Cartography / CloudQuery) — *[first slice implemented](digital_twin.md)* | a continuously-updated graph of every repo/service/identity/cloud/k8s/key/dependency/data-class — answer instantly *"what is affected if this is compromised?"* |
 | 2 | **Identity & permission attack graph** (BloodHound) | effective + transitive permissions, escalation paths, dormant privilege, separation-of-duties breaks |
 | 3 | **Data lineage & privacy graph** (DataHub / OpenLineage) | field-level lineage + classification propagation — detect *"a new integration moves a health field outside its approved boundary"* |
 | 4 | **Endpoint intelligence fabric** (osquery / Fleet) | structured OS state via **signed, reviewed query packs only** — never model-generated commands |

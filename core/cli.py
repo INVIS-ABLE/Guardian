@@ -114,5 +114,45 @@ def brain_cmd(scope_file: str, no_dry_run: bool, approve: tuple[str, ...],
                       detail={"approved": run.approved, "halted_at": run.halted_at})
 
 
+@main.command("twin-blast")
+@click.argument("spec_file", type=click.Path(exists=True))
+@click.argument("asset_id")
+@click.option("--max-depth", type=int, default=None, help="Limit propagation depth.")
+def twin_blast_cmd(spec_file: str, asset_id: str, max_depth: int | None) -> None:
+    """Digital twin: what is affected if ASSET_ID is compromised?"""
+    from .twin import load_twin
+
+    twin = load_twin(spec_file)
+    radius = twin.blast_radius(asset_id, max_depth=max_depth)
+    origin = twin.asset(asset_id)
+    click.echo(f"Blast radius of {origin.kind.value} '{origin.name}' ({asset_id}):")
+    if not radius.impacted:
+        click.echo("  (no downstream assets — isolated)")
+    for item in radius.impacted:
+        trail = " → ".join(f"{s.via.value}:{s.asset}" for s in item.path)
+        click.echo(f"  [{item.distance}] {item.asset.kind.value:16s} {item.asset.id}   ({trail})")
+    AuditLog().record("twin-blast", actor="cli", scope=asset_id, decision="allowed",
+                      detail={"impacted": len(radius.impacted)})
+
+
+@main.command("twin-path")
+@click.argument("spec_file", type=click.Path(exists=True))
+@click.argument("source")
+@click.argument("target")
+def twin_path_cmd(spec_file: str, source: str, target: str) -> None:
+    """Digital twin: shortest attack path SOURCE → TARGET."""
+    from .twin import load_twin
+
+    twin = load_twin(spec_file)
+    path = twin.attack_path(source, target)
+    if path is None:
+        click.echo(f"No path from {source} to {target}.")
+        raise SystemExit(1)
+    trail = source + "".join(f" → {s.via.value} → {s.asset}" for s in path)
+    click.echo(trail)
+    AuditLog().record("twin-path", actor="cli", scope=f"{source}->{target}",
+                      decision="allowed", detail={"hops": len(path)})
+
+
 if __name__ == "__main__":  # pragma: no cover
     main()
