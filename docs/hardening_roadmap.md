@@ -35,7 +35,7 @@ plugs into that single decision point.
 | 8 | Sandbox & runtime detection | gVisor (runsc), Falco | 🟡 | sandbox profile + run-spec validation shipped (`isolation/sandbox.py`); gVisor/Falco runtime wiring pending |
 | 9 | Build provenance | actions/attest, cosign, witness | 🟡 | admission verify + provenance signing shipped (`supplychain/`): digest-pinned+signed+provenance+SBOM, fail-closed; cosign/witness CI wiring pending |
 | 10 | Mandatory CI gates | dependency-review, scorecard, zizmor, pip-audit, bandit | 🟡 | zizmor + pip-audit + bandit blocking now; dependency-review + scorecard pending |
-| 11 | High-assurance testing | hypothesis, schemathesis, uv, renovate | 🟡 | hypothesis property tests done; uv lockfile + schemathesis next |
+| 11 | High-assurance testing | hypothesis, schemathesis, uv, renovate | 🟡 | hypothesis property tests done; reproducible `uv.lock` + blocking `uv lock --check` CI gate shipped; schemathesis (API fuzzing) next |
 | 21 | Reversible containment | deterministic adapter | 🟡 | reversible-only allowlist + deterministic param validation + audit shipped (`containment/`); concrete IdP/Cilium/Harbor adapters pending |
 | 19 | Detection-as-code | SigmaHQ/sigma | 🟡 | ATT&CK-mapped rules + engine shipped (`detection/`): per-rule positive/negative tests, recommends reversible containment (still gated); Sigma export to Wazuh/Loki pending |
 | 23 | Chaos & fail-closed | LitmusChaos | 🟡 | control-plane health + fail-closed gate shipped (`resilience/`): OPA/OpenBao/immudb/Temporal down ⇒ sensitive actions refused + audited; chaos-cluster injection pending |
