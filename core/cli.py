@@ -542,6 +542,8 @@ def forensics_cmd(log_dir: str | None, rules: str | None, case: str | None) -> N
     Read-only analysis: it draws conclusions and authorises nothing. Exits non-zero when any
     anomaly is found, so it can gate a pipeline or wake an operator.
     """
+    from pathlib import Path
+
     import yaml
 
     from forensics import ForensicTimeline, events_from_audit_log
@@ -554,7 +556,7 @@ def forensics_cmd(log_dir: str | None, rules: str | None, case: str | None) -> N
     corroboration: dict = {}
     expected: dict = {}
     if rules:
-        data = yaml.safe_load(open(rules, encoding="utf-8")) or {}
+        data = yaml.safe_load(Path(rules).read_text(encoding="utf-8")) or {}
         corroboration = data.get("corroboration", {}) or {}
         expected = data.get("expected_sequences", {}) or {}
 
