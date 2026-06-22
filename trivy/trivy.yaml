@@ -24,3 +24,7 @@ misconfiguration:
 
 # Fail CI on HIGH/CRITICAL by default (overridable per workflow).
 exit-code: 1
+
+# Targeted, justified, time-boxed CVE exceptions (no blanket bypass). See the file's
+# header; `ignore-unfixed: false` above means fixable vulnerabilities still gate CI.
+ignorefile: .trivyignore.yaml

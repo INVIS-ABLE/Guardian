@@ -1,0 +1,38 @@
+name: Twin blast-radius gate
+
+# Ambient PR guardrail: map the PR's changed files to digital-twin assets and fail if a
+# change's compromise would reach a sink at/above the threshold (docs/digital_twin.md).
+# Conservative by default (--fail-on critical): only changes that reach regulated user
+# content block; everything else is visible but non-blocking.
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  blast-radius:
+    name: Digital-twin blast-radius gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install
+        run: pip install -e .
+
+      - name: Blast-radius gate on changed files
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git fetch --no-tags origin "$BASE_REF"
+          BASE_SHA="$(git merge-base FETCH_HEAD HEAD)"
+          git diff --name-only "$BASE_SHA" HEAD > changed.txt
+          echo "Changed files:"; cat changed.txt
+          guardian twin-gate twin/guardian-repo.yaml --files-from changed.txt --fail-on critical

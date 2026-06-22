@@ -57,14 +57,15 @@ evidence Guardian already has, so the roots are populated from facts — not han
 | human | `human_trust_from(principal, approvals, …)` | `identity.oidc.Principal` + `core.guardrails.Approval` (validity + envelope binding) |
 | workload | `workload_trust_from(credential, …)` | `identity.credentials.Credential.valid()` |
 | evidence | `evidence_trust_from(receipt, …)` | a real `core.evidence.store.EvidenceReceipt` from an immutable append |
-| machine | `machine_trust_from(report)` | verified TPM/Keylime attestation result |
-| software | `software_trust_from(report)` | verified SBOM/provenance/signature result |
-| target | `target_trust_from(report)` | verified ownership/DNS result |
+| machine | `machine_trust_from_verification(v)` | `core.machine_attestation.MachineAttestationVerifier` — AK-signed TPM-quote over golden PCRs + nonce + firmware/kernel allow-list |
+| software | `software_trust_from_admission(decision, …)` | the live `supplychain.verify_artifact` admission decision (digest-pin + signed provenance + allowed signer + SBOM) + orthogonal build/deps/policy-digest anchors |
+| target | `target_trust_from_ownership(evidence, …)` | the live `ownership.OwnershipVerifier` (DNS-TXT challenge / GitHub-App installation) + a DNS-change check against the authorised address baseline |
 
 Each producer is **fail closed**: a field is asserted only when its evidence supports it
 (`tests/test_trust_producers.py` — an expired credential fails the workload root, an unbound
 approval fails the human envelope-binding, a missing receipt fails the evidence root, etc.).
-The machine/software/target producers are the integration points for the attestation,
-provenance, and ownership systems; until those land, an incomplete report keeps the root
-negative rather than assuming trust.
+All six roots are now populated from real verifiers: human (principal + approvals), workload
+(credential), evidence (immutable receipt), target (ownership verifier), **machine**
+(`core.machine_attestation`), and **software** (`supplychain.verify_artifact`). An incomplete
+or failed verification keeps the root negative rather than assuming trust.
 

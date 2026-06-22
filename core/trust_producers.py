@@ -36,8 +36,12 @@ from .roots_of_trust import (
 if TYPE_CHECKING:  # hints only — no runtime dependency on these packages
     from core.evidence.store import EvidenceReceipt
     from core.guardrails import Approval
+    from core.machine_attestation import MachineVerification
     from identity.credentials import Credential
     from identity.oidc import Principal
+    from ownership.evidence import OwnershipEvidence
+    from supplychain.admission import AdmissionDecision
+    from supplychain.provenance import Provenance
 
 
 def _approval_envelope_bound(approval: Any, envelope: Mapping[str, Any]) -> bool:
@@ -163,6 +167,78 @@ def target_trust_from(report: Mapping[str, Any]) -> TargetTrust:
     )
 
 
+def machine_trust_from_verification(verification: "MachineVerification") -> MachineTrust:
+    """Map a machine-attestation result (``core.machine_attestation``) to the machine root.
+
+    An invalid AK signature or a replayed nonce means *no* claim in the quote is trustworthy,
+    so the whole root fails closed; otherwise each anchor is asserted unless its specific
+    check failed.
+    """
+    reasons = set(getattr(verification, "reasons", ()))
+    if "ak_signature_invalid" in reasons or "nonce_mismatch" in reasons:
+        return MachineTrust()  # nothing in an unsigned/replayed quote can be trusted
+    return MachineTrust(
+        secure_boot="secure_boot_off" not in reasons,
+        tpm_attested=True,  # AK signature valid + nonce fresh
+        measured_boot="pcr_mismatch" not in reasons,
+        ima_ok="ima_failed" not in reasons,
+        approved_firmware=not ({"firmware_not_approved", "kernel_not_approved"} & reasons),
+        not_quarantined="node_quarantined" not in reasons,
+    )
+
+
+def software_trust_from_admission(
+    decision: "AdmissionDecision",
+    provenance: "Provenance | None" = None,
+    *,
+    build_verified: bool = False,
+    deps_approved: bool = False,
+    policy_connector_digest_ok: bool = False,
+) -> SoftwareTrust:
+    """Map a supply-chain admission decision (``supplychain.verify_artifact``) to the software
+    root. Admission proves digest-pinning + signed provenance + allowed signer + SBOM; the
+    three orthogonal anchors (reproducible build, dependency policy, policy+connector digest)
+    come from their own verifiers as explicit inputs (fail-closed defaults).
+    """
+    admitted = bool(getattr(decision, "allow", False))
+    commit = getattr(provenance, "commit", "") if provenance is not None else ""
+    return software_trust_from({
+        "approved_repo": admitted,
+        "commit": commit if admitted else "",
+        "build_verified": admitted and build_verified,
+        "sbom_present": admitted,
+        "provenance_valid": admitted,
+        "signature_valid": admitted,
+        "approved_builder": admitted,
+        "deps_approved": admitted and deps_approved,
+        "policy_connector_digest_ok": admitted and policy_connector_digest_ok,
+    })
+
+
+def target_trust_from_ownership(
+    evidence: "OwnershipEvidence | None",
+    *,
+    environment: str,
+    resolved_addresses: Sequence[str] = (),
+    authorised_addresses: Sequence[str] | None = None,
+) -> TargetTrust:
+    """Bridge the ownership verifier (``ownership.OwnershipVerifier.verify``) to the target
+    root. A non-None evidence means ownership is currently proven (the verifier returns
+    fresh-or-None); ``dns_unchanged`` holds only when the freshly-resolved addresses match
+    the recorded authorised baseline — a post-authorisation DNS change is a fail.
+    """
+    verified = evidence is not None
+    resolved = tuple(resolved_addresses)
+    dns_unchanged = bool(authorised_addresses) and resolved == tuple(authorised_addresses)
+    return target_trust_from({
+        "ownership_verified": verified,
+        "environment": environment,
+        "resolved_addresses": resolved,
+        "dns_unchanged": dns_unchanged,
+        "not_third_party": verified,
+    })
+
+
 def build_trust_context(
     *,
     human: HumanTrust | None = None,
@@ -186,5 +262,6 @@ def build_trust_context(
 __all__ = [
     "human_trust_from", "workload_trust_from", "evidence_trust_from",
     "machine_trust_from", "software_trust_from", "target_trust_from",
-    "build_trust_context",
+    "machine_trust_from_verification", "software_trust_from_admission",
+    "target_trust_from_ownership", "build_trust_context",
 ]

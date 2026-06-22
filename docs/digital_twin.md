@@ -69,8 +69,24 @@ Severity is driven by the most sensitive sink reached: regulated data classes (`
 stores/queues/certificates are **medium**. Every sensitive hit carries its explanatory path, so a
 reviewer sees *how* the change reaches the sink. The command **fails closed on a typo** — an
 unknown changed-asset id raises rather than reporting a clean bill of health. It is read-only: it
-proposes a verdict, it authorises nothing. A CI job maps a PR's changed files to twin asset ids
-and calls `twin-assess`; a `FAIL` blocks merge for review.
+proposes a verdict, it authorises nothing.
+
+### Ambient — it runs on every PR
+
+The gate is wired into CI ([`.github/workflows/twin-gate.yml`](../.github/workflows/twin-gate.yml)).
+A repo-scoped twin ([`twin/guardian-repo.yaml`](../twin/guardian-repo.yaml)) maps this repo's
+sensitive paths to assets via each asset's `paths` globs; the workflow diffs the PR, resolves
+changed files to assets (`resolve_changed_assets`), and runs `guardian twin-gate`:
+
+```bash
+git diff --name-only "$BASE_SHA" HEAD | \
+  guardian twin-gate twin/guardian-repo.yaml --files-from - --fail-on critical
+```
+
+It is conservative by default (`--fail-on critical`): a change reaching regulated user content —
+e.g. touching the E2EE crypto layer — **blocks for review**; a change reaching only confidential
+evidence (e.g. the policy authority) is reported but does not block. Unmapped changes (docs,
+tests) pass cleanly. Tune `--fail-on` to raise or lower the bar.
 
 ## The production path
 

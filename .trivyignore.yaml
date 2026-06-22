@@ -1,0 +1,18 @@
+# Trivy ignore file — TARGETED, JUSTIFIED, TIME-BOXED exceptions only.
+#
+# This is not a blanket bypass: each entry names one CVE, the path it applies to, a
+# justification, and an expiry date after which Trivy will flag it again (forcing a
+# revisit). Fixable vulnerabilities are never ignored here — `ignore-unfixed: false`
+# stays set in trivy/trivy.yaml so anything with an available patch still fails CI.
+vulnerabilities:
+  - id: CVE-2025-69872
+    paths:
+      - "uv.lock"
+    statement: >
+      python-diskcache 5.6.3 arbitrary-code-execution (MEDIUM). No upstream fix is
+      published as of 2026-06-22 (Fixed Version is empty in the advisory), so it cannot
+      be remediated by a version bump. diskcache is a TRANSITIVE dependency pulled in via
+      `ragas` — an eval-only extra ([eval]) used for RAG-quality testing, not part of the
+      Guardian production runtime, and never fed attacker-controlled cache input. Accepted
+      and time-boxed; revisit when a patched diskcache ships.
+    expired_at: 2026-09-22

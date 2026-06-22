@@ -119,9 +119,20 @@ def assess_change(
     assessments: list[AssetAssessment] = []
     overall = Severity.NONE
     for cid in changed_ids:
+        origin = twin.asset(cid)
         radius = twin.blast_radius(cid, max_depth=max_depth)
         hits: list[SensitiveHit] = []
         worst = Severity.NONE
+        # A change that directly TOUCHES a sensitive asset is risky even with no downstream
+        # edge (e.g. modifying the signing key or crypto layer itself).
+        self_sev, self_reason = _sink_severity(origin)
+        if self_sev != Severity.NONE:
+            hits.append(SensitiveHit(
+                asset=origin, severity=self_sev,
+                reason=f"directly modifies {origin.kind.value} '{origin.name}'",
+                distance=0, path=(),
+            ))
+            worst = max(worst, self_sev)
         for item in radius.impacted:
             sev, reason = _sink_severity(item.asset)
             if sev == Severity.NONE:

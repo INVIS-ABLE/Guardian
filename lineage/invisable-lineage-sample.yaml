@@ -1,0 +1,32 @@
+# Sample data lineage & privacy graph for the INVISABLE estate.
+#
+# It models the canonical detection from docs/sovereign_ops_plane.md — a new integration that
+# moves a health (and a PII) field out of the approved clinical boundary into an analytics
+# warehouse that is NOT approved to hold them — plus the retention obligation that should have
+# travelled with the data.
+#
+# Run:
+#   guardian lineage-trace     lineage/invisable-lineage-sample.yaml f:ehr.diagnosis
+#   guardian lineage-class     lineage/invisable-lineage-sample.yaml f:analytics.diag_stats
+#   guardian lineage-boundary  lineage/invisable-lineage-sample.yaml
+#   guardian lineage-retention lineage/invisable-lineage-sample.yaml
+#
+# Metadata only: a field's classification is a LABEL ("this column holds health data"), never a
+# record. The lineage graph is structurally outside private content (mirrors the digital twin).
+boundaries:
+  - { id: "zone:clinical",  name: "Clinical store",      purpose: "Care delivery",
+      approved: [public, internal, confidential, restricted, pii, health] }
+  - { id: "zone:analytics", name: "Analytics warehouse", purpose: "Aggregate reporting",
+      approved: [public, internal, confidential] }   # NOT approved for pii / health
+
+fields:
+  # Source of truth — clinical zone, correctly approved for health/PII, 10-year deletion obligation.
+  - { id: "f:ehr.diagnosis",       dataset: "ehr.records",       name: diagnosis,  classification: health, boundary: "zone:clinical",  retention_days: 3650 }
+  - { id: "f:ehr.patient_id",      dataset: "ehr.records",       name: patient_id, classification: pii,    boundary: "zone:clinical",  retention_days: 3650 }
+  # Derived analytics fields — the new integration's outputs, in a boundary not approved for the data.
+  - { id: "f:analytics.diag_stats", dataset: "analytics.patients", name: diagnosis,  boundary: "zone:analytics" }                       # no retention declared
+  - { id: "f:analytics.cohort_id",  dataset: "analytics.patients", name: cohort_id, classification: internal, boundary: "zone:analytics", retention_days: 7300 }  # kept 20y
+
+flows:
+  - { src: "f:ehr.diagnosis",  dst: "f:analytics.diag_stats", via: nightly_etl }   # health → analytics
+  - { src: "f:ehr.patient_id", dst: "f:analytics.cohort_id",  via: pseudonymize }  # pii → analytics
