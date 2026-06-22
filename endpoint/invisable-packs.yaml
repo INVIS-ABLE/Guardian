@@ -1,0 +1,44 @@
+# Reviewed osquery query packs for the INVISABLE estate.
+#
+# This file is the *reviewed content* — the queries a human approved. It deliberately holds NO
+# signatures or keys: a reviewer signs a pack offline with their own key, and the fabric admits
+# it only if that signature verifies against a trusted reviewer key (see core/endpoint/). Every
+# query is read-only (SELECT) and every pack names an author AND a distinct reviewer, because
+# the fabric refuses author == reviewer (separation of duties).
+#
+# Run (the CLI signs these with a one-off demo reviewer key to show the full admit→vet flow):
+#   guardian endpoint-packs endpoint/invisable-packs.yaml
+#   guardian endpoint-vet   endpoint/invisable-packs.yaml "SELECT pid, port, protocol FROM listening_ports"
+#   guardian endpoint-vet   endpoint/invisable-packs.yaml "SELECT * FROM shadow"   # ad-hoc → REFUSED
+#
+# Metadata only: these queries observe OS state (ports, modules, packages), never message
+# contents or keys. The fabric is structurally outside private content.
+packs:
+  - id: "pack:integrity-monitoring"
+    name: "Host integrity monitoring"
+    version: "1.2.0"
+    author: "secops-engineer"
+    reviewed_by: "secops-lead"
+    queries:
+      - { name: listening_ports, platform: all,   interval: 300,
+          description: "Open listening sockets — detect unexpected exposure",
+          query: "SELECT pid, port, protocol, address FROM listening_ports" }
+      - { name: kernel_modules,  platform: linux, interval: 3600,
+          description: "Loaded kernel modules — detect rootkits",
+          query: "SELECT name, status, size FROM kernel_modules WHERE status = 'live'" }
+      - { name: startup_items,   platform: all,   interval: 3600,
+          description: "Auto-start items — detect persistence",
+          query: "SELECT name, path, source FROM startup_items" }
+
+  - id: "pack:identity-hygiene"
+    name: "Endpoint identity hygiene"
+    version: "1.0.0"
+    author: "secops-engineer"
+    reviewed_by: "platform-lead"
+    queries:
+      - { name: sudoers,      platform: linux, interval: 86400,
+          description: "Sudoers entries — detect privilege drift",
+          query: "SELECT rule_details, header FROM sudoers" }
+      - { name: last_logins,  platform: all,   interval: 3600,
+          description: "Recent logins — detect anomalous access",
+          query: "SELECT username, tty, host, time FROM last" }
