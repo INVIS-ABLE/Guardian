@@ -39,6 +39,7 @@ GLOBAL_APPROVAL_REQUIRED: frozenset[str] = frozenset(
         "account_locking_test",
         "data_export_test",
         "admin_permission_test",
+        "credential_audit",  # hashcat/john/hydra-style auditing always needs sign-off
     }
 )
 

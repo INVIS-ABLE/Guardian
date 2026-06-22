@@ -40,6 +40,15 @@ PLANNED: tuple[str, ...] = (
     "report_system_abuse",
     "recovery_rollback",
     "supply_chain_tamper",
+    # Mobile / PWA defence simulators (see policies/mobile_guardian_modules.yaml)
+    "sim_swap_risk",
+    "session_theft",
+    "pwa_browser_security",
+    "malicious_upload",
+    # Credential-resilience simulators (driven via the approval-gated credential_audit
+    # connectors: hashcat/john for policy strength, hydra for login-defence resilience)
+    "password_policy_strength",
+    "login_defence_resilience",
 )
 
 __all__ = [
