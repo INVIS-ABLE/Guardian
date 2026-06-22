@@ -1,0 +1,57 @@
+# High-risk path -> owner matrix. Owners are roles until named people are assigned
+# (see docs/governance/CONTROL_OWNERS.md). Overlapping worker edits to these paths
+# must be coordinated before merge. The repository-governor flags overlaps.
+version: 1
+ownership:
+  - paths: ["core/policy_gate.py", "policies/opa/**", "policies/**"]
+    owner: policy_owner
+    risk: high
+    review: security-architecture + independent
+  - paths: ["core/scope.py", "core/guardrails.py"]
+    owner: authorization_owner
+    risk: high
+    review: security-architecture + independent
+  - paths: ["ownership/**", "core/ownership/**", "docs/architecture/roots_of_trust.md"]
+    owner: ownership_verification_owner
+    risk: high
+    review: security + platform
+  - paths: ["identity/**", "core/identity/**"]
+    owner: identity_owner
+    risk: high
+    review: identity + security
+  - paths: ["core/signing.py", "security/crypto/**", "core/tools/capability.py"]
+    owner: cryptography_owner
+    risk: high
+    review: cryptography-competent + security
+  - paths: ["attestation/**", "core/evidence/**", "core/audit.py"]
+    owner: evidence_owner
+    risk: high
+    review: audit/evidence + security
+  - paths: ["isolation/**", "containment/**"]
+    owner: runtime_security_owner
+    risk: high
+    review: platform + runtime-security
+  - paths: ["orchestration/**", "core/brain/**"]
+    owner: workflow_owner
+    risk: high
+    review: workflow + security
+  - paths: ["supplychain/**"]
+    owner: supply_chain_owner
+    risk: high
+    review: supply-chain + security
+  - paths: [".github/workflows/**", ".github/zizmor.yml", "renovate.json"]
+    owner: ci_security_owner
+    risk: high
+    review: supply-chain + security
+  - paths: ["core/ai/**", "shadow_guardian/**"]
+    owner: ai_safety_owner
+    risk: high
+    review: ai-safety + security
+  - paths: ["docker-compose*.yml", "deploy/**"]
+    owner: infrastructure_owner
+    risk: critical
+    review: platform + repository-owner
+  - paths: ["docs/governance/**", ".github/CODEOWNERS"]
+    owner: repository_steward
+    risk: medium
+    review: independent

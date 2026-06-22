@@ -1,0 +1,48 @@
+# Dependency-ordered merge queue. The steward never auto-merges; this records the
+# intended order and blocking reasons. Entries are removed to merge_ledger.yaml on merge.
+version: 1
+canonical_branch: main
+queue:
+  - pr: 57            # tracked as issue #57 / steward baseline PR
+    title: "steward: merge-governor baseline + reconciliation"
+    risk: medium
+    depends_on: []
+    blocks: [wave0-forward-port]
+    files: ["docs/governance/**", ".github/**", "scripts/repository_governor.py"]
+    required_checks: ["Guardrails + tests", "Workflow security audit (zizmor)", "Enforce draft + human-review policy"]
+    required_reviewers: ["independent-human"]
+    status: ready        # awaits independent human review (steward cannot self-approve)
+    reason: "Governance scaffold; no security-control change. Draft until human review."
+
+  - pr: 0
+    title: "steward: forward-port Wave 0 repository-truth baseline to main"
+    risk: low
+    depends_on: [57]
+    blocks: []
+    files: ["core/inventory.py", "reports/audit/**", "docs/architecture/**", "tests/test_repo_inventory.py"]
+    required_checks: ["Guardrails + tests"]
+    required_reviewers: ["independent-human"]
+    status: waiting
+    reason: "Additive inventory; depends on governance baseline. Not yet opened."
+
+  - pr: 52
+    title: "feat(twin): ambient PR blast-radius gate"
+    risk: medium
+    depends_on: []
+    blocks: []
+    files: ["core/twin/**", ".github/workflows/twin-gate.yml"]
+    required_checks: ["Guardrails + tests", "Workflow security audit (zizmor)"]
+    required_reviewers: ["independent-human"]
+    status: blocked
+    reason: "Open PR; touches .github/workflows -> CI/security review required. Not draft."
+
+  - pr: 55
+    title: "feat(endpoint): endpoint intelligence fabric"
+    risk: high
+    depends_on: []
+    blocks: []
+    files: ["core/endpoint/**", "endpoint/**"]
+    required_checks: ["Guardrails + tests", "Rego tests + OPA/embedded parity"]
+    required_reviewers: ["ai-safety-human", "security-human"]
+    status: blocked
+    reason: "Endpoint command-execution boundary = HIGH risk; 2 independent human reviews + CODEOWNERS required. Draft."
