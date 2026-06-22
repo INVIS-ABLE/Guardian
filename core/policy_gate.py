@@ -59,9 +59,25 @@ class ApprovalLite:
     action: str
     approver: str
     expires_at: float | None = None  # epoch seconds; None = never expires (discouraged)
+    # Binding fields — an approval is a capability for a SPECIFIC change, not the action in
+    # the abstract. When set, the approval only applies to a request with the same value;
+    # changing any bound field invalidates the capability. None = unbound (wildcard).
+    target: str | None = None  # exact domain or repo
+    commit: str | None = None
+    workflow_run: str | None = None
 
     def is_valid(self, now: float) -> bool:
         return self.expires_at is None or now < self.expires_at
+
+    def applies_to(self, inp: "PolicyInput") -> bool:
+        """Whether this approval is bound-compatible with the request."""
+        if self.commit is not None and self.commit != inp.commit:
+            return False
+        if self.workflow_run is not None and self.workflow_run != inp.workflow_run:
+            return False
+        if self.target is not None and self.target not in (inp.domain, inp.repo):
+            return False
+        return True
 
 
 @dataclass
@@ -98,7 +114,14 @@ class PolicyInput:
             "approval_required": self.approval_required,
             "allowed_test_accounts": self.allowed_test_accounts,
             "approvals": [
-                {"action": a.action, "approver": a.approver, "expires_at": a.expires_at}
+                {
+                    "action": a.action,
+                    "approver": a.approver,
+                    "expires_at": a.expires_at,
+                    "target": a.target,
+                    "commit": a.commit,
+                    "workflow_run": a.workflow_run,
+                }
                 for a in self.approvals
             ],
             "commit": self.commit,
@@ -117,7 +140,12 @@ class PolicyDecision:
 
 
 def _valid_approvals_for(inp: PolicyInput, action: str) -> list[ApprovalLite]:
-    return [a for a in inp.approvals if a.action == action and a.is_valid(inp.now)]
+    """Approvals that are for this action, unexpired, AND bound-compatible with the request."""
+    return [
+        a
+        for a in inp.approvals
+        if a.action == action and a.is_valid(inp.now) and a.applies_to(inp)
+    ]
 
 
 def decide(inp: PolicyInput) -> PolicyDecision:

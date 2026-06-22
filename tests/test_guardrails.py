@@ -114,6 +114,30 @@ def test_authorize_has_no_allow_production_parameter():
     assert "allow_production" not in params
 
 
+def test_production_ownership_fails_closed_without_verifier(tmp_path):
+    scope = _production_scope(tmp_path)
+    gr = Guardrails(scope=scope)
+    # Two distinct approvers present, but a named production target with NO real ownership
+    # verifier must be refused — scope membership is not proof of ownership in production.
+    gr.record_approval(Approval(action="production_scan", approver="ciso", ticket="SEC-1"))
+    gr.record_approval(Approval(action="production_scan", approver="head_of_eng", ticket="SEC-2"))
+    with pytest.raises(GuardrailViolation):
+        gr.authorize(mode="code_review", action="code_review", domain="invisable.co.uk")
+    # With a real verifier asserting ownership, it proceeds.
+    gr.ownership_verifier = lambda kind, target: True
+    gr.authorize(mode="code_review", action="code_review", domain="invisable.co.uk")
+
+
+def test_commit_bound_approval_rejected_for_other_commit(staging_scope):
+    gr = Guardrails(scope=staging_scope)
+    gr.record_approval(
+        Approval(action="high_volume_test", approver="ciso", ticket="SEC-1", commit="abc")
+    )
+    with pytest.raises(GuardrailViolation):
+        gr.authorize(mode="abuse_simulation", action="high_volume_test", commit="def")
+    gr.authorize(mode="abuse_simulation", action="high_volume_test", commit="abc")  # matches
+
+
 def test_full_authorize_happy_path(staging_scope):
     gr = Guardrails(scope=staging_scope)
     # A normal, in-scope safeguarding simulation on staging should be authorised.
