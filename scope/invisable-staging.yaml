@@ -1,0 +1,52 @@
+# Example scope file — INVISABLE staging.
+# This is the single source of truth for what a Guardian run targeting staging may do.
+# Validate:  python -m core.guardrails check scope/invisable-staging.yaml
+asset: invisable-staging
+environment: staging
+owner: INVISABLE
+
+allowed_domains:
+  - staging.invisable.co.uk
+
+allowed_repos:
+  - github.com/invisable/app
+
+allowed_test_accounts:
+  - standard_user_test
+  - vulnerable_user_test
+  - moderator_test
+  - admin_test
+  - banned_user_test
+
+allowed_modes:
+  - code_review
+  - dependency_scan
+  - secrets_scan
+  - zap_scan
+  - api_security
+  - auth_permissions
+  - privacy_leakage
+  - safeguarding
+  - abuse_simulation
+
+blocked_actions:
+  - third_party_scan
+  - real_user_data_access
+  - credential_theft
+  - stealth
+  - persistence
+  - exploit_deployment
+  - hack_back
+  - destructive_testing
+
+approval_required:
+  - production_scan
+  - high_volume_test
+  - account_locking_test
+  - data_export_test
+  - admin_permission_test
+
+rate_limits:
+  max_requests_per_second: 5
+  max_concurrent_sessions: 3
+  max_test_duration_minutes: 30

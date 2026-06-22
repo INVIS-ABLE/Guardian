@@ -1,0 +1,33 @@
+# Guardian Gitleaks configuration.
+# Extends the default ruleset and adds INVISABLE-specific allow/deny rules.
+title = "INVISABLE Guardian gitleaks config"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "invisable-internal-token"
+description = "INVISABLE internal service token"
+regex = '''(?i)invisable[_-]?(api|service|svc)[_-]?(key|token)[\s:=]+['\"]?[A-Za-z0-9]{16,}'''
+tags = ["key", "invisable"]
+
+[[rules]]
+id = "generic-jwt"
+description = "JSON Web Token"
+regex = '''eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}'''
+tags = ["jwt"]
+
+[allowlist]
+description = "Allowlisted paths and synthetic test fixtures (no real secrets)."
+paths = [
+  '''reports/templates/.*''',
+  '''.*/fixtures/.*''',
+  '''.*\.example$''',
+  '''SCOPE_SCHEMA\.yaml''',
+]
+# Synthetic placeholder values used in docs/examples must not trip the scanner.
+regexes = [
+  '''REDACTED''',
+  '''standard_user_test''',
+  '''guardian-owner=invisable''',
+]

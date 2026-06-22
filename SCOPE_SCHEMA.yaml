@@ -1,0 +1,107 @@
+# SCOPE_SCHEMA.yaml
+# JSON-Schema (YAML form) describing a Guardian scope file.
+# Validate a scope file with:  python -m core.scope validate scope/<file>.yaml
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "https://invisable.co.uk/guardian/scope.schema.json"
+title: "Guardian Scope File"
+description: >
+  Declares exactly which INVISABLE-owned assets a Guardian run may touch, which test
+  accounts it may use, which modes are permitted, and which actions are blocked or
+  require human approval. Default-deny: anything not explicitly allowed is denied.
+type: object
+additionalProperties: false
+required:
+  - asset
+  - environment
+  - allowed_domains
+  - allowed_repos
+  - allowed_test_accounts
+  - allowed_modes
+  - blocked_actions
+  - approval_required
+properties:
+  asset:
+    type: string
+    description: Human-readable identifier of the asset group (must exist in scope/assets.yaml).
+  environment:
+    type: string
+    enum: [staging, development, production]
+    description: Target environment. `production` requires an explicit human-approved scope.
+  owner:
+    type: string
+    default: INVISABLE
+    description: Owning organisation. Ownership is verified at runtime (DNS / repo).
+  allowed_domains:
+    type: array
+    minItems: 1
+    items:
+      type: string
+      pattern: "^[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+    description: FQDNs Guardian may interact with. Must be INVISABLE-owned.
+  allowed_repos:
+    type: array
+    minItems: 1
+    items:
+      type: string
+      pattern: "^github\\.com/[^/]+/[^/]+$"
+    description: Repositories Guardian may scan / open PRs against.
+  allowed_test_accounts:
+    type: array
+    minItems: 1
+    items:
+      type: string
+    description: Test-account ids (must exist in scope/test_accounts.yaml). No real users.
+  allowed_modes:
+    type: array
+    minItems: 1
+    items:
+      type: string
+      enum:
+        - code_review
+        - dependency_scan
+        - secrets_scan
+        - zap_scan
+        - api_security
+        - auth_permissions
+        - privacy_leakage
+        - safeguarding
+        - abuse_simulation
+        - container_scan
+        - iac_scan
+        - runtime_monitoring
+    description: Test modes permitted for this scope.
+  blocked_actions:
+    type: array
+    description: >
+      Actions explicitly blocked for this scope. The global BLOCKED_ACTIONS set in
+      core/guardrails.py is always enforced in addition to this list.
+    items:
+      type: string
+      enum:
+        - third_party_scan
+        - real_user_data_access
+        - credential_theft
+        - stealth
+        - persistence
+        - exploit_deployment
+        - hack_back
+        - destructive_testing
+  approval_required:
+    type: array
+    description: Actions that require a recorded human approval before execution.
+    items:
+      type: string
+      enum:
+        - production_scan
+        - high_volume_test
+        - account_locking_test
+        - data_export_test
+        - admin_permission_test
+  rate_limits:
+    type: object
+    additionalProperties: false
+    description: Optional ceilings to keep tests controlled (never uncontrolled).
+    properties:
+      max_requests_per_second: { type: number, minimum: 0, default: 5 }
+      max_concurrent_sessions: { type: integer, minimum: 1, default: 3 }
+      max_test_duration_minutes: { type: integer, minimum: 1, default: 30 }

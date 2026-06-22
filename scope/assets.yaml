@@ -1,0 +1,49 @@
+# Asset registry — every INVISABLE-owned asset Guardian is permitted to know about.
+# Ownership is verified at runtime; an asset appearing here is necessary but not
+# sufficient — a scope file must still authorise the specific run.
+assets:
+  - id: invisable-staging
+    name: INVISABLE App (staging)
+    environment: staging
+    type: web_app
+    domains:
+      - staging.invisable.co.uk
+    repos:
+      - github.com/invisable/app
+    ownership_proof:
+      dns_txt: "guardian-owner=invisable"     # verified TXT record on the domain
+      repo_owner: invisable
+    data_classification: synthetic_only        # staging holds no real user data
+    safeguarding_relevant: true
+
+  - id: invisable-api-staging
+    name: INVISABLE API (staging)
+    environment: staging
+    type: api
+    domains:
+      - api.staging.invisable.co.uk
+    repos:
+      - github.com/invisable/app
+    ownership_proof:
+      dns_txt: "guardian-owner=invisable"
+      repo_owner: invisable
+    openapi_spec: zap/specs/invisable-api.openapi.json
+    data_classification: synthetic_only
+    safeguarding_relevant: true
+
+  # Production assets are listed for inventory only. Targeting any of these requires
+  # a separate, human-approved production scope file (approval_required: production_scan).
+  - id: invisable-production
+    name: INVISABLE App (production)
+    environment: production
+    type: web_app
+    domains:
+      - invisable.co.uk
+    repos:
+      - github.com/invisable/app
+    ownership_proof:
+      dns_txt: "guardian-owner=invisable"
+      repo_owner: invisable
+    data_classification: real_user_data         # NEVER accessed by Guardian
+    safeguarding_relevant: true
+    guardian_default: denied

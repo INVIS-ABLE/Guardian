@@ -1,0 +1,77 @@
+# guardian.config.yaml
+# Top-level Guardian configuration. Safe-by-default: dry-run on, staging only,
+# production disabled until an approved scope + human approval are present.
+
+guardian:
+  version: "0.1.0"
+  environment_default: staging
+  dry_run_default: true          # never execute live actions unless explicitly disabled
+  fail_closed: true              # any guardrail error => refuse the run
+
+  # --- AI / Agent layer -------------------------------------------------------
+  agents:
+    command_centre: ECC          # ECC is the orchestration / workflow command centre
+    framework: custom            # one of: langgraph | crewai | autogen | custom
+    reasoning_model:
+      provider: claude           # claude | gpt-compatible
+      model: claude-opus-4-8
+    local_model:
+      enabled: false             # optional offline/private analysis model
+      model: null
+    rag:
+      enabled: true
+      vector_db: qdrant          # qdrant | weaviate | chroma | pgvector
+      collections:
+        - invisable_repos
+        - policies
+        - threat_models
+        - app_docs
+        - support_flows
+        - safeguarding_rules
+
+  # --- Connectors (security tools) -------------------------------------------
+  # Each connector is dry-run aware and refuses to run outside an approved scope.
+  connectors:
+    codeql:   { enabled: true,  config: codeql/codeql-config.yml }
+    semgrep:  { enabled: true,  config: semgrep/semgrep.yml }
+    gitleaks: { enabled: true,  config: gitleaks/.gitleaks.toml }
+    trivy:    { enabled: true,  config: trivy/trivy.yaml }
+    zap:      { enabled: true,  config: zap/staging-baseline.yaml }
+    osv:      { enabled: true }
+    syft:     { enabled: true }
+    grype:    { enabled: true }
+    checkov:  { enabled: false }
+    playwright: { enabled: true, config: playwright/playwright.config.ts }
+
+  # --- Self-healing workflow --------------------------------------------------
+  self_healing:
+    enabled: true
+    open_pull_requests: true
+    draft_only: true             # all Guardian PRs open as drafts
+    require_human_approval: true # cannot be disabled
+    deploy:
+      feature_flag_required: true
+      auto_rollback_on_safety_failure: true
+
+  # --- Reporting / evidence ---------------------------------------------------
+  reporting:
+    output_dir: reports
+    template: reports/templates/report_template.md
+    scrub_secrets: true
+    formats: [markdown, json]
+
+  # --- Audit / logging --------------------------------------------------------
+  audit:
+    enabled: true               # every action logged; cannot be disabled in practice
+    log_dir: reports/audit
+    tamper_evident: true        # hash-chained audit entries
+
+  # --- Monitoring -------------------------------------------------------------
+  monitoring:
+    sentry: { enabled: false }
+    opentelemetry: { enabled: true }
+    prometheus: { enabled: true }
+    grafana: { enabled: true }
+    loki: { enabled: true }
+    falco: { enabled: false }   # runtime detection (lab only)
+    wazuh: { enabled: false }

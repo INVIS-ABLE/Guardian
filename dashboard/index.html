@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>INVISABLE Guardian</title>
+  <style>
+    :root { --bg:#0b0f14; --card:#131a22; --fg:#e6edf3; --mut:#8b98a5; --ok:#3fb950; --warn:#d29922; --crit:#f85149; --acc:#58a6ff; }
+    * { box-sizing:border-box; }
+    body { margin:0; font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--fg); }
+    header { padding:20px 28px; border-bottom:1px solid #21262d; display:flex; align-items:baseline; gap:14px; }
+    header h1 { font-size:20px; margin:0; }
+    header .tag { color:var(--mut); font-size:13px; }
+    .wrap { padding:24px 28px; display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:18px; }
+    .card { background:var(--card); border:1px solid #21262d; border-radius:10px; padding:16px 18px; }
+    .card h2 { font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--mut); margin:0 0 12px; }
+    .pill { display:inline-block; padding:2px 9px; border-radius:999px; font-size:12px; margin:2px 4px 2px 0; background:#21262d; color:var(--fg); }
+    .ok{color:var(--ok)} .warn{color:var(--warn)} .crit{color:var(--crit)} .acc{color:var(--acc)}
+    ul { margin:6px 0; padding-left:18px; } li { margin:2px 0; }
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    td,th { text-align:left; padding:6px 8px; border-bottom:1px solid #21262d; }
+    .muted { color:var(--mut); }
+    code { background:#0d1117; padding:1px 5px; border-radius:5px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🛡️ INVISABLE Guardian</h1>
+    <span class="tag">defensive-only security &amp; safeguarding immune system</span>
+  </header>
+  <div class="wrap" id="app"><div class="card">Loading…</div></div>
+
+  <script>
+    const el = (h) => { const t=document.createElement('template'); t.innerHTML=h.trim(); return t.content.firstChild; };
+    const sevClass = (s) => ({critical:'crit',high:'crit',medium:'warn',low:'warn',info:'muted'})[String(s).toLowerCase()]||'';
+
+    async function load() {
+      const app = document.getElementById('app');
+      let d;
+      try { d = await (await fetch('/api/status')).json(); }
+      catch (e) { app.innerHTML = '<div class="card crit">Failed to load /api/status</div>'; return; }
+      app.innerHTML = '';
+
+      app.appendChild(el(`<div class="card">
+        <h2>System</h2>
+        <p>Version <code>${d.version}</code></p>
+        <p>Dry-run default: <span class="${d.dry_run_default?'ok':'warn'}">${d.dry_run_default}</span></p>
+        <p>Fail closed: <span class="${d.fail_closed?'ok':'crit'}">${d.fail_closed}</span></p>
+        <p>Human approval required: <span class="${d.require_human_approval?'ok':'crit'}">${d.require_human_approval}</span></p>
+        <p>Audit chain: <span class="${d.audit_chain_ok?'ok':'crit'}">${d.audit_chain_ok?'intact':'TAMPERED'}</span></p>
+      </div>`));
+
+      app.appendChild(el(`<div class="card">
+        <h2>Guardrails</h2>
+        <p class="muted">Always blocked</p>
+        <div>${d.blocked_actions.map(a=>`<span class="pill crit">${a}</span>`).join('')}</div>
+        <p class="muted" style="margin-top:10px">Human approval required</p>
+        <div>${d.approval_required.map(a=>`<span class="pill warn">${a}</span>`).join('')}</div>
+      </div>`));
+
+      app.appendChild(el(`<div class="card">
+        <h2>Scopes</h2>
+        ${d.scopes.map(s=> s.error
+          ? `<p class="crit">${s.file}: ${s.error}</p>`
+          : `<p><b>${s.asset}</b> <span class="muted">(${s.environment})</span><br>
+             ${s.modes.map(m=>`<span class="pill acc">${m}</span>`).join('')}
+             ${(s.notes||[]).map(n=>`<div class="warn">⚠ ${n}</div>`).join('')}</p>`
+        ).join('')}
+      </div>`));
+
+      app.appendChild(el(`<div class="card">
+        <h2>Agents (${d.agents.length})</h2>
+        <div>${d.agents.map(a=>`<span class="pill">${a}</span>`).join('')}</div>
+      </div>`));
+
+      app.appendChild(el(`<div class="card">
+        <h2>Simulators</h2>
+        <p class="muted">Active</p>
+        <div>${d.simulators.map(s=>`<span class="pill ok">${s}</span>`).join('')}</div>
+        <p class="muted" style="margin-top:10px">Planned</p>
+        <div>${d.planned_simulators.map(s=>`<span class="pill">${s}</span>`).join('')}</div>
+      </div>`));
+
+      app.appendChild(el(`<div class="card">
+        <h2>Recent evidence</h2>
+        ${d.recent_reports.length ? `<table><tr><th>Scenario</th><th>Severity</th><th>Detection</th></tr>
+          ${d.recent_reports.map(r=>`<tr><td>${r.scenario||r.file}</td>
+            <td class="${sevClass(r.severity)}">${r.severity||''}</td>
+            <td class="muted">${r.detection||''}</td></tr>`).join('')}</table>`
+          : '<p class="muted">No reports yet. Run a simulator with <code>--report</code>.</p>'}
+      </div>`));
+    }
+    load();
+  </script>
+</body>
+</html>

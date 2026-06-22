@@ -1,0 +1,42 @@
+# Test account registry — the ONLY identities Guardian may use.
+# These are synthetic accounts on staging. No real user is ever referenced.
+# `role` drives RBAC/ABAC permission-matrix testing.
+test_accounts:
+  - id: standard_user_test
+    role: standard_user
+    description: Baseline authenticated user with default permissions.
+    mfa: optional
+    synthetic: true
+
+  - id: vulnerable_user_test
+    role: standard_user
+    description: >
+      Represents an at-risk / vulnerable user profile (e.g. flagged for additional
+      safeguarding protections). Used to verify protective controls actually apply.
+    mfa: optional
+    safeguarding_protected: true
+    synthetic: true
+
+  - id: moderator_test
+    role: moderator
+    description: Content moderator. Used for moderator-abuse and report-system tests.
+    mfa: required
+    synthetic: true
+
+  - id: admin_test
+    role: admin
+    description: Administrator. admin_permission_test actions require human approval.
+    mfa: required
+    synthetic: true
+
+  - id: banned_user_test
+    role: banned_user
+    description: A banned identity. Used for banned-user-return simulations.
+    status: banned
+    synthetic: true
+
+  - id: suspended_user_test
+    role: suspended_user
+    description: A suspended identity. Used for access-control regression checks.
+    status: suspended
+    synthetic: true

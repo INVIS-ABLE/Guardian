@@ -1,0 +1,44 @@
+name: CodeQL
+
+# Static code security analysis on the Guardian repo (and a model for in-scope repos).
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "27 3 * * 1"   # weekly
+
+permissions:
+  contents: read
+  security-events: write    # upload SARIF to code scanning
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [python, javascript-typescript]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          config-file: ./codeql/codeql-config.yml
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      # CodeQL's analyze step uploads results to the Security tab, which requires
+      # code scanning (GitHub Advanced Security). If that isn't enabled on the repo
+      # the upload fails ("Resource not accessible by integration"); don't block the
+      # PR on it. Once code scanning is enabled this runs and reports normally.
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        continue-on-error: true
+        with:
+          category: "/language:${{ matrix.language }}"
