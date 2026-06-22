@@ -35,6 +35,13 @@ from .report import (
     scrub,
     write_report,
 )
+from .store import (
+    EvidenceEvent,
+    EvidenceReceipt,
+    EvidenceStore,
+    HashChainBackend,
+    get_backend,
+)
 
 __all__ = [
     # report layer (unchanged public API)
@@ -44,6 +51,12 @@ __all__ = [
     "SimulatorResult",
     "scrub",
     "write_report",
+    # evidence system of record
+    "EvidenceEvent",
+    "EvidenceReceipt",
+    "EvidenceStore",
+    "HashChainBackend",
+    "get_backend",
     # typed evidence-graph contracts
     "SCHEMA_VERSION",
     "Classification",

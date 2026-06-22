@@ -17,6 +17,7 @@ class ZapConnector(BaseConnector):
     binary = "zap.sh"
     mode = "zap_scan"
     action = "zap_scan"
+    ACTIONS = ("baseline",)
 
     def run(self, *, repo: str | None = None, target: str | None = None, **kwargs: Any) -> ConnectorResult:
         # Belt-and-braces: ZAP must always have an explicit in-scope target domain.

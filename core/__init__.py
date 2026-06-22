@@ -17,6 +17,7 @@ __all__ = [
     "router",
     "policy_gate",
     "brain",
+    "verifier",
 ]
 
 VERSION = "0.1.0"
