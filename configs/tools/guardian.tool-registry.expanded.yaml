@@ -1,0 +1,1284 @@
+apiVersion: guardian.invisable/v1
+kind: ToolRegistry
+metadata:
+  name: guardian-expanded-open-source-registry
+  description: Candidate and primary open-source tools for Guardian capability families
+spec:
+  selectionPrinciple: one production primary per capability; alternates remain validation,
+    fallback or specialist adapters
+  categories:
+  - id: reasoning_orchestration
+    primary: LangGraph
+    candidates:
+    - id: langgraph
+      name: LangGraph
+      status: primary
+    - id: temporal
+      name: Temporal
+      status: candidate
+    - id: pydanticai
+      name: PydanticAI
+      status: candidate
+    - id: dspy
+      name: DSPy
+      status: candidate
+    - id: haystack
+      name: Haystack
+      status: candidate
+    - id: llamaindex
+      name: LlamaIndex
+      status: candidate
+    - id: autogen
+      name: AutoGen
+      status: candidate
+    - id: semantic-kernel
+      name: Semantic Kernel
+      status: candidate
+    - id: crewai
+      name: CrewAI
+      status: candidate
+    - id: prefect
+      name: Prefect
+      status: candidate
+    - id: dagster
+      name: Dagster
+      status: candidate
+    - id: ray
+      name: Ray
+      status: candidate
+    - id: dask
+      name: Dask
+      status: candidate
+  - id: model_gateway_serving
+    primary: Guardian Native Model Gateway
+    candidates:
+    - id: guardian-native-model-gateway
+      name: Guardian Native Model Gateway
+      status: primary
+    - id: litellm
+      name: LiteLLM
+      status: candidate
+    - id: vllm
+      name: vLLM
+      status: candidate
+    - id: ollama
+      name: Ollama
+      status: candidate
+    - id: llama-cpp
+      name: llama.cpp
+      status: candidate
+    - id: sglang
+      name: SGLang
+      status: candidate
+    - id: hugging-face-tgi
+      name: Hugging Face TGI
+      status: candidate
+    - id: localai
+      name: LocalAI
+      status: candidate
+    - id: kserve
+      name: KServe
+      status: candidate
+    - id: bentoml
+      name: BentoML
+      status: candidate
+    - id: ray-serve
+      name: Ray Serve
+      status: candidate
+    - id: triton-inference-server
+      name: Triton Inference Server
+      status: candidate
+    - id: mlx-lm
+      name: MLX-LM
+      status: candidate
+  - id: structured_generation
+    primary: Pydantic
+    candidates:
+    - id: pydantic
+      name: Pydantic
+      status: primary
+    - id: instructor
+      name: Instructor
+      status: candidate
+    - id: outlines
+      name: Outlines
+      status: candidate
+    - id: guidance
+      name: Guidance
+      status: candidate
+    - id: baml
+      name: BAML
+      status: candidate
+    - id: guardrails-ai
+      name: Guardrails AI
+      status: candidate
+    - id: json-schema
+      name: JSON Schema
+      status: candidate
+    - id: typechat
+      name: TypeChat
+      status: candidate
+    - id: lm-format-enforcer
+      name: lm-format-enforcer
+      status: candidate
+  - id: ai_security_evaluation
+    primary: NeMo Guardrails
+    candidates:
+    - id: nemo-guardrails
+      name: NeMo Guardrails
+      status: primary
+    - id: llm-guard
+      name: LLM Guard
+      status: candidate
+    - id: garak
+      name: garak
+      status: candidate
+    - id: pyrit
+      name: PyRIT
+      status: candidate
+    - id: promptfoo
+      name: Promptfoo
+      status: candidate
+    - id: giskard
+      name: Giskard
+      status: candidate
+    - id: inspect-ai
+      name: Inspect AI
+      status: candidate
+    - id: deepeval
+      name: DeepEval
+      status: candidate
+    - id: ragas
+      name: Ragas
+      status: candidate
+    - id: agentdojo
+      name: AgentDojo
+      status: candidate
+    - id: purplellama-cyberseceval
+      name: PurpleLlama CyberSecEval
+      status: candidate
+    - id: modelscan
+      name: ModelScan
+      status: candidate
+    - id: microsoft-presidio
+      name: Microsoft Presidio
+      status: candidate
+    - id: rebuff
+      name: Rebuff
+      status: candidate
+    - id: vigil
+      name: Vigil
+      status: candidate
+    - id: openai-evals-compatible-harness
+      name: OpenAI Evals-compatible harness
+      status: candidate
+  - id: ai_observability
+    primary: Langfuse
+    candidates:
+    - id: langfuse
+      name: Langfuse
+      status: primary
+    - id: arize-phoenix
+      name: Arize Phoenix
+      status: candidate
+    - id: openlit
+      name: OpenLIT
+      status: candidate
+    - id: opentelemetry
+      name: OpenTelemetry
+      status: candidate
+    - id: helicone-oss
+      name: Helicone OSS
+      status: candidate
+    - id: traceloop-sdk
+      name: Traceloop SDK
+      status: candidate
+  - id: memory_retrieval
+    primary: Qdrant
+    candidates:
+    - id: qdrant
+      name: Qdrant
+      status: primary
+    - id: pgvector
+      name: pgvector
+      status: candidate
+    - id: opensearch
+      name: OpenSearch
+      status: candidate
+    - id: chroma
+      name: Chroma
+      status: candidate
+    - id: milvus
+      name: Milvus
+      status: candidate
+    - id: weaviate
+      name: Weaviate
+      status: candidate
+    - id: lancedb
+      name: LanceDB
+      status: candidate
+    - id: neo4j
+      name: Neo4j
+      status: candidate
+    - id: sentence-transformers
+      name: sentence-transformers
+      status: candidate
+    - id: fastembed
+      name: FastEmbed
+      status: candidate
+    - id: flagembedding
+      name: FlagEmbedding
+      status: candidate
+    - id: bm25
+      name: BM25
+      status: candidate
+    - id: splade
+      name: SPLADE
+      status: candidate
+    - id: colbert
+      name: ColBERT
+      status: candidate
+    - id: flashrank
+      name: FlashRank
+      status: candidate
+    - id: docling
+      name: Docling
+      status: candidate
+    - id: unstructured
+      name: Unstructured
+      status: candidate
+    - id: apache-tika
+      name: Apache Tika
+      status: candidate
+  - id: sandbox_execution
+    primary: gVisor
+    candidates:
+    - id: gvisor
+      name: gVisor
+      status: primary
+    - id: firecracker
+      name: Firecracker
+      status: candidate
+    - id: kata-containers
+      name: Kata Containers
+      status: candidate
+    - id: nsjail
+      name: nsjail
+      status: candidate
+    - id: bubblewrap
+      name: bubblewrap
+      status: candidate
+    - id: rootless-podman
+      name: rootless Podman
+      status: candidate
+    - id: containerd
+      name: containerd
+      status: candidate
+    - id: systemd-nspawn
+      name: systemd-nspawn
+      status: candidate
+    - id: wasmedge
+      name: WasmEdge
+      status: candidate
+    - id: wasmtime
+      name: Wasmtime
+      status: candidate
+    - id: seccomp
+      name: seccomp
+      status: candidate
+    - id: apparmor
+      name: AppArmor
+      status: candidate
+    - id: selinux
+      name: SELinux
+      status: candidate
+    - id: landlock
+      name: Landlock
+      status: candidate
+    - id: cgroups-v2
+      name: cgroups v2
+      status: candidate
+    - id: linux-namespaces
+      name: Linux namespaces
+      status: candidate
+  - id: browser_automation
+    primary: Playwright
+    candidates:
+    - id: playwright
+      name: Playwright
+      status: primary
+    - id: playwright-mcp
+      name: Playwright MCP
+      status: candidate
+    - id: selenium
+      name: Selenium
+      status: candidate
+    - id: puppeteer
+      name: Puppeteer
+      status: candidate
+    - id: chrome-devtools-protocol
+      name: Chrome DevTools Protocol
+      status: candidate
+    - id: browserless
+      name: Browserless
+      status: candidate
+    - id: mitmproxy
+      name: mitmproxy
+      status: candidate
+    - id: owasp-zap-browser-integration
+      name: OWASP ZAP browser integration
+      status: candidate
+  - id: sast_code_quality
+    primary: CodeQL
+    candidates:
+    - id: codeql
+      name: CodeQL
+      status: primary
+    - id: semgrep
+      name: Semgrep
+      status: candidate
+    - id: opengrep
+      name: Opengrep
+      status: candidate
+    - id: bearer
+      name: Bearer
+      status: candidate
+    - id: bandit
+      name: Bandit
+      status: candidate
+    - id: ruff
+      name: Ruff
+      status: candidate
+    - id: mypy
+      name: mypy
+      status: candidate
+    - id: pyright
+      name: Pyright
+      status: candidate
+    - id: gosec
+      name: gosec
+      status: candidate
+    - id: govulncheck
+      name: govulncheck
+      status: candidate
+    - id: brakeman
+      name: Brakeman
+      status: candidate
+    - id: spotbugs
+      name: SpotBugs
+      status: candidate
+    - id: findsecbugs
+      name: FindSecBugs
+      status: candidate
+    - id: pmd
+      name: PMD
+      status: candidate
+    - id: cppcheck
+      name: cppcheck
+      status: candidate
+    - id: clang-tidy
+      name: clang-tidy
+      status: candidate
+    - id: clang-static-analyzer
+      name: Clang Static Analyzer
+      status: candidate
+    - id: infer
+      name: Infer
+      status: candidate
+    - id: cargo-clippy
+      name: cargo-clippy
+      status: candidate
+    - id: cargo-geiger
+      name: cargo-geiger
+      status: candidate
+    - id: eslint
+      name: ESLint
+      status: candidate
+    - id: eslint-plugin-security
+      name: eslint-plugin-security
+      status: candidate
+    - id: njsscan
+      name: njsscan
+      status: candidate
+    - id: psalm
+      name: Psalm
+      status: candidate
+    - id: phpstan
+      name: PHPStan
+      status: candidate
+    - id: sonarqube-community-build
+      name: SonarQube Community Build
+      status: candidate
+  - id: secret_detection
+    primary: Gitleaks
+    candidates:
+    - id: gitleaks
+      name: Gitleaks
+      status: primary
+    - id: trufflehog
+      name: TruffleHog
+      status: candidate
+    - id: detect-secrets
+      name: detect-secrets
+      status: candidate
+    - id: git-secrets
+      name: git-secrets
+      status: candidate
+    - id: secretlint
+      name: secretlint
+      status: candidate
+    - id: ggshield-community-tooling
+      name: ggshield community tooling
+      status: candidate
+    - id: yelp-detect-secrets
+      name: Yelp detect-secrets
+      status: candidate
+  - id: dependency_supply_chain
+    primary: OSV-Scanner
+    candidates:
+    - id: osv-scanner
+      name: OSV-Scanner
+      status: primary
+    - id: trivy
+      name: Trivy
+      status: candidate
+    - id: syft
+      name: Syft
+      status: candidate
+    - id: grype
+      name: Grype
+      status: candidate
+    - id: owasp-dependency-check
+      name: OWASP Dependency-Check
+      status: candidate
+    - id: dependency-track
+      name: Dependency-Track
+      status: candidate
+    - id: cdxgen
+      name: cdxgen
+      status: candidate
+    - id: cyclonedx-cli
+      name: CycloneDX CLI
+      status: candidate
+    - id: spdx-tools
+      name: SPDX tools
+      status: candidate
+    - id: pip-audit
+      name: pip-audit
+      status: candidate
+    - id: npm-audit
+      name: npm audit
+      status: candidate
+    - id: pnpm-audit
+      name: pnpm audit
+      status: candidate
+    - id: yarn-audit
+      name: yarn audit
+      status: candidate
+    - id: cargo-audit
+      name: cargo-audit
+      status: candidate
+    - id: bundler-audit
+      name: bundler-audit
+      status: candidate
+    - id: retire-js
+      name: retire.js
+      status: candidate
+    - id: renovate
+      name: Renovate
+      status: candidate
+    - id: dependabot
+      name: Dependabot
+      status: candidate
+    - id: guac
+      name: GUAC
+      status: candidate
+    - id: ort
+      name: ORT
+      status: candidate
+  - id: provenance_signing
+    primary: Cosign
+    candidates:
+    - id: cosign
+      name: Cosign
+      status: primary
+    - id: sigstore-rekor
+      name: Sigstore Rekor
+      status: candidate
+    - id: sigstore-fulcio
+      name: Sigstore Fulcio
+      status: candidate
+    - id: in-toto
+      name: in-toto
+      status: candidate
+    - id: witness
+      name: Witness
+      status: candidate
+    - id: slsa-verifier
+      name: SLSA verifier
+      status: candidate
+    - id: tuf
+      name: TUF
+      status: candidate
+    - id: notary-project
+      name: Notary Project
+      status: candidate
+    - id: oras
+      name: ORAS
+      status: candidate
+    - id: ratify
+      name: Ratify
+      status: candidate
+    - id: notation
+      name: Notation
+      status: candidate
+  - id: dast_web
+    primary: OWASP ZAP
+    candidates:
+    - id: owasp-zap
+      name: OWASP ZAP
+      status: primary
+    - id: nuclei
+      name: Nuclei
+      status: candidate
+    - id: httpx
+      name: httpx
+      status: candidate
+    - id: katana
+      name: Katana
+      status: candidate
+    - id: naabu
+      name: Naabu
+      status: candidate
+    - id: amass
+      name: Amass
+      status: candidate
+    - id: subfinder
+      name: Subfinder
+      status: candidate
+    - id: dnsx
+      name: dnsx
+      status: candidate
+    - id: wapiti
+      name: Wapiti
+      status: candidate
+    - id: nikto
+      name: Nikto
+      status: candidate
+    - id: sslyze
+      name: SSLyze
+      status: candidate
+    - id: testssl-sh
+      name: testssl.sh
+      status: candidate
+    - id: whatweb
+      name: WhatWeb
+      status: candidate
+    - id: owasp-nettacker
+      name: OWASP Nettacker
+      status: candidate
+  - id: api_security
+    primary: Schemathesis
+    candidates:
+    - id: schemathesis
+      name: Schemathesis
+      status: primary
+    - id: restler
+      name: RESTler
+      status: candidate
+    - id: evomaster
+      name: EvoMaster
+      status: candidate
+    - id: dredd
+      name: Dredd
+      status: candidate
+    - id: newman
+      name: Newman
+      status: candidate
+    - id: step-ci
+      name: Step CI
+      status: candidate
+    - id: tavern
+      name: Tavern
+      status: candidate
+    - id: karate
+      name: Karate
+      status: candidate
+    - id: hurl
+      name: Hurl
+      status: candidate
+    - id: openapi-diff
+      name: OpenAPI Diff
+      status: candidate
+    - id: spectral
+      name: Spectral
+      status: candidate
+    - id: vacuum
+      name: Vacuum
+      status: candidate
+    - id: graphql-cop
+      name: GraphQL Cop
+      status: candidate
+    - id: inql
+      name: InQL
+      status: candidate
+    - id: graphqlmap-test-harness
+      name: GraphQLmap test harness
+      status: candidate
+  - id: fuzzing_property_mutation
+    primary: AFL++
+    candidates:
+    - id: aflplusplus
+      name: AFL++
+      status: primary
+    - id: libfuzzer
+      name: libFuzzer
+      status: candidate
+    - id: honggfuzz
+      name: Honggfuzz
+      status: candidate
+    - id: jazzer
+      name: Jazzer
+      status: candidate
+    - id: atheris
+      name: Atheris
+      status: candidate
+    - id: hypothesis
+      name: Hypothesis
+      status: candidate
+    - id: boofuzz
+      name: boofuzz
+      status: candidate
+    - id: fuzzilli
+      name: Fuzzilli
+      status: candidate
+    - id: cargo-fuzz
+      name: cargo-fuzz
+      status: candidate
+    - id: go-fuzz
+      name: go-fuzz
+      status: candidate
+    - id: oss-fuzz
+      name: OSS-Fuzz
+      status: candidate
+    - id: clusterfuzzlite
+      name: ClusterFuzzLite
+      status: candidate
+    - id: stryker
+      name: Stryker
+      status: candidate
+    - id: strykerjs
+      name: StrykerJS
+      status: candidate
+    - id: mutmut
+      name: mutmut
+      status: candidate
+    - id: cosmic-ray
+      name: Cosmic Ray
+      status: candidate
+    - id: cargo-mutants
+      name: cargo-mutants
+      status: candidate
+  - id: iac_policy
+    primary: Checkov
+    candidates:
+    - id: checkov
+      name: Checkov
+      status: primary
+    - id: kics
+      name: KICS
+      status: candidate
+    - id: terrascan
+      name: Terrascan
+      status: candidate
+    - id: trivy-config
+      name: Trivy Config
+      status: candidate
+    - id: conftest
+      name: Conftest
+      status: candidate
+    - id: opa
+      name: OPA
+      status: candidate
+    - id: regula
+      name: Regula
+      status: candidate
+    - id: tflint
+      name: TFLint
+      status: candidate
+    - id: terraform-compliance
+      name: terraform-compliance
+      status: candidate
+    - id: terratest
+      name: Terratest
+      status: candidate
+    - id: infracost-policy-checks
+      name: Infracost policy checks
+      status: candidate
+    - id: open-policy-containers
+      name: Open Policy Containers
+      status: candidate
+  - id: kubernetes_container
+    primary: Kubescape
+    candidates:
+    - id: kubescape
+      name: Kubescape
+      status: primary
+    - id: kube-bench
+      name: kube-bench
+      status: candidate
+    - id: kube-linter
+      name: kube-linter
+      status: candidate
+    - id: kube-score
+      name: kube-score
+      status: candidate
+    - id: polaris
+      name: Polaris
+      status: candidate
+    - id: popeye
+      name: Popeye
+      status: candidate
+    - id: kyverno
+      name: Kyverno
+      status: candidate
+    - id: gatekeeper
+      name: Gatekeeper
+      status: candidate
+    - id: falco
+      name: Falco
+      status: candidate
+    - id: tetragon
+      name: Tetragon
+      status: candidate
+    - id: tracee
+      name: Tracee
+      status: candidate
+    - id: dockle
+      name: Dockle
+      status: candidate
+    - id: hadolint
+      name: Hadolint
+      status: candidate
+    - id: container-structure-test
+      name: container-structure-test
+      status: candidate
+    - id: cilium
+      name: Cilium
+      status: candidate
+    - id: neuvector-community-edition
+      name: NeuVector Community Edition
+      status: candidate
+  - id: cloud_security
+    primary: Prowler
+    candidates:
+    - id: prowler
+      name: Prowler
+      status: primary
+    - id: scoutsuite
+      name: ScoutSuite
+      status: candidate
+    - id: steampipe
+      name: Steampipe
+      status: candidate
+    - id: cloudquery
+      name: CloudQuery
+      status: candidate
+    - id: cartography
+      name: Cartography
+      status: candidate
+    - id: cloudmapper
+      name: CloudMapper
+      status: candidate
+    - id: cloudsplaining
+      name: Cloudsplaining
+      status: candidate
+    - id: parliament
+      name: Parliament
+      status: candidate
+    - id: principal-mapper
+      name: Principal Mapper
+      status: candidate
+    - id: iam-live
+      name: IAM Live
+      status: candidate
+    - id: cloud-custodian
+      name: Cloud Custodian
+      status: candidate
+    - id: pacu-owned-lab-adapter
+      name: Pacu owned-lab adapter
+      status: candidate
+  - id: runtime_endpoint_network
+    primary: Falco
+    candidates:
+    - id: falco
+      name: Falco
+      status: primary
+    - id: tetragon
+      name: Tetragon
+      status: candidate
+    - id: tracee
+      name: Tracee
+      status: candidate
+    - id: wazuh
+      name: Wazuh
+      status: candidate
+    - id: osquery
+      name: osquery
+      status: candidate
+    - id: suricata
+      name: Suricata
+      status: candidate
+    - id: zeek
+      name: Zeek
+      status: candidate
+    - id: crowdsec
+      name: CrowdSec
+      status: candidate
+    - id: yara
+      name: YARA
+      status: candidate
+    - id: sigma
+      name: Sigma
+      status: candidate
+    - id: clamav
+      name: ClamAV
+      status: candidate
+    - id: velociraptor
+      name: Velociraptor
+      status: candidate
+    - id: opencanary
+      name: OpenCanary
+      status: candidate
+    - id: cowrie
+      name: Cowrie
+      status: candidate
+    - id: arkime
+      name: Arkime
+      status: candidate
+    - id: security-onion
+      name: Security Onion
+      status: candidate
+    - id: selks
+      name: SELKS
+      status: candidate
+    - id: opensnitch
+      name: OpenSnitch
+      status: candidate
+    - id: ntopng
+      name: ntopng
+      status: candidate
+    - id: maltrail
+      name: Maltrail
+      status: candidate
+    - id: snort
+      name: Snort
+      status: candidate
+  - id: incident_response_threat_intel
+    primary: DFIR-IRIS
+    candidates:
+    - id: dfir-iris
+      name: DFIR-IRIS
+      status: primary
+    - id: thehive
+      name: TheHive
+      status: candidate
+    - id: cortex
+      name: Cortex
+      status: candidate
+    - id: misp
+      name: MISP
+      status: candidate
+    - id: opencti
+      name: OpenCTI
+      status: candidate
+    - id: shuffle
+      name: Shuffle
+      status: candidate
+    - id: timesketch
+      name: Timesketch
+      status: candidate
+    - id: plaso
+      name: Plaso
+      status: candidate
+    - id: velociraptor
+      name: Velociraptor
+      status: candidate
+    - id: grr-rapid-response
+      name: GRR Rapid Response
+      status: candidate
+    - id: autopsy
+      name: Autopsy
+      status: candidate
+    - id: volatility-3
+      name: Volatility 3
+      status: candidate
+    - id: chainsaw
+      name: Chainsaw
+      status: candidate
+    - id: hayabusa
+      name: Hayabusa
+      status: candidate
+    - id: zircolite
+      name: Zircolite
+      status: candidate
+    - id: loki-ioc-scanner
+      name: Loki IOC Scanner
+      status: candidate
+    - id: sigma-cli
+      name: Sigma CLI
+      status: candidate
+    - id: yara
+      name: YARA
+      status: candidate
+  - id: malware_file_analysis
+    primary: ClamAV
+    candidates:
+    - id: clamav
+      name: ClamAV
+      status: primary
+    - id: yara
+      name: YARA
+      status: candidate
+    - id: capa
+      name: capa
+      status: candidate
+    - id: floss
+      name: FLOSS
+      status: candidate
+    - id: oletools
+      name: oletools
+      status: candidate
+    - id: pdfid
+      name: pdfid
+      status: candidate
+    - id: pdf-parser
+      name: pdf-parser
+      status: candidate
+    - id: qpdf
+      name: qpdf
+      status: candidate
+    - id: exiftool
+      name: ExifTool
+      status: candidate
+    - id: libmagic
+      name: libmagic
+      status: candidate
+    - id: apache-tika
+      name: Apache Tika
+      status: candidate
+    - id: binwalk
+      name: binwalk
+      status: candidate
+    - id: radare2
+      name: radare2
+      status: candidate
+    - id: ghidra
+      name: Ghidra
+      status: candidate
+    - id: cutter
+      name: Cutter
+      status: candidate
+    - id: remnux-components
+      name: REMnux components
+      status: candidate
+  - id: identity_secrets_pki
+    primary: Keycloak
+    candidates:
+    - id: keycloak
+      name: Keycloak
+      status: primary
+    - id: openfga
+      name: OpenFGA
+      status: candidate
+    - id: opa
+      name: OPA
+      status: candidate
+    - id: spire
+      name: SPIRE
+      status: candidate
+    - id: cert-manager
+      name: cert-manager
+      status: candidate
+    - id: step-ca
+      name: step-ca
+      status: candidate
+    - id: openbao
+      name: OpenBao
+      status: candidate
+    - id: sops
+      name: SOPS
+      status: candidate
+    - id: external-secrets-operator
+      name: External Secrets Operator
+      status: candidate
+    - id: oauth2-proxy
+      name: oauth2-proxy
+      status: candidate
+    - id: dex
+      name: Dex
+      status: candidate
+    - id: authelia
+      name: Authelia
+      status: candidate
+    - id: kanidm
+      name: Kanidm
+      status: candidate
+  - id: edge_pwa
+    primary: Envoy Gateway
+    candidates:
+    - id: envoy-gateway
+      name: Envoy Gateway
+      status: primary
+    - id: coraza
+      name: Coraza
+      status: candidate
+    - id: owasp-core-rule-set
+      name: OWASP Core Rule Set
+      status: candidate
+    - id: modsecurity
+      name: ModSecurity
+      status: candidate
+    - id: caddy
+      name: Caddy
+      status: candidate
+    - id: nginx
+      name: Nginx
+      status: candidate
+    - id: haproxy
+      name: HAProxy
+      status: candidate
+    - id: workbox
+      name: Workbox
+      status: candidate
+    - id: lighthouse-ci
+      name: Lighthouse CI
+      status: candidate
+    - id: axe-core
+      name: axe-core
+      status: candidate
+    - id: pa11y
+      name: pa11y
+      status: candidate
+    - id: dompurify
+      name: DOMPurify
+      status: candidate
+    - id: trusted-types
+      name: Trusted Types
+      status: candidate
+    - id: helmet
+      name: Helmet
+      status: candidate
+    - id: zod
+      name: Zod
+      status: candidate
+    - id: simplewebauthn
+      name: SimpleWebAuthn
+      status: candidate
+    - id: csp-evaluator
+      name: CSP Evaluator
+      status: candidate
+    - id: dependency-cruiser
+      name: dependency-cruiser
+      status: candidate
+    - id: madge
+      name: Madge
+      status: candidate
+    - id: playwright
+      name: Playwright
+      status: candidate
+    - id: vitest
+      name: Vitest
+      status: candidate
+    - id: jest
+      name: Jest
+      status: candidate
+    - id: testing-library
+      name: Testing Library
+      status: candidate
+  - id: observability_evidence
+    primary: OpenTelemetry Collector
+    candidates:
+    - id: opentelemetry-collector
+      name: OpenTelemetry Collector
+      status: primary
+    - id: prometheus
+      name: Prometheus
+      status: candidate
+    - id: grafana
+      name: Grafana
+      status: candidate
+    - id: loki
+      name: Loki
+      status: candidate
+    - id: tempo
+      name: Tempo
+      status: candidate
+    - id: alertmanager
+      name: Alertmanager
+      status: candidate
+    - id: jaeger
+      name: Jaeger
+      status: candidate
+    - id: sentry
+      name: Sentry
+      status: candidate
+    - id: opensearch
+      name: OpenSearch
+      status: candidate
+    - id: fluent-bit
+      name: Fluent Bit
+      status: candidate
+    - id: vector
+      name: Vector
+      status: candidate
+    - id: immudb
+      name: immudb
+      status: candidate
+    - id: minio
+      name: MinIO
+      status: candidate
+    - id: postgresql
+      name: PostgreSQL
+      status: candidate
+    - id: sigstore
+      name: Sigstore
+      status: candidate
+    - id: witness
+      name: Witness
+      status: candidate
+    - id: restic
+      name: restic
+      status: candidate
+    - id: thanos
+      name: Thanos
+      status: candidate
+    - id: mimir
+      name: Mimir
+      status: candidate
+  - id: event_data_platform
+    primary: NATS JetStream
+    candidates:
+    - id: nats-jetstream
+      name: NATS JetStream
+      status: primary
+    - id: redpanda
+      name: Redpanda
+      status: candidate
+    - id: apache-kafka
+      name: Apache Kafka
+      status: candidate
+    - id: rabbitmq
+      name: RabbitMQ
+      status: candidate
+    - id: debezium
+      name: Debezium
+      status: candidate
+    - id: postgresql
+      name: PostgreSQL
+      status: candidate
+    - id: redis
+      name: Redis
+      status: candidate
+    - id: valkey
+      name: Valkey
+      status: candidate
+    - id: minio
+      name: MinIO
+      status: candidate
+    - id: opensearch
+      name: OpenSearch
+      status: candidate
+    - id: clickhouse
+      name: ClickHouse
+      status: candidate
+  - id: devsecops_ci
+    primary: uv
+    candidates:
+    - id: uv
+      name: uv
+      status: primary
+    - id: pre-commit
+      name: pre-commit
+      status: candidate
+    - id: pytest
+      name: pytest
+      status: candidate
+    - id: hypothesis
+      name: Hypothesis
+      status: candidate
+    - id: nox
+      name: nox
+      status: candidate
+    - id: tox
+      name: tox
+      status: candidate
+    - id: actionlint
+      name: actionlint
+      status: candidate
+    - id: zizmor
+      name: zizmor
+      status: candidate
+    - id: openssf-scorecard
+      name: OpenSSF Scorecard
+      status: candidate
+    - id: renovate
+      name: Renovate
+      status: candidate
+    - id: dagger
+      name: Dagger
+      status: candidate
+    - id: earthly
+      name: Earthly
+      status: candidate
+    - id: tekton
+      name: Tekton
+      status: candidate
+    - id: argo-workflows
+      name: Argo Workflows
+      status: candidate
+    - id: argo-cd
+      name: Argo CD
+      status: candidate
+    - id: flux
+      name: Flux
+      status: candidate
+    - id: helm
+      name: Helm
+      status: candidate
+    - id: kustomize
+      name: Kustomize
+      status: candidate
+    - id: trivy-operator
+      name: Trivy Operator
+      status: candidate
+  - id: backup_recovery
+    primary: restic
+    candidates:
+    - id: restic
+      name: restic
+      status: primary
+    - id: kopia
+      name: Kopia
+      status: candidate
+    - id: velero
+      name: Velero
+      status: candidate
+    - id: litestream
+      name: Litestream
+      status: candidate
+    - id: pgbackrest
+      name: pgBackRest
+      status: candidate
+    - id: barman
+      name: Barman
+      status: candidate
+    - id: rclone
+      name: Rclone
+      status: candidate
+    - id: minio-object-lock
+      name: MinIO object lock
+      status: candidate
+    - id: openbao-raft-snapshots
+      name: OpenBao Raft snapshots
+      status: candidate
