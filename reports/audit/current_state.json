@@ -1,0 +1,505 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-06-22T22:39:18.870315+00:00",
+  "wave": 0,
+  "summary": {
+    "agents": 17,
+    "connectors": 8,
+    "simulators": 3,
+    "router_capabilities": 12,
+    "tool_manifest_capabilities": 8,
+    "tests": 36,
+    "source_directories": [
+      "agents",
+      "attestation",
+      "connectors",
+      "containment",
+      "core",
+      "dashboard",
+      "detection",
+      "identity",
+      "isolation",
+      "orchestration",
+      "shadow_guardian",
+      "simulators",
+      "supplychain"
+    ]
+  },
+  "agents": [
+    {
+      "name": "abuse_simulation",
+      "class": "AbuseSimulationAgent",
+      "summary": "Executes simulators; collects detection/containment evidence."
+    },
+    {
+      "name": "api_security",
+      "class": "APISecurityAgent",
+      "summary": "Controlled DAST/API fuzzing on staging within rate limits."
+    },
+    {
+      "name": "asset_scope",
+      "class": "AssetScopeAgent",
+      "summary": "Resolves and ownership-verifies in-scope assets; default-deny."
+    },
+    {
+      "name": "auth_rbac",
+      "class": "AuthRBACAgent",
+      "summary": "Validates authn/session/MFA and the role permission matrix."
+    },
+    {
+      "name": "code_review",
+      "class": "CodeReviewAgent",
+      "summary": "Runs CodeQL/Semgrep on in-scope repos; collects findings as evidence."
+    },
+    {
+      "name": "dependency",
+      "class": "DependencyAgent",
+      "summary": "Assesses dependency and supply-chain risk; SBOM + vuln correlation."
+    },
+    {
+      "name": "evidence_report",
+      "class": "EvidenceReportAgent",
+      "summary": "Renders evidence reports (reports/templates/report_template.md)."
+    },
+    {
+      "name": "guardian_planner",
+      "class": "GuardianPlannerAgent",
+      "summary": "Builds the run plan (modes, agents, sequencing) from the active scope."
+    },
+    {
+      "name": "human_approval",
+      "class": "HumanApprovalAgent",
+      "summary": "Routes high-impact actions and all PRs to a human; reports approval."
+    },
+    {
+      "name": "learning_memory",
+      "class": "LearningMemoryAgent",
+      "summary": "Stores findings/outcomes in vector memory for future runs."
+    },
+    {
+      "name": "patch_proposal",
+      "class": "PatchProposalAgent",
+      "summary": "Generates patch branch + tests; opens a draft PR only."
+    },
+    {
+      "name": "privacy_gdpr",
+      "class": "PrivacyGDPRAgent",
+      "summary": "Checks privacy/GDPR controls; drives the Privacy Leak Simulator."
+    },
+    {
+      "name": "runtime_monitoring",
+      "class": "RuntimeMonitoringAgent",
+      "summary": "Watches runtime telemetry; maps signals to the malware defence library."
+    },
+    {
+      "name": "safeguarding",
+      "class": "SafeguardingAgent",
+      "summary": "Verifies safeguarding protections via Playwright journeys + simulators."
+    },
+    {
+      "name": "secrets",
+      "class": "SecretsAgent",
+      "summary": "Scans for leaked secrets; never exfiltrates, only reports locations."
+    },
+    {
+      "name": "test_runner",
+      "class": "TestRunnerAgent",
+      "summary": "Executes the full test gate before a fix can be reviewed."
+    },
+    {
+      "name": "threat_model",
+      "class": "ThreatModelAgent",
+      "summary": "Produces a defensive threat model and safeguarding risk map."
+    }
+  ],
+  "connectors": [
+    {
+      "name": "codeql",
+      "class": "CodeQLConnector",
+      "binary": "codeql",
+      "mode": "code_review",
+      "trust_zone": "execution",
+      "actions": [
+        "analyze"
+      ]
+    },
+    {
+      "name": "gitleaks",
+      "class": "GitleaksConnector",
+      "binary": "gitleaks",
+      "mode": "secrets_scan",
+      "trust_zone": "execution",
+      "actions": [
+        "detect"
+      ]
+    },
+    {
+      "name": "hashcat",
+      "class": "HashcatConnector",
+      "binary": "hashcat",
+      "mode": "credential_audit",
+      "trust_zone": "execution",
+      "actions": [
+        "credential_audit"
+      ]
+    },
+    {
+      "name": "hydra",
+      "class": "HydraConnector",
+      "binary": "hydra",
+      "mode": "credential_audit",
+      "trust_zone": "execution",
+      "actions": [
+        "high_volume_test"
+      ]
+    },
+    {
+      "name": "john",
+      "class": "JohnConnector",
+      "binary": "john",
+      "mode": "credential_audit",
+      "trust_zone": "execution",
+      "actions": [
+        "credential_audit"
+      ]
+    },
+    {
+      "name": "semgrep",
+      "class": "SemgrepConnector",
+      "binary": "semgrep",
+      "mode": "code_review",
+      "trust_zone": "execution",
+      "actions": [
+        "scan"
+      ]
+    },
+    {
+      "name": "trivy",
+      "class": "TrivyConnector",
+      "binary": "trivy",
+      "mode": "dependency_scan",
+      "trust_zone": "execution",
+      "actions": [
+        "scan"
+      ]
+    },
+    {
+      "name": "zap",
+      "class": "ZapConnector",
+      "binary": "zap.sh",
+      "mode": "zap_scan",
+      "trust_zone": "execution",
+      "actions": [
+        "baseline"
+      ]
+    }
+  ],
+  "simulators": [
+    {
+      "name": "banned_user_return",
+      "class": "BannedUserReturnSimulator",
+      "mode": "abuse_simulation"
+    },
+    {
+      "name": "moderator_abuse",
+      "class": "ModeratorAbuseSimulator",
+      "mode": "abuse_simulation"
+    },
+    {
+      "name": "privacy_leak",
+      "class": "PrivacyLeakSimulator",
+      "mode": "privacy_leakage"
+    }
+  ],
+  "router_capabilities": [
+    {
+      "capability": "api_security",
+      "kind": "connector",
+      "tool": "zap"
+    },
+    {
+      "capability": "banned_user_simulation",
+      "kind": "simulator",
+      "tool": "banned_user_return"
+    },
+    {
+      "capability": "codeql",
+      "kind": "connector",
+      "tool": "codeql"
+    },
+    {
+      "capability": "container",
+      "kind": "connector",
+      "tool": "trivy"
+    },
+    {
+      "capability": "dast",
+      "kind": "connector",
+      "tool": "zap"
+    },
+    {
+      "capability": "dependency",
+      "kind": "connector",
+      "tool": "trivy"
+    },
+    {
+      "capability": "login_resilience",
+      "kind": "connector",
+      "tool": "hydra"
+    },
+    {
+      "capability": "moderator_abuse_simulation",
+      "kind": "simulator",
+      "tool": "moderator_abuse"
+    },
+    {
+      "capability": "password_strength",
+      "kind": "connector",
+      "tool": "hashcat"
+    },
+    {
+      "capability": "privacy_simulation",
+      "kind": "simulator",
+      "tool": "privacy_leak"
+    },
+    {
+      "capability": "secrets",
+      "kind": "connector",
+      "tool": "gitleaks"
+    },
+    {
+      "capability": "static_code",
+      "kind": "connector",
+      "tool": "semgrep"
+    }
+  ],
+  "tool_manifest_capabilities": [
+    {
+      "capability": "code_analysis",
+      "tool": "codeql",
+      "allowed_environments": [
+        "development",
+        "staging"
+      ],
+      "requires_approval": false,
+      "network": "deny_all"
+    },
+    {
+      "capability": "container_scan",
+      "tool": "trivy",
+      "allowed_environments": [
+        "development",
+        "staging"
+      ],
+      "requires_approval": false,
+      "network": "deny_all"
+    },
+    {
+      "capability": "dast",
+      "tool": "zap",
+      "allowed_environments": [
+        "staging"
+      ],
+      "requires_approval": false,
+      "network": "egress_allowlist"
+    },
+    {
+      "capability": "dependency_scan",
+      "tool": "trivy",
+      "allowed_environments": [
+        "development",
+        "staging"
+      ],
+      "requires_approval": false,
+      "network": "deny_all"
+    },
+    {
+      "capability": "login_resilience",
+      "tool": "hydra",
+      "allowed_environments": [
+        "staging"
+      ],
+      "requires_approval": true,
+      "network": "egress_allowlist"
+    },
+    {
+      "capability": "password_strength",
+      "tool": "hashcat",
+      "allowed_environments": [
+        "staging"
+      ],
+      "requires_approval": true,
+      "network": "deny_all"
+    },
+    {
+      "capability": "secrets_scan",
+      "tool": "gitleaks",
+      "allowed_environments": [
+        "development",
+        "staging"
+      ],
+      "requires_approval": false,
+      "network": "deny_all"
+    },
+    {
+      "capability": "static_code_scan",
+      "tool": "semgrep",
+      "allowed_environments": [
+        "development",
+        "staging"
+      ],
+      "requires_approval": false,
+      "network": "deny_all"
+    }
+  ],
+  "subprocess_inventory": [
+    {
+      "file": "connectors/base.py",
+      "lines": [
+        14,
+        115
+      ]
+    },
+    {
+      "file": "core/policy_gate.py",
+      "lines": [
+        26,
+        237
+      ]
+    }
+  ],
+  "placeholder_inventory": [
+    {
+      "file": "agents/__init__.py",
+      "markers": [
+        {
+          "line": 3,
+          "marker": "deliberately thin"
+        }
+      ]
+    },
+    {
+      "file": "attestation/evidence_store.py",
+      "markers": [
+        {
+          "line": 124,
+          "marker": "NotImplementedError"
+        },
+        {
+          "line": 127,
+          "marker": "NotImplementedError"
+        },
+        {
+          "line": 130,
+          "marker": "NotImplementedError"
+        }
+      ]
+    },
+    {
+      "file": "connectors/base.py",
+      "markers": [
+        {
+          "line": 86,
+          "marker": "NotImplementedError"
+        }
+      ]
+    },
+    {
+      "file": "core/brain/nodes.py",
+      "markers": [
+        {
+          "line": 9,
+          "marker": "deliberately thin"
+        },
+        {
+          "line": 139,
+          "marker": "placeholder"
+        }
+      ]
+    },
+    {
+      "file": "core/tools/registry.py",
+      "markers": [
+        {
+          "line": 78,
+          "marker": "placeholder"
+        }
+      ]
+    },
+    {
+      "file": "identity/credentials.py",
+      "markers": [
+        {
+          "line": 114,
+          "marker": "NotImplementedError"
+        },
+        {
+          "line": 117,
+          "marker": "NotImplementedError"
+        },
+        {
+          "line": 120,
+          "marker": "NotImplementedError"
+        }
+      ]
+    }
+  ],
+  "components": {
+    "total": 33,
+    "by_status": {
+      "planned": 31,
+      "present": 2
+    },
+    "by_trust_zone": {
+      "detection": 7,
+      "edge": 4,
+      "evidence": 4,
+      "execution": 3,
+      "identity": 8,
+      "management": 6,
+      "observability": 1
+    },
+    "present": [
+      "policy_engine",
+      "repo_inventory"
+    ]
+  },
+  "tests": [
+    "tests/test_agent_boundary.py",
+    "tests/test_ai_gateway.py",
+    "tests/test_attestation.py",
+    "tests/test_audit.py",
+    "tests/test_authorization_properties.py",
+    "tests/test_brain.py",
+    "tests/test_brain_tools_manifest.py",
+    "tests/test_components_manifest.py",
+    "tests/test_connector_contract.py",
+    "tests/test_connector_contract_migration.py",
+    "tests/test_containment.py",
+    "tests/test_credential_audit.py",
+    "tests/test_detection.py",
+    "tests/test_evidence_store.py",
+    "tests/test_failclosed.py",
+    "tests/test_guardrails.py",
+    "tests/test_identity.py",
+    "tests/test_isolation.py",
+    "tests/test_memory.py",
+    "tests/test_opa_parity.py",
+    "tests/test_orchestration.py",
+    "tests/test_policy_gate.py",
+    "tests/test_privacy_invariants.py",
+    "tests/test_reasoning_graph.py",
+    "tests/test_repo_inventory.py",
+    "tests/test_router.py",
+    "tests/test_router_contract_execution.py",
+    "tests/test_scope.py",
+    "tests/test_shadow_guardian.py",
+    "tests/test_signing.py",
+    "tests/test_simulators.py",
+    "tests/test_sovereign_capabilities_manifest.py",
+    "tests/test_supplychain.py",
+    "tests/test_tool_manifest.py",
+    "tests/test_typed_state.py",
+    "tests/test_verifier.py"
+  ]
+}

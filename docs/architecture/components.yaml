@@ -104,6 +104,13 @@ components:
     roadmap_area: 1
     phase: 1
     status: present          # core/policy_gate.py + policies/opa/guardian.rego
+  - id: repo_inventory
+    component: invis-able/guardian-inventory
+    function: machine-readable current-state report and repository-truth enforcement
+    trust_zone: management
+    roadmap_area: 1
+    phase: 0
+    status: present          # core/inventory.py + reports/audit/current_state.json
   - id: k8s_admission
     component: open-policy-agent/gatekeeper
     function: Kubernetes admission-policy enforcement
