@@ -42,6 +42,13 @@ brain = [
 guardrails = [
     "nemoguardrails>=0.9",
 ]
+
+# Evaluation tooling is DEV-ONLY: it never ships in the Guardian runtime / production image.
+# Declared as a PEP 735 dependency-group (not a project extra) so it is still locked, but
+# classified as a development dependency — supply-chain scanners (Trivy) then treat its
+# transitive deps (e.g. ragas -> diskcache) as dev and do not gate the runtime on them.
+# Install with: uv sync --group eval   (or: pip install --group eval)
+[dependency-groups]
 eval = [
     "deepeval>=1.0",
     "ragas>=0.2",
