@@ -13,6 +13,10 @@ __all__ = [
     "guardrails",
     "evidence",
     "audit",
+    "memory",
+    "router",
+    "opa",
+    "brain",
 ]
 
 VERSION = "0.1.0"

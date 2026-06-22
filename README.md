@@ -37,11 +37,16 @@ Every action is scoped, logged, and gated. The full control matrix is in
 
 ```
 /                       root config, policies, CI workflows
-├── core/               config loader, scope engine, guardrails, evidence, audit log
-├── agents/             the 17 Guardian ECC agents (orchestration layer)
+├── core/               config, scope, guardrails, evidence, audit + the Brain
+│   ├── brain.py        controlled orchestrator (Detect→…→Approval→Learn)
+│   ├── router.py       tool router (capability → guarded tool execution)
+│   ├── memory.py       memory/RAG layer (vector backends + offline fallback)
+│   └── opa.py          OPA policy-gate bridge (binary or in-Python twin)
+├── agents/             the 17 Guardian ECC agents (decide; delegate to the router)
 ├── connectors/         thin, dry-run-aware wrappers around security tools
 ├── simulators/         defensive abuse/attack simulators (owned staging only)
-├── policies/           security-standard mappings + malware defence library
+├── policies/           security standards + OPA (rego) + NeMo Guardrails configs
+├── eval/               evaluation harness (DeepEval · Promptfoo · Ragas)
 ├── scope/              asset registry, scope files, test-account registry
 ├── reports/            generated evidence reports + templates
 ├── tests/              unit tests for guardrails, scope, simulators
@@ -67,8 +72,11 @@ pip install -e ".[dev]"
 # 2. Validate scope + guardrails against a scope file (dry run, no scanning)
 python -m core.guardrails check scope/invisable-staging.yaml
 
-# 3. List available simulators
-python -m simulators list
+# 3. Run the Guardian Brain over a scope (dry-run; halts at human approval)
+guardian brain scope/invisable-staging.yaml
+
+# 3b. Evaluate the policy gate for an action (OPA twin / in-Python fallback)
+guardian policy scope/invisable-staging.yaml --action production_scan --mode code_review
 
 # 4. Run a simulator against owned staging (dry run by default)
 python -m simulators run privacy_leak --scope scope/invisable-staging.yaml --dry-run
@@ -91,6 +99,11 @@ The first build target ships:
 
 | Capability                | Where                                              |
 | ------------------------- | -------------------------------------------------- |
+| Guardian Brain orchestrator | `core/brain.py`, [docs/brain.md](docs/brain.md)  |
+| Tool router               | `core/router.py`                                   |
+| Memory / RAG layer        | `core/memory.py`                                   |
+| Policy gates (OPA + NeMo) | `core/opa.py`, `policies/opa/`, `policies/guardrails/nemo/` |
+| Evaluation harness        | `eval/` (DeepEval · Promptfoo · Ragas)             |
 | Asset registry            | `scope/assets.yaml`                                |
 | Scope file + schema       | `scope/invisable-staging.yaml`, `SCOPE_SCHEMA.yaml`|
 | Test account registry     | `scope/test_accounts.yaml`                         |
@@ -120,6 +133,7 @@ OWASP **WSTG**, **ASVS 5.0**, **SAMM**, **MASVS/MASTG**; **NIST SSDF**; **SLSA**
 - [SECURITY_POLICY.md](SECURITY_POLICY.md) — disclosure, self-healing workflow, approval
 - [GUARDRAILS.md](GUARDRAILS.md) — the mandatory control gates
 - [docs/architecture.md](docs/architecture.md) — system architecture
+- [docs/brain.md](docs/brain.md) — the Guardian Brain (orchestrator, router, memory, policy gates, eval)
 - [docs/agents.md](docs/agents.md) — the 17 Guardian agents
 - [docs/workflow.md](docs/workflow.md) — self-healing workflow detail
 - [docs/self_healing_stack.md](docs/self_healing_stack.md) — recommended tools/frameworks per self-healing layer

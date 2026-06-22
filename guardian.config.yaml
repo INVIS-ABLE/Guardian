@@ -28,6 +28,7 @@ guardian:
         - app_docs
         - support_flows
         - safeguarding_rules
+        - run_outcomes          # Brain run findings/outcomes fed back for learning
 
   # --- Connectors (security tools) -------------------------------------------
   # Each connector is dry-run aware and refuses to run outside an approved scope.
@@ -47,6 +48,34 @@ guardian:
     hashcat:  { enabled: false, purpose: password_policy_strength_audit }
     john:     { enabled: false, purpose: password_policy_strength_audit }
     hydra:    { enabled: false, purpose: login_defence_resilience }
+
+  # --- Brain orchestration ----------------------------------------------------
+  # The Guardian Brain coordinates the agents through a controlled, gated workflow.
+  # It is a "brain, not a supermodel": it stitches proven pieces together, it does
+  # not train a model from scratch.
+  brain:
+    enabled: true
+    workflow_engine: builtin       # builtin | langgraph (optional dependency)
+    halt_for_human_approval: true  # hard stop before any deploy stage; cannot disable
+    memory_writes: true            # persist detect/simulate/evidence outputs to memory
+
+  # --- Policy gates -----------------------------------------------------------
+  # Defence-in-depth: in-code guardrails + a declarative OPA twin + NeMo rails on
+  # the reasoning model. All three must agree on "defensive-only".
+  policy:
+    opa:
+      enabled: true
+      policy_dir: policies/opa
+      fallback: python              # if the `opa` binary is absent, evaluate in-process
+    nemo_guardrails:
+      enabled: true
+      config_dir: policies/guardrails/nemo
+
+  # --- Evaluation -------------------------------------------------------------
+  evaluation:
+    deepeval:  { enabled: true, path: eval/deepeval }
+    promptfoo: { enabled: true, config: eval/promptfooconfig.yaml }
+    ragas:     { enabled: true, path: eval/ragas }
 
   # --- Self-healing workflow --------------------------------------------------
   self_healing:
