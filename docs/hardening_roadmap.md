@@ -31,7 +31,8 @@ plugs into that single decision point.
 | 5 | Immutable audit & evidence | immudb, in-toto/witness, cosign | 🟡 | system-of-record + Ed25519-signed attestations shipped (`attestation/`); local deletion can't erase evidence; immudb + cosign/witness wiring pending |
 | 6 | Findings management | DefectDojo | ⬜ | unified findings ledger; Guardian orchestrates, doesn't re-home findings |
 | 7 | Dashboard identity | oauth2-proxy (OIDC) | 🟡 | principal + role enforcement shipped (`identity/oidc.py`); internal ports closed; oauth2-proxy/Keycloak wiring pending |
-| 8 | Sandbox & runtime detection | gVisor (runsc), Falco | ⬜ | scanners rootless, read-only input, egress allowlist |
+| 7b | Egress control | Cilium + egress gateway | 🟡 | default-deny egress policy shipped (`isolation/egress.py`: blocks metadata/private/loopback, allowlist); Cilium gateway wiring pending |
+| 8 | Sandbox & runtime detection | gVisor (runsc), Falco | 🟡 | sandbox profile + run-spec validation shipped (`isolation/sandbox.py`); gVisor/Falco runtime wiring pending |
 | 9 | Build provenance | actions/attest, cosign, witness | ⬜ | SBOM + provenance + signature; verify by digest before deploy |
 | 10 | Mandatory CI gates | dependency-review, scorecard, zizmor, pip-audit, bandit | 🟡 | zizmor + pip-audit + bandit blocking now; dependency-review + scorecard pending |
 | 11 | High-assurance testing | hypothesis, schemathesis, uv, renovate | 🟡 | hypothesis property tests done; uv lockfile + schemathesis next |
