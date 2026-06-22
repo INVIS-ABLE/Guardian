@@ -1,0 +1,59 @@
+# Guardian CODEOWNERS — review routing (PROPOSAL / interim).
+#
+# Named role owners do not yet exist (see docs/governance/CONTROL_OWNERS.md — all TBD).
+# Until they are assigned, security-sensitive paths route to the accountable repository
+# owner @INVIS-ABLE. This is interim, not a claim that separation-of-duties is complete:
+# a HIGH/CRITICAL change still needs a SECOND independent human reviewer per the Merge
+# Governor charter — CODEOWNERS approval alone does not satisfy that.
+#
+# Replace @INVIS-ABLE with the specific role owners from path_ownership.yaml as they are
+# named, and enable "Require review from Code Owners" in the main ruleset (owner action).
+
+# Default: repository owner is accountable for anything not otherwise routed.
+*                               @INVIS-ABLE
+
+# --- Authorization / policy (HIGH) ---
+/core/policy_gate.py            @INVIS-ABLE
+/core/guardrails.py             @INVIS-ABLE
+/core/scope.py                  @INVIS-ABLE
+/policies/                      @INVIS-ABLE
+
+# --- Ownership verification (HIGH) ---
+/ownership/                     @INVIS-ABLE
+/docs/architecture/roots_of_trust.md @INVIS-ABLE
+
+# --- Cryptography / capability tokens (HIGH) ---
+/core/signing.py                @INVIS-ABLE
+/security/crypto/               @INVIS-ABLE
+/core/tools/capability.py       @INVIS-ABLE
+
+# --- Identity & secrets (HIGH) ---
+/identity/                      @INVIS-ABLE
+
+# --- Evidence / attestation / audit (HIGH) ---
+/attestation/                   @INVIS-ABLE
+/core/evidence/                 @INVIS-ABLE
+/core/audit.py                  @INVIS-ABLE
+
+# --- Runtime isolation & containment (HIGH) ---
+/isolation/                     @INVIS-ABLE
+/containment/                   @INVIS-ABLE
+
+# --- AI / model safety & Shadow Guardian (HIGH) ---
+/core/ai/                       @INVIS-ABLE
+/shadow_guardian/               @INVIS-ABLE
+
+# --- CI / Actions / supply chain (HIGH) ---
+/.github/workflows/             @INVIS-ABLE
+/.github/zizmor.yml             @INVIS-ABLE
+/renovate.json                  @INVIS-ABLE
+/supplychain/                   @INVIS-ABLE
+
+# --- Infrastructure (CRITICAL) ---
+/docker-compose.yml             @INVIS-ABLE
+/deploy/                        @INVIS-ABLE
+
+# --- Repository governance ---
+/docs/governance/               @INVIS-ABLE
+/.github/CODEOWNERS             @INVIS-ABLE
+/scripts/repository_governor.py @INVIS-ABLE

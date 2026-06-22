@@ -1,0 +1,140 @@
+# Branch retirement candidates.
+# Branches with 0 unique commits vs main (cherry-pick aware) — work already integrated.
+# RETIREMENT REQUIRES EXPLICIT HUMAN OWNER APPROVAL and the final SHA recorded here.
+# The steward never deletes a branch autonomously.
+version: 1
+evidence_timestamp: "2026-06-22T23:03:16Z"
+approval_required: true
+candidates:
+  - branch: claude/area11-uv-lockfile
+    final_sha: 1aa9d6fd280d5c388b957f116d557de6026c8c18
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/area2-ownership-verification
+    final_sha: 1a1ad3b3827866f7c80a28432b70672c43fb13c8
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/brain-v2-prereq-fixes
+    final_sha: b00a00c1fc0f15ee93e04c64e786e68c402c9f8d
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/crypto-ci-fixes
+    final_sha: b7739a3d2828f94b831946a868bac9cd44c0df89
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/digital-twin
+    final_sha: 2bd3f1c332a5da8fb247d28ce3c39c8a1d2b717e
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/evidence-classification-restricted
+    final_sha: 26b1b2b14913ef0c9228115d796550a707285854
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/festive-brahmagupta-ctyiyn
+    final_sha: 808e61debfd15c264bbd9e84c09456d0b354b36f
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/guardian-brain
+    final_sha: f4775e0917971560175b3d71a2e743d9ad0eba0a
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/keen-euler-4t9vo7
+    final_sha: a890adda6d2c157c4dd9e2d9d8d2257b511053a8
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/mobile-and-credential-audit
+    final_sha: 3952a9a7a441741ed4a07327a51b344054bb3463
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/model-gateway
+    final_sha: 2ab794db39750a9f14f8287203aa21ecb4bee261
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/phase-observability
+    final_sha: 73b32fa052e96b6753493bb5ff15282f3033ee21
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/phase0-ci-pinning
+    final_sha: 978345982612f1066300b669cf41f3c1862a635a
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/phase0-hardening
+    final_sha: d3469d5d82331c24a20e500b8c8b7b2aeaa64042
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/phase1-temporal-statemachine
+    final_sha: afebe7760df35e824745aedfcafc53be8c791651
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/phase2-codeql-fixes
+    final_sha: 61802d10100138cc5906b9680b10788128530629
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/phase2-identity-evidence
+    final_sha: 9858778e3ab350d166cef3019dc32236bd4f3db2
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/phase3-isolation
+    final_sha: 9101a74c2d9a2f7522efc06dde6960a9b4615bee
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/phase4-supplychain
+    final_sha: 726072462b942445459436c8621290c7c3e803ac
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/phase6-containment
+    final_sha: 3777eae79d884778efe48c571874756e0687385d
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/phase6-detection-as-code
+    final_sha: b4aa95df492d2b67d9953b443f598d147b740754
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/phase6-resilience-recovery
+    final_sha: 6c29aef9f8d86cf71a0980faa2a13708cfba800a
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/priority-agents
+    final_sha: bf03094f77a80fe19a1ae3f7ff3f57611889f758
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/reasoning-graph
+    final_sha: 77ad0392a3b4a140dbf122a146bc3ba0eb3b72c1
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/security-crypto-layer
+    final_sha: abd35ff401ffb6ddeaa35d473f250db159e59a0f
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/sovereign-ops-plane
+    final_sha: f94b7bf8db073b3e44b9304f65872fe9aa033a0c
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/target-architecture
+    final_sha: 4322b6a6d7941c5b980354cc4f57b5f68af3993b
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/tool-manifest-gateway
+    final_sha: f64cd150e38ed76a7df4a189a3327449f5505f2b
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/twin-blast-gate
+    final_sha: f32ba74bc0ac79152ca090f0f5be7acbf1f4f122
+    state: merged_into_main
+    owner_approved: false
+  - branch: claude/vibrant-gates-8qmfxc
+    final_sha: 7a458eeaff5951552c2f9144818ed79f4384fedd
+    state: merged_into_main
+    owner_approved: false
+# Branches with unique work (NOT retirement candidates): see branch_reconciliation_plan.md
+retain_pending_reconciliation:
+  - branch: claude/confident-planck-9t1rfs
+    final_sha: d51c6ed9597d7f493893a45069e2bceb61d188fe
+  - branch: claude/laughing-ptolemy-zfeiiu
+    final_sha: 152b321727a15e453fcdc094063d55cf1b28fc81
+  - branch: claude/exciting-goldberg-udmve1
+    final_sha: 25099a4938c1dd3666fb7949a4e70405b447945c
+  - branch: claude/fix-main-ci-rego-zizmor
+    final_sha: 035ad520fc90eff973ed99ac7c64e3aa099aa50d
+  - branch: claude/twin-ci-gate
+    final_sha: c5ec3166c64b9912b149bb28241b8845f9c47af1

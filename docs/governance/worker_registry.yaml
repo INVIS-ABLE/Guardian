@@ -1,0 +1,92 @@
+# Guardian worker registry — one bounded objective per worker.
+# A worker without a registered objective may not merge. Status reflects last
+# observation by the Merge Governor; workers update their own entry via PR.
+#
+# schema (per entry):
+#   agent_name, branch, issue, objective, owned_paths, prohibited_paths,
+#   dependencies, expected_outputs, risk, started_at, last_observed_commit, status
+version: 1
+canonical_branch: main
+workers:
+  merge_governor:
+    agent_name: Guardian Merge Governor
+    branch: steward/57-merge-governor-baseline
+    issue: 57
+    objective: Establish governance scaffold + canonical-branch reconciliation baseline.
+    owned_paths:
+      - docs/governance/**
+      - .github/CODEOWNERS
+      - .github/pull_request_template.md
+      - .github/ISSUE_TEMPLATE/**
+      - .github/workflows/repository-governor.yml
+      - scripts/repository_governor.py
+      - tests/test_repository_governor.py
+    prohibited_paths:
+      - core/**           # steward governs; it does not author feature code here
+    dependencies: []
+    expected_outputs:
+      - governance file set
+      - branch inventory + reconciliation plan
+      - non-merging repository-governor watchdog
+    risk: medium
+    started_at: "2026-06-22"
+    last_observed_commit: ""
+    status: active
+
+  wave0_repository_truth:
+    agent_name: Final Power-Up Wave 0
+    branch: claude/confident-planck-9t1rfs
+    issue: 0
+    objective: Machine-readable repository-truth baseline (core/inventory.py).
+    owned_paths:
+      - core/inventory.py
+      - reports/audit/**
+      - docs/architecture/final_powerup_map.md
+      - docs/architecture/build_directive.md
+      - docs/architecture/invariants.md
+      - docs/architecture/wave_status.md
+      - docs/architecture/*_inventory.md
+      - configs/tools/guardian.tool-registry.expanded.yaml
+    prohibited_paths: []
+    dependencies: []
+    expected_outputs:
+      - reports/audit/current_state.json
+      - tests/test_repo_inventory.py
+    risk: low
+    started_at: "2026-06-22"
+    last_observed_commit: d51c6ed
+    status: review        # merged to LEGACY only; must be forward-ported to main
+
+  twin_ci_gate:
+    agent_name: Digital-twin blast-radius gate
+    branch: claude/twin-ci-gate
+    issue: 0
+    objective: Ambient PR blast-radius gate (changed-files -> assets -> CI).
+    owned_paths:
+      - core/twin/**
+      - .github/workflows/twin-gate.yml
+    prohibited_paths: []
+    dependencies: []
+    expected_outputs:
+      - tests/test_twin_changemap.py
+    risk: medium
+    started_at: "2026-06-22"
+    last_observed_commit: 34fa83c
+    status: active        # open PR #52 -> main
+
+  endpoint_fabric:
+    agent_name: Endpoint intelligence fabric
+    branch: claude/keen-euler-4t9vo7
+    issue: 0
+    objective: Signed, reviewed osquery query packs only (reference monitor).
+    owned_paths:
+      - core/endpoint/**
+      - endpoint/**
+    prohibited_paths: []
+    dependencies: []
+    expected_outputs:
+      - tests/test_endpoint.py
+    risk: high            # endpoint command execution boundary
+    started_at: "2026-06-22"
+    last_observed_commit: 1720f94
+    status: active        # open PR #55 -> main (draft)

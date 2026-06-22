@@ -1,0 +1,57 @@
+name: Worker task
+description: Register a bounded worker objective with the Merge Governor.
+title: "[worker] <area>: <short objective>"
+labels: ["requires:human-review"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        One worker, one bounded objective. Branch from current `main` as
+        `agent/<area>/<issue>-<short-description>`. Do not modify another worker's
+        owned paths (see `docs/governance/path_ownership.yaml`) without coordination.
+  - type: input
+    id: area
+    attributes:
+      label: Area
+      description: e.g. authz, ownership, ci, runtime, ai, evidence, identity, supply-chain
+    validations:
+      required: true
+  - type: textarea
+    id: objective
+    attributes:
+      label: Bounded objective
+      description: Exactly what this worker will deliver. No silent scope expansion.
+    validations:
+      required: true
+  - type: textarea
+    id: owned_paths
+    attributes:
+      label: Owned paths
+      description: Paths this worker will change.
+    validations:
+      required: true
+  - type: dropdown
+    id: risk
+    attributes:
+      label: Risk classification
+      options: [low, medium, high, critical]
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: Other issues/PRs that must land first (or "none").
+    validations:
+      required: true
+  - type: checkboxes
+    id: rules
+    attributes:
+      label: Worker contract
+      options:
+        - label: I will branch from current `main` and target `main`.
+          required: true
+        - label: I will not expand scope silently; new work gets a new issue.
+          required: true
+        - label: I understand security-sensitive changes require independent human review.
+          required: true

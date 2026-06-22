@@ -1,0 +1,43 @@
+name: Security governance / freeze
+description: Raise a security-governance concern or an emergency freeze.
+title: "[steward] <concern>"
+labels: ["requires:security-review"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for freeze triggers or security-governance decisions. **Never paste
+        secret values.** See `docs/governance/emergency_freeze.md`.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options:
+        - Emergency freeze (stop all merges)
+        - Branch protection / ruleset change request
+        - Default-branch change request
+        - Security-sensitive merge approval request
+        - Capability-claim dispute
+        - Other governance concern
+    validations:
+      required: true
+  - type: textarea
+    id: detail
+    attributes:
+      label: What happened / what is requested
+      description: Time detected (UTC), the change (link, not secrets), actor if visible.
+    validations:
+      required: true
+  - type: textarea
+    id: affected
+    attributes:
+      label: Affected branches / PRs / paths
+    validations:
+      required: true
+  - type: textarea
+    id: decision
+    attributes:
+      label: Owner decision required
+      description: The specific human decision needed to proceed or lift the freeze.
+    validations:
+      required: true

@@ -1,0 +1,32 @@
+# Append-only logical record of merges into main, governed by the Merge Governor.
+# A repository YAML file alone is NOT immutable evidence: where Guardian's signed
+# evidence system exists, attest the merge event externally. This ledger is the
+# human-readable index, not the system of record.
+#
+# This ledger begins at the governance baseline. Pre-governance merges into main
+# (PRs up to #53) predate the steward and are catalogued in branch_inventory.yaml
+# rather than re-litigated here.
+version: 1
+canonical_branch: main
+entries: []
+#  - pr: 0
+#    title: ""
+#    merged_at: ""
+#    merge_commit: ""
+#    base_branch: main
+#    head_branch: ""
+#    risk: low|medium|high|critical
+#    worker: ""
+#    issue: 0
+#    dependencies: []
+#    reviewers: []
+#    codeowners: []
+#    checks: { required: [], passed: [] }
+#    security_impact: ""
+#    privacy_impact: ""
+#    authorization_impact: ""
+#    capability_changes: []
+#    evidence: []
+#    rollback: ""
+#    residual_risk: ""
+#    steward_decision: ""
