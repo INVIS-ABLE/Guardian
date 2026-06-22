@@ -693,5 +693,30 @@ def timeline_phases_cmd(stream_file: str) -> None:
                       detail={"phases": len(sketch.phases()), "ttr": d.time_to_respond_seconds})
 
 
+@main.command("reason-causal")
+@click.argument("spec_file", type=click.Path(exists=True))
+@click.option("--observed", required=True, help="Comma-separated observed-compromised asset ids.")
+@click.option("--sink", required=True, help="The sensitive asset that was reached.")
+def reason_causal_cmd(spec_file: str, observed: str, sink: str) -> None:
+    """Wave 2: causal root-cause of how OBSERVED compromise reached SINK (over a twin spec)."""
+    from .reasoning import root_cause
+    from .twin import load_twin
+
+    twin = load_twin(spec_file)
+    ids = [o.strip() for o in observed.split(",") if o.strip()]
+    r = root_cause(twin, observed=ids, sink=sink)
+    if r.first_event is None:
+        click.echo(f"No path from {ids} to {sink} — sink not reached.")
+        raise SystemExit(0)
+    click.echo(f"Incident reaching {sink}:")
+    click.echo(f"  first event:    {r.first_event}")
+    click.echo(f"  root cause:     {r.root_cause}  (earliest necessary link — cut this)")
+    click.echo(f"  enabling:       {' → '.join(r.enabling_conditions) or '(none)'}")
+    click.echo(f"  amplifiers:     {', '.join(r.amplifiers) or '(none)'}")
+    click.echo(f"  symptoms:       {' → '.join(r.symptoms)}")
+    AuditLog().record("reason-causal", actor="cli", scope=sink, decision="allowed",
+                      detail={"root_cause": r.root_cause, "first_event": r.first_event})
+
+
 if __name__ == "__main__":  # pragma: no cover
     main()

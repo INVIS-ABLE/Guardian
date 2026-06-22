@@ -78,10 +78,10 @@ The authoritative, machine-checked list is
 ### Wave 2 — Intelligence (deeper reasoning)
 | # | System | Gives Guardian |
 | - | ------ | -------------- |
-| 7 | **Evidence & competing-hypothesis engine** | every case holds rival hypotheses with supporting/contradicting/missing evidence + falsification tests; it seeks *disproof* of its preferred theory |
-| 8 | **Causal root-cause engine** | counterfactual reasoning to separate first-event / root-cause / enabling-conditions / amplifiers / symptoms |
+| 7 | **Evidence & competing-hypothesis engine** — *[first slice implemented](reasoning.md)* | every case holds rival hypotheses with supporting/contradicting/missing evidence + falsification tests; it seeks *disproof* of its preferred theory |
+| 8 | **Causal root-cause engine** — *[first slice implemented](reasoning.md)* | counterfactual reasoning to separate first-event / root-cause / enabling-conditions / amplifiers / symptoms |
 | 9 | **Multi-model reasoning council** | planner · sceptic · alt-hypothesis · attack-path · privacy · adjudicator roles across model families — adjudication, **not majority vote** |
-| 10 | **Confidence calibration & abstention** | learns whether 90%-confidence is right ~90% of the time; lowers it or says *"insufficient evidence"* |
+| 10 | **Confidence calibration & abstention** — *[first slice implemented](reasoning.md)* | learns whether 90%-confidence is right ~90% of the time; lowers it or says *"insufficient evidence"* |
 | 11 | **Autonomous threat-hunting engine** | continuous read-only, budgeted, tenant-isolated, privacy-filtered hunts; a validated hunt becomes a **permanent detection** |
 | 12 | **Predictive attack-path forecasting** (NetworkX over the twin) — *[first slice implemented](digital_twin.md#cross-domain-federation--attack-path-forecasting)* | evaluates PRs & infra changes *before* deploy — not after a scanner finds the exposure |
 
