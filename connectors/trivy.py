@@ -13,6 +13,7 @@ class TrivyConnector(BaseConnector):
     binary = "trivy"
     mode = "dependency_scan"
     action = "dependency_scan"
+    ACTIONS = ("scan",)
 
     def build_command(self, *, repo: str | None = None, target: str | None = None, **kwargs: Any) -> list[str]:
         scan_type = kwargs.get("scan_type", "fs")  # fs | image | config | repo
