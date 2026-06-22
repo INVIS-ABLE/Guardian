@@ -50,6 +50,7 @@ guardian = "core.cli:main"
 [tool.setuptools]
 packages = [
     "core",
+    "core.ai",
     "core.brain",
     "core.evidence",
     "agents",
