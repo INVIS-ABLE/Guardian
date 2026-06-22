@@ -9,10 +9,13 @@ plugs into that single decision point.
 | Item | Status | Notes |
 | ---- | ------ | ----- |
 | Central OPA-backed `authorize()`, no `allow_production` escape | ✅ | `core/policy_gate.py` + `policies/opa/guardian.rego`; property-tested |
+| Approvals bound to commit/workflow/target (not just action name) | ✅ | policy gate binding + tests |
+| Scope-file membership not accepted as ownership proof in production | ✅ | `Guardrails._verify_ownership` fail-closed; test |
+| Replace default Grafana password; close exposed internal ports; no `latest` | ✅ | `docker-compose.yml` (version-pinned, private network, fail-closed Grafana pw) |
+| Governance docs skeleton | ✅ | `docs/governance/` (14 docs) |
 | Remove every `\|\| true` / security `continue-on-error`; make security jobs blocking | ⬜ | Now unblocked (code scanning enabled, findings clean). Next PR. |
 | Pin every Action to a full commit SHA | ⬜ | Next PR (resolve + pin all `uses:` refs) |
-| Pin every container by digest; remove `latest` | ⬜ | `docker-compose.yml` + Dockerfiles |
-| Replace default Grafana password; close exposed internal ports | ⬜ | compose: keep only the proxied dashboard public |
+| Pin every container by digest (sha256) | 🟡 | version tags pinned now; digest-pin after registry/Harbor mirror (area 8) |
 | Protected `main`; ruleset (2 reviews, CODEOWNERS, signed commits, no force-push) | ⬜ | repo settings (admin action) |
 | Production GitHub Environment with required reviewers, no self-review/admin bypass | ⬜ | repo settings |
 | Register Guardian as a least-privilege GitHub App | ⬜ | area 2 |

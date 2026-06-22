@@ -95,3 +95,31 @@ def test_expired_production_approval_does_not_count():
         ApprovalLite("production_scan", "head_of_eng", 0.0),
     ]
     assert decide(base(environment="production", approvals=expired, now=10_000.0)).allow is False
+
+
+def test_commit_bound_approval_only_valid_for_that_commit():
+    # An approval bound to commit "abc" must not authorise a request for commit "def".
+    appr = [ApprovalLite("high_volume_test", "ciso", None, commit="abc")]
+    denied = decide(
+        base(action="high_volume_test", mode="abuse_simulation", approvals=appr, commit="def")
+    )
+    assert denied.allow is False
+    allowed = decide(
+        base(action="high_volume_test", mode="abuse_simulation", approvals=appr, commit="abc")
+    )
+    assert allowed.allow is True
+
+
+def test_workflow_bound_approval_only_valid_for_that_run():
+    appr = [ApprovalLite("high_volume_test", "ciso", None, workflow_run="run-1")]
+    assert (
+        decide(
+            base(
+                action="high_volume_test",
+                mode="abuse_simulation",
+                approvals=appr,
+                workflow_run="run-2",
+            )
+        ).allow
+        is False
+    )

@@ -56,6 +56,7 @@ class Approval:
     ticket: str  # issue/PR/incident reference — evidence of the decision
     note: str = ""
     expires_at: float | None = None  # epoch seconds; None = no expiry (discouraged)
+    target: str | None = None  # exact domain or repo the approval is for (None = unbound)
     commit: str | None = None
     workflow_run: str | None = None
 
@@ -64,7 +65,14 @@ class Approval:
         return self.expires_at is None or now < self.expires_at
 
     def _lite(self) -> ApprovalLite:
-        return ApprovalLite(action=self.action, approver=self.approver, expires_at=self.expires_at)
+        return ApprovalLite(
+            action=self.action,
+            approver=self.approver,
+            expires_at=self.expires_at,
+            target=self.target,
+            commit=self.commit,
+            workflow_run=self.workflow_run,
+        )
 
 
 @dataclass
@@ -200,8 +208,15 @@ class Guardrails:
         return ok
 
     def _verify_ownership(self, kind: str, target: str) -> bool:
+        # A configured verifier (DNS-TXT / GitHub-App, with expiring evidence) is authoritative.
         if self.ownership_verifier is not None:
             return bool(self.ownership_verifier(kind, target))  # type: ignore[operator]
+        # No real verifier configured. Fail CLOSED for production: scope-file membership is
+        # NOT proof of ownership for production targets. Non-production accepts scope
+        # membership as dev/staging evidence (documented; replaced by a real verifier in
+        # deployment — see docs/authorization.md, blueprint area 2).
+        if self.scope.is_production():
+            return False
         if kind == "domain":
             return domain_is_in_scope(self.scope, target)
         if kind == "repo":

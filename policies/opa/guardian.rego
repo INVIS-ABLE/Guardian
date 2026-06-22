@@ -20,13 +20,33 @@ global_approval_required := {
 production_min_reviewers := 2
 
 # ---- valid (unexpired) approvals ------------------------------------------------
-valid_approval(a) if {
-	a.expires_at == null
-}
+unexpired(a) if a.expires_at == null
 
-valid_approval(a) if {
+unexpired(a) if {
 	a.expires_at != null
 	input.now < a.expires_at
+}
+
+# An approval's bindings (target/commit/workflow_run) must match the request when set.
+bound_ok(a) if {
+	commit_ok(a)
+	workflow_ok(a)
+	target_ok(a)
+}
+
+commit_ok(a) if a.commit == null
+commit_ok(a) if a.commit == input.commit
+
+workflow_ok(a) if a.workflow_run == null
+workflow_ok(a) if a.workflow_run == input.workflow_run
+
+target_ok(a) if a.target == null
+target_ok(a) if a.target == input.domain
+target_ok(a) if a.target == input.repo
+
+valid_approval(a) if {
+	unexpired(a)
+	bound_ok(a)
 }
 
 valid_approvals_for(action) := {a |
