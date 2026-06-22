@@ -16,6 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Trivy filesystem scan
         uses: aquasecurity/trivy-action@master
@@ -26,13 +28,10 @@ jobs:
           format: sarif
           output: trivy-results.sarif
 
-      # Uploading to the Security tab requires code scanning (GitHub Advanced
-      # Security), which isn't available on all repos/plans. Don't block the PR if
-      # the upload isn't permitted — keep the SARIF as a build artifact instead.
+      # Code scanning is enabled, so SARIF upload succeeds and is a blocking signal.
       - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@v3
         if: always()
-        continue-on-error: true
         with:
           sarif_file: trivy-results.sarif
 

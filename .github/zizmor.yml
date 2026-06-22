@@ -1,0 +1,11 @@
+# zizmor configuration — GitHub Actions security audit (blueprint area 10).
+#
+# `unpinned-uses` (pin Actions to a full commit SHA) is enforced by Renovate
+# (renovate.json: helpers:pinGitHubActionDigests). Until Renovate's first pin PR lands,
+# it is downgraded here so the rest of zizmor's audits can gate without a chicken-and-egg
+# block. Once Actions are SHA-pinned, remove this override to make it an error again.
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        "*": ref-pin   # require a pinned ref (tag/sha); upgrade to hash-pin after Renovate
