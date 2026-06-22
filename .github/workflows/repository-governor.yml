@@ -31,7 +31,10 @@ jobs:
         run: python -m pip install --upgrade pip pytest
 
       - name: Governor self-tests (detectors must work)
-        run: python -m pytest tests/test_repository_governor.py -q
+        # Hermetic: the governor test loads the stdlib-only script via importlib and
+        # needs no project deps. --noconftest skips tests/conftest.py (which imports
+        # core.* and PyYAML) so the watchdog stays self-contained and fast.
+        run: python -m pytest tests/test_repository_governor.py -q --noconftest
 
       - name: Run governor (report-only, non-blocking)
         id: governor
