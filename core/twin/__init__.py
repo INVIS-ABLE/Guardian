@@ -17,7 +17,16 @@ from .assessment import (
     Severity,
     assess_change,
 )
+from .cartography import CartographyExportError, from_cartography_export
 from .changemap import resolve_changed_assets
+from .federate import federate
+from .forecast import (
+    ChokePoint,
+    attack_surface,
+    chokepoint_ranking,
+    default_sinks,
+    default_sources,
+)
 from .ingest import build_from_spec, from_cartography, load_twin, production_source_required
 from .models import (
     AssetKind,
@@ -49,4 +58,12 @@ __all__ = [
     "BlastAssessment",
     "assess_change",
     "resolve_changed_assets",
+    "federate",
+    "ChokePoint",
+    "chokepoint_ranking",
+    "attack_surface",
+    "default_sources",
+    "default_sinks",
+    "from_cartography_export",
+    "CartographyExportError",
 ]

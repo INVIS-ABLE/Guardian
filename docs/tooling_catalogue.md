@@ -73,3 +73,19 @@ See [credential_audit_tools.md](credential_audit_tools.md) for the strict guardr
 > Inclusion here authorises a tool only within Guardian's guardrails: owned assets only,
 > test accounts only, no third-party scanning, dry-run by default, and human approval for
 > high-impact actions. See [../GUARDRAILS.md](../GUARDRAILS.md).
+
+---
+
+## Final Power-Up expanded registry (Wave 0)
+
+The full candidate catalogue for the Final Power-Up — one production primary per
+capability family, with alternates kept as validation / fallback / specialist adapters —
+lives in [`../configs/tools/guardian.tool-registry.expanded.yaml`](../configs/tools/guardian.tool-registry.expanded.yaml)
+(27 capability families, 398 candidate tools). It is the canonical target for connector
+expansion in later waves; a tool is adopted into Guardian only once it has a manifest,
+parser, schemas, fixtures, contract tests, health check, pinned digest, SBOM, signature
+and evidence mapping (see `architecture/final_powerup_map.md §15`).
+
+The **current** delivered capability surface (not the target) is recorded truthfully in
+the machine-readable inventory at [`../reports/audit/current_state.md`](../reports/audit/current_state.md)
+and enforced by `tests/test_repo_inventory.py`.
