@@ -119,6 +119,7 @@ class Guardrails:
                 action=action,
                 mode=mode,
                 environment=self.scope.environment,
+                tenant_id=self.scope.tenant,
                 domain=domain,
                 repo=repo,
                 test_account=test_account,

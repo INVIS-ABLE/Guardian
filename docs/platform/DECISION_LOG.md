@@ -5,6 +5,26 @@ Each decision records: context, decision, rationale, and how to reverse it.
 
 ---
 
+## D-0004 — Tenant authorisation is an outer AND over the policy gate (Phase B)
+- **Date:** 2026-06-22
+- **Context:** The action policy (`core/policy_gate.decide`) is mirrored exactly by
+  `policies/opa/guardian.rego`, and a CI job enforces OPA/embedded parity. Tenant
+  authorisation must not disturb that parity.
+- **Decision:** Enforce tenant target-authorisation in `evaluate()` as an **outer
+  AND** (`_tenant_denies()` runs `core.tenancy.authorise_target` *before/around* the
+  action decision), gated by `GUARDIAN_TENANCY_ENFORCE` (default **off**). It lives
+  outside `decide()`, so the Rego mirror and parity test are untouched. `PolicyInput`
+  gains inert `tenant_id` (default `invisable`), `capability`, `asset_id`, `grants`,
+  `verify_grant_key`. Scope's tenant is threaded into both `PolicyInput` construction
+  sites (`core/guardrails.py`, `core/brain/orchestrator.py`).
+- **Rationale:** Keeps the single action-policy authority and its OPA twin intact;
+  adds tenant legitimacy as a strictly-additive gate; default-off preserves INVISABLE
+  behaviour exactly. A request must satisfy **both** gates — tenancy never *grants*
+  what the action policy denies.
+- **Reverse:** Unset the flag (instant, full revert to prior behaviour) or remove
+  `_tenant_denies`/`_tenancy_enforced`, the new `PolicyInput` fields, and the two
+  `tenant_id=` lines. No data migration occurred.
+
 ## D-0003 — Defer the candidate-catalogue evaluation to a follow-up
 - **Date:** 2026-06-22
 - **Context:** The master prompt lists ~200 candidate repositories to evaluate

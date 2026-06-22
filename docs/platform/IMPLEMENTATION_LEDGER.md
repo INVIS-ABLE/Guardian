@@ -26,6 +26,25 @@ programme. Claims here are only made for code that exists and passes tests.
 - **Rollback:** Delete the module, test, accessor, and schema field. Lossless.
 - **Owner:** Platform architecture. **Review date:** at Phase B start.
 
+### Tenant-aware policy enforcement (Phase B, feature-flagged)
+- **Decision:** D-0004 (DECISION_LOG.md).
+- **Code:** `core/policy_gate.py` — `_tenancy_enforced()` (flag `GUARDIAN_TENANCY_ENFORCE`,
+  default off), `_tenant_denies()`, `evaluate()` refactored to apply tenant
+  authorisation as an outer AND over `_evaluate_core()` (the unchanged OPA/embedded
+  path). `PolicyInput` gains inert `tenant_id` (default `invisable`), `capability`,
+  `asset_id`, `grants`, `verify_grant_key`.
+- **Integration:** scope tenant threaded into `PolicyInput` at both construction
+  sites (`core/guardrails.py`, `core/brain/orchestrator.py`).
+- **Parity:** tenant check lives **outside** `decide()`, so `policies/opa/guardian.rego`
+  and the OPA/embedded parity test are untouched.
+- **Tests:** `tests/test_policy_tenancy.py` — inert-by-default, allow-with-grant,
+  deny-without-grant, cross-tenant denial, missing-capability, capability escalation,
+  non-target action, AND-composition with the action policy, and signature
+  enforcement. Full suite green.
+- **Feature flag:** `GUARDIAN_TENANCY_ENFORCE` (default off).
+- **Rollback:** unset the flag (instant) or revert the additions. Lossless.
+- **Owner:** Platform architecture. **Review date:** at Phase C start.
+
 ### Phase 0 platform documentation
 - `docs/platform/`: README, CURRENT_STATE_ASSESSMENT, GUARDIAN_UNIVERSAL_PRODUCT_VISION,
   TENANT_AND_AUTHORISED_TARGET_MODEL, INVISABLE_TO_MULTI_TENANT_MIGRATION,
@@ -35,9 +54,9 @@ programme. Claims here are only made for code that exists and passes tests.
 
 | Item | Phase | Tracked in |
 |------|-------|-----------|
-| Wire `authorise_target()` ahead of `policy_gate.decide()` (feature-flagged) | B | migration doc |
-| `tenant_id` on `PolicyInput`, `ActionRequest`, `EvidenceItem` | B–C | migration doc |
-| Tenant dimension on the target root of trust | B | migration doc |
+| ~~Wire `authorise_target()` ahead of the policy gate (feature-flagged)~~ | B | ✅ shipped (D-0004) |
+| `tenant_id` on `PolicyInput` ✅ / `ActionRequest`, `EvidenceItem` ⏳ | B–C | migration doc |
+| Tenant dimension on the target root of trust | C | migration doc |
 | Generalise `ownership/verifier.py` maps to tenant-scoped | C | migration doc |
 | Cross-tenant leakage tests (cache/telemetry/evidence) | C | migration doc |
 | `tenant:` column in asset/test-account registries | D | migration doc |

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-22T23:35:26.929181+00:00",
+  "generated_at": "2026-06-22T23:53:13.720207+00:00",
   "wave": 0,
   "summary": {
     "agents": 17,
@@ -8,7 +8,7 @@
     "simulators": 3,
     "router_capabilities": 12,
     "tool_manifest_capabilities": 8,
-    "tests": 57,
+    "tests": 58,
     "source_directories": [
       "agents",
       "attestation",
@@ -364,7 +364,7 @@
       "file": "core/policy_gate.py",
       "lines": [
         26,
-        237
+        249
       ]
     }
   ],
@@ -533,6 +533,7 @@
     "tests/test_orchestration.py",
     "tests/test_ownership.py",
     "tests/test_policy_gate.py",
+    "tests/test_policy_tenancy.py",
     "tests/test_privacy_invariants.py",
     "tests/test_reasoning_graph.py",
     "tests/test_recovery.py",
