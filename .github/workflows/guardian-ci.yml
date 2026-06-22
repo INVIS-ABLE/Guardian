@@ -65,11 +65,12 @@ jobs:
         with:
           python-version: "3.11"
       - name: zizmor (blocking)
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          pip install zizmor
-          zizmor --config .github/zizmor.yml .github/workflows
+          pip install zizmor==1.26.1
+          # Offline = deterministic: the static audits (unpinned-uses, artipacked,
+          # excessive-permissions, unpinned-images) need no network. Online advisory
+          # audits are enabled separately once Renovate pins refs.
+          zizmor --offline --config .github/zizmor.yml .github/workflows
 
   draft-pr-policy:
     name: Enforce draft + human-review policy
