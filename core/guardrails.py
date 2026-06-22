@@ -28,9 +28,16 @@ from .policy_gate import (
 )
 from .scope import Scope, domain_is_in_scope, load_scope, repo_is_in_scope
 
+# The approval action that releases the Brain's human-in-the-loop gate. An approval
+# for this action — recorded out-of-band by a human, never granted by an agent —
+# authorises the Brain to proceed past the approval node to post-approval stages.
+HUMAN_GATE_ACTION = "guardian_proceed"
+
 __all__ = [
     "BLOCKED_ACTIONS",
     "GLOBAL_APPROVAL_REQUIRED",
+    "HUMAN_GATE_ACTION",
+    "PRODUCTION_MIN_REVIEWERS",
     "GuardrailViolation",
     "Approval",
     "Guardrails",
@@ -133,6 +140,25 @@ class Guardrails:
 
     def record_approval(self, approval: Approval) -> None:
         self.approvals.append(approval)
+
+    def proceed_approval(self) -> tuple[bool, list[str], int]:
+        """Whether a valid, recorded human decision authorises proceeding past the gate.
+
+        This is the basis for the Brain's human-approval node. It is **never**
+        self-granted: the approvals come from outside the Brain (a human records an
+        ``Approval`` for :data:`HUMAN_GATE_ACTION`). Production requires
+        ``PRODUCTION_MIN_REVIEWERS`` distinct, unexpired approvers; other environments
+        require at least one. Returns ``(approved, distinct_approvers, required)``.
+        """
+        approvers = sorted(
+            {
+                a.approver
+                for a in self.approvals
+                if a.action == HUMAN_GATE_ACTION and a.valid()
+            }
+        )
+        required = PRODUCTION_MIN_REVIEWERS if self.scope.is_production() else 1
+        return (len(approvers) >= required, approvers, required)
 
     # --- granular checks (kept for ergonomic sub-checks; all consistent with policy) ----
     def assert_owned(self, *, domain: str | None = None, repo: str | None = None) -> None:

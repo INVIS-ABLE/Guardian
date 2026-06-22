@@ -48,7 +48,14 @@ eval = [
 guardian = "core.cli:main"
 
 [tool.setuptools]
-packages = ["core", "agents", "connectors", "simulators"]
+packages = [
+    "core",
+    "core.brain",
+    "core.evidence",
+    "agents",
+    "connectors",
+    "simulators",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

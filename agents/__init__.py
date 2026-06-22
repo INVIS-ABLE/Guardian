@@ -11,6 +11,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from core.guardrails import HUMAN_GATE_ACTION
+
 from .base import AgentContext, GuardianAgent
 
 
@@ -178,14 +180,24 @@ class EvidenceReportAgent(GuardianAgent):
 
 
 class HumanApprovalAgent(GuardianAgent):
-    """The human-in-the-loop gate. Never auto-approves; records the decision."""
+    """The human-in-the-loop gate. Never auto-approves; reports the recorded decision."""
 
     name = "human_approval"
-    summary = "Routes high-impact actions and all PRs to a human; records approval."
+    summary = "Routes high-impact actions and all PRs to a human; reports approval."
 
     def act(self) -> dict[str, Any]:
-        # This agent only *requests* approval; it cannot grant it itself.
-        return {"auto_approve": False, "requires": "recorded human decision"}
+        # This agent cannot grant approval itself. It reports whether a valid human
+        # decision has been independently recorded (an Approval for HUMAN_GATE_ACTION,
+        # supplied from outside the Brain). The Brain reads ``approved`` from this.
+        approved, approvers, required = self.guardrails.proceed_approval()
+        return {
+            "approved": approved,
+            "self_granted": False,
+            "gate_action": HUMAN_GATE_ACTION,
+            "approvers": approvers,
+            "required_approvers": required,
+            "requires": "recorded human decision",
+        }
 
 
 class LearningMemoryAgent(GuardianAgent):

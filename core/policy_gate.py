@@ -11,7 +11,11 @@ The canonical policy is expressed twice, identically:
     even before OPA is wired and so unit/property tests can prove the rules.
 
 If the ``opa`` binary + bundle are present and ``GUARDIAN_USE_OPA=1``, ``evaluate()``
-delegates to OPA; otherwise it uses the embedded evaluator. Both must agree.
+delegates to OPA. Otherwise the embedded evaluator is used **only** where the runtime
+posture allows it: in ``development``/``ci`` (set via ``GUARDIAN_ENV``). In
+``staging``/``production`` — or for any production *target* — OPA is mandatory and its
+absence means deny; the embedded mirror is a testing oracle, not a production
+authority. In ``ci`` with OPA present, the OPA and embedded decisions must agree.
 """
 
 from __future__ import annotations
@@ -113,7 +117,11 @@ class PolicyInput:
     domain: str | None = None
     repo: str | None = None
     test_account: str | None = None
-    ownership_verified: bool = True  # result of DNS/repo ownership check (False ⇒ deny)
+    # Result of a DNS-TXT / GitHub-App ownership check. Fail-closed default: ownership
+    # is NOT assumed. A caller must pass evidence of verification; an unverified named
+    # target is denied (see ``decide`` rule 3). Previously this defaulted to ``True``,
+    # which silently treated every target as owned — a fail-open default.
+    ownership_verified: bool = False
     allowed_modes: list[str] = field(default_factory=list)
     blocked_actions: list[str] = field(default_factory=list)
     approval_required: list[str] = field(default_factory=list)
@@ -241,8 +249,62 @@ def _decide_via_opa(inp: PolicyInput) -> PolicyDecision:  # pragma: no cover - n
     return PolicyDecision(allow=bool(result.get("allow")), denies=list(result.get("denies", [])))
 
 
+def _guardian_env() -> str:
+    """Runtime deployment posture: development | ci | staging | production.
+
+    Distinct from a *target's* ``PolicyInput.environment`` — this is where Guardian
+    itself is running, set by ``GUARDIAN_ENV``. Unset defaults to ``development``.
+    """
+    return os.environ.get("GUARDIAN_ENV", "development").strip().lower()
+
+
+# Postures in which the embedded Python evaluator is NOT an acceptable production
+# authority — OPA must answer, and its absence means deny.
+_OPA_REQUIRED_ENVS: frozenset[str] = frozenset({"staging", "production"})
+
+
+def _embedded_permitted(inp: PolicyInput) -> bool:
+    """Whether the embedded evaluator may decide, given runtime posture + target.
+
+    The embedded evaluator mirrors the Rego as a *testing oracle*, not an alternative
+    production authority (target architecture §10):
+
+      * development / ci      → permitted (OPA optional; CI also checks parity below).
+      * staging / production  → OPA required; its absence means deny.
+
+    The gate keys off Guardian's deployment *posture* (``GUARDIAN_ENV``), not a
+    target's environment: a production *target* is still authorised by the embedded
+    mirror during development/test (that is how the two-person production rule is unit
+    tested), but a Guardian actually deployed to staging/production must use OPA.
+    """
+    if _guardian_env() in _OPA_REQUIRED_ENVS:
+        return False
+    return True
+
+
 def evaluate(inp: PolicyInput) -> PolicyDecision:
-    """Single entry point. Delegates to OPA when configured, else the embedded evaluator."""
+    """Single entry point. Delegates to OPA when configured.
+
+    Fail-closed: when OPA is unavailable and the embedded evaluator is not an
+    acceptable authority for this posture/target, **deny** rather than silently fall
+    back to the in-process mirror (target architecture §10). In CI, when OPA *is*
+    available, the OPA decision and the embedded mirror must agree.
+    """
     if _opa_available():
-        return _decide_via_opa(inp)
-    return decide(inp)
+        decision = _decide_via_opa(inp)
+        if _guardian_env() == "ci":
+            mirror = decide(inp)
+            if mirror.allow != decision.allow:
+                return PolicyDecision(
+                    allow=False,
+                    denies=[
+                        f"opa_embedded_mismatch:opa={decision.allow},embedded={mirror.allow}"
+                    ],
+                )
+        return decision
+    if _embedded_permitted(inp):
+        return decide(inp)
+    return PolicyDecision(
+        allow=False,
+        denies=[f"opa_required:posture={_guardian_env()},target={inp.environment}"],
+    )
