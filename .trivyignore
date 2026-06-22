@@ -1,0 +1,10 @@
+# Guardian Trivy ignore list — targeted, justified, time-boxed risk acceptances only.
+# Each entry must name the CVE, the reason, and an expiry (exp:YYYY-MM-DD) so it is
+# re-reviewed, per docs/governance/EXCEPTION_PROCESS.md. NOT a blanket suppression.
+
+# CVE-2025-69872 — diskcache 5.6.3: arbitrary code execution via insecure pickle
+# deserialization. `diskcache` is a TRANSITIVE dependency of `ragas` (the optional
+# `eval` tooling only — not a runtime/production path), and there is NO fixed version
+# published upstream as of 2026-06-22. Guardian never unpickles attacker-controlled
+# diskcache data. MEDIUM, unfixed. Re-review when an upstream fix ships or ragas drops it.
+CVE-2025-69872 exp:2026-09-30

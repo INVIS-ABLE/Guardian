@@ -1,0 +1,45 @@
+# Repo-scoped digital twin for the Guardian repository itself.
+#
+# Maps THIS repo's sensitive source paths to assets so the CI blast-radius gate
+# (.github/workflows/twin-gate.yml → `guardian twin-gate`) runs automatically on every PR:
+# a change touching the crypto layer, the policy authority, the signing key, the verifier,
+# the capability broker or the evidence/audit store is flagged with what it reaches.
+#
+# Edges point in the direction a compromise propagates (changing a control endangers the
+# sensitive sink it guards). Metadata only — "data:user-content" is a category, never content.
+assets:
+  - id: "ctrl:policy-authority"
+    kind: security_control
+    name: "Central policy authority (OPA + guardrails)"
+    paths: ["core/policy_gate.py", "core/guardrails.py", "policies/opa/**"]
+  - id: "ctrl:crypto"
+    kind: security_control
+    name: "E2EE crypto layer"
+    paths: ["security/crypto/**"]
+  - id: "key:signing"
+    kind: encryption_key
+    name: "Signing key module"
+    paths: ["core/signing.py"]
+  - id: "ctrl:verifier"
+    kind: security_control
+    name: "Key-transparency verifier"
+    paths: ["core/verifier.py"]
+  - id: "ctrl:capability-broker"
+    kind: security_control
+    name: "Capability broker (one-use tokens)"
+    paths: ["core/tools/**"]
+  - id: "data:audit-evidence"
+    kind: data_class
+    name: "Audit + evidence store"
+    classification: confidential
+    paths: ["core/audit.py", "core/evidence/**"]
+  - id: "data:user-content"
+    kind: data_class
+    name: "Protected user content (guarded by the crypto layer)"
+    classification: health   # the most sensitive class the crypto layer protects
+
+relationships:
+  - { src: "ctrl:crypto",            dst: "data:user-content",   kind: stores }
+  - { src: "ctrl:policy-authority",  dst: "data:audit-evidence", kind: writes }
+  - { src: "ctrl:verifier",          dst: "data:audit-evidence", kind: writes }
+  - { src: "ctrl:capability-broker", dst: "data:audit-evidence", kind: can_access }

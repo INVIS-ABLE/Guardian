@@ -17,6 +17,7 @@ from .assessment import (
     Severity,
     assess_change,
 )
+from .changemap import resolve_changed_assets
 from .ingest import build_from_spec, from_cartography, load_twin, production_source_required
 from .models import (
     AssetKind,
@@ -47,4 +48,5 @@ __all__ = [
     "AssetAssessment",
     "BlastAssessment",
     "assess_change",
+    "resolve_changed_assets",
 ]
