@@ -59,7 +59,7 @@ evidence Guardian already has, so the roots are populated from facts — not han
 | evidence | `evidence_trust_from(receipt, …)` | a real `core.evidence.store.EvidenceReceipt` from an immutable append |
 | machine | `machine_trust_from(report)` | verified TPM/Keylime attestation result |
 | software | `software_trust_from(report)` | verified SBOM/provenance/signature result |
-| target | `target_trust_from(report)` | verified ownership/DNS result |
+| target | `target_trust_from_ownership(evidence, …)` | the live `ownership.OwnershipVerifier` (DNS-TXT challenge / GitHub-App installation) + a DNS-change check against the authorised address baseline |
 
 Each producer is **fail closed**: a field is asserted only when its evidence supports it
 (`tests/test_trust_producers.py` — an expired credential fails the workload root, an unbound

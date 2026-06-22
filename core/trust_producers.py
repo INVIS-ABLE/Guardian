@@ -38,6 +38,7 @@ if TYPE_CHECKING:  # hints only — no runtime dependency on these packages
     from core.guardrails import Approval
     from identity.credentials import Credential
     from identity.oidc import Principal
+    from ownership.evidence import OwnershipEvidence
 
 
 def _approval_envelope_bound(approval: Any, envelope: Mapping[str, Any]) -> bool:
@@ -163,6 +164,30 @@ def target_trust_from(report: Mapping[str, Any]) -> TargetTrust:
     )
 
 
+def target_trust_from_ownership(
+    evidence: "OwnershipEvidence | None",
+    *,
+    environment: str,
+    resolved_addresses: Sequence[str] = (),
+    authorised_addresses: Sequence[str] | None = None,
+) -> TargetTrust:
+    """Bridge the ownership verifier (``ownership.OwnershipVerifier.verify``) to the target
+    root. A non-None evidence means ownership is currently proven (the verifier returns
+    fresh-or-None); ``dns_unchanged`` holds only when the freshly-resolved addresses match
+    the recorded authorised baseline — a post-authorisation DNS change is a fail.
+    """
+    verified = evidence is not None
+    resolved = tuple(resolved_addresses)
+    dns_unchanged = bool(authorised_addresses) and resolved == tuple(authorised_addresses)
+    return target_trust_from({
+        "ownership_verified": verified,
+        "environment": environment,
+        "resolved_addresses": resolved,
+        "dns_unchanged": dns_unchanged,
+        "not_third_party": verified,
+    })
+
+
 def build_trust_context(
     *,
     human: HumanTrust | None = None,
@@ -186,5 +211,5 @@ def build_trust_context(
 __all__ = [
     "human_trust_from", "workload_trust_from", "evidence_trust_from",
     "machine_trust_from", "software_trust_from", "target_trust_from",
-    "build_trust_context",
+    "target_trust_from_ownership", "build_trust_context",
 ]
