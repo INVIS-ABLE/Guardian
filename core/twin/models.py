@@ -86,6 +86,7 @@ class AssetNode(BaseModel):
     subtype: str | None = None    # e.g. identity: "human" | "service" | "machine"
     classification: Classification = Classification.INTERNAL
     owner: str | None = None      # team/owner for blast-radius reporting
+    paths: tuple[str, ...] = ()   # source-path globs that map a code change to this asset
 
     @field_validator("id", "name")
     @classmethod

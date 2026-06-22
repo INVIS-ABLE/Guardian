@@ -370,5 +370,47 @@ def lineage_retention_cmd(spec_file: str) -> None:
     raise SystemExit(1 if violations else 0)
 
 
+@main.command("twin-gate")
+@click.argument("spec_file", type=click.Path(exists=True))
+@click.option("--files-from", default="-", type=click.File("r"),
+              help="File of changed paths, one per line ('-' = stdin).")
+@click.option("--fail-on", default="critical", show_default=True,
+              help="Severity that fails the gate: low|medium|high|critical.")
+def twin_gate_cmd(spec_file, files_from, fail_on: str) -> None:
+    """Digital twin: ambient PR gate — map changed files to assets, then assess blast radius.
+
+    Reads changed paths (from a PR diff), resolves them to twin assets via each asset's
+    declared path globs, and runs the blast-radius gate. Unmapped changes pass cleanly.
+    """
+    from .twin import Severity, assess_change, load_twin, resolve_changed_assets
+
+    threshold = Severity.from_label(fail_on)
+    twin = load_twin(spec_file)
+    changed_files = [ln.strip() for ln in files_from.read().splitlines() if ln.strip()]
+    changed_assets = resolve_changed_assets(twin, changed_files)
+    if not changed_assets:
+        click.echo(f"twin-gate: {len(changed_files)} changed file(s) map to no twin assets → PASS")
+        AuditLog().record("twin-gate", actor="cli", decision="allowed",
+                          detail={"changed_files": len(changed_files), "mapped_assets": 0})
+        raise SystemExit(0)
+
+    click.echo(f"twin-gate: changed files map to assets: {', '.join(changed_assets)}")
+    result = assess_change(twin, changed_assets)
+    for a in result.assessments:
+        if not a.hits:
+            continue
+        click.echo(f"  {a.origin.id} ({a.origin.kind.value}): {a.severity.label.upper()}")
+        for h in a.hits:
+            trail = " → ".join(f"{s.via.value}:{s.asset}" for s in h.path)
+            click.echo(f"      [{h.severity.label:8s}] {h.reason}  ({trail})")
+    breached = result.breaches(threshold)
+    click.echo(f"\ntwin-gate: {result.severity.label.upper()} (fail-on={threshold.label}) "
+               f"→ {'FAIL' if breached else 'PASS'}")
+    AuditLog().record("twin-gate", actor="cli",
+                      decision="denied" if breached else "allowed",
+                      detail={"severity": result.severity.label, "mapped_assets": len(changed_assets)})
+    raise SystemExit(1 if breached else 0)
+
+
 if __name__ == "__main__":  # pragma: no cover
     main()
