@@ -45,13 +45,16 @@ class Credential:
 
 class CredentialBroker(ABC):
     @abstractmethod
-    def issue(self, scope: str, *, ttl: int, workflow_run: str | None = None) -> Credential: ...
+    def issue(self, scope: str, *, ttl: int, workflow_run: str | None = None) -> Credential:
+        """Issue a short-lived credential for ``scope`` with the given TTL."""
 
     @abstractmethod
-    def redeem(self, credential_id: str, secret: str, *, now: float | None = None) -> Credential: ...
+    def redeem(self, credential_id: str, secret: str, *, now: float | None = None) -> Credential:
+        """Return the credential if valid; raise if expired/revoked/unknown."""
 
     @abstractmethod
-    def revoke(self, credential_id: str) -> None: ...
+    def revoke(self, credential_id: str) -> None:
+        """Revoke a credential so it can no longer be redeemed."""
 
 
 class InMemoryCredentialBroker(CredentialBroker):

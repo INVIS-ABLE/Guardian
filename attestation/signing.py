@@ -25,8 +25,11 @@ def canonical(record: object) -> bytes:
 class Signer(Protocol):
     algorithm: str
 
-    def sign(self, record: object) -> str: ...
-    def verify(self, record: object, signature: str) -> bool: ...
+    def sign(self, record: object) -> str:
+        """Return a signature string for the canonicalised record."""
+
+    def verify(self, record: object, signature: str) -> bool:
+        """Return True if the signature is valid for the record."""
 
 
 class HmacSigner:
@@ -78,21 +81,17 @@ class Ed25519Signer:
 
 
 def ed25519_available() -> bool:
-    # A broken `cryptography` (e.g. missing _cffi_backend) raises a Rust PanicException, which
-    # is NOT an Exception subclass — catch BaseException so we cleanly fall back to HMAC.
-    try:
-        from cryptography.hazmat.primitives.asymmetric.ed25519 import (  # noqa: F401
-            Ed25519PrivateKey,
-        )
+    """True if the cryptography package is importable (Ed25519 signing usable)."""
+    import importlib.util
 
-        Ed25519PrivateKey.generate()  # ensure the backend actually works
-        return True
-    except BaseException:
-        return False
+    return importlib.util.find_spec("cryptography") is not None
 
 
 def default_signer(hmac_key: bytes = b"guardian-dev-attestation-key-change-me") -> Signer:
-    """Ed25519 if available (preferred), else HMAC. Production injects KMS/OpenBao keys."""
-    if ed25519_available():
-        return Ed25519Signer()
+    """In-process default is HMAC — dependency-free and deterministic.
+
+    For non-repudiable signing, production injects an Ed25519 signer backed by a KMS/OpenBao
+    key (``Ed25519Signer(private_key=...)``), and cosign/witness sign release artifacts and
+    pipeline attestations (blueprint area 9).
+    """
     return HmacSigner(hmac_key)
