@@ -38,6 +38,8 @@ plugs into that single decision point.
 | 11 | High-assurance testing | hypothesis, schemathesis, uv, renovate | 🟡 | hypothesis property tests done; uv lockfile + schemathesis next |
 | 21 | Reversible containment | deterministic adapter | 🟡 | reversible-only allowlist + deterministic param validation + audit shipped (`containment/`); concrete IdP/Cilium/Harbor adapters pending |
 | 19 | Detection-as-code | SigmaHQ/sigma | 🟡 | ATT&CK-mapped rules + engine shipped (`detection/`): per-rule positive/negative tests, recommends reversible containment (still gated); Sigma export to Wazuh/Loki pending |
+| 23 | Chaos & fail-closed | LitmusChaos | 🟡 | control-plane health + fail-closed gate shipped (`resilience/`): OPA/OpenBao/immudb/Temporal down ⇒ sensitive actions refused + audited; chaos-cluster injection pending |
+| 26 | Backup & recovery | restic, Velero | 🟡 | WORM backups + restore drill shipped (`recovery/`): integrity-verified, tamper-refusing restore, audit-chain re-verification with measured RPO/RTO; restic/Velero wiring pending |
 | 12 | Observability & alerting | OTel (py + collector), Tempo, Alertmanager | ⬜ | trace IDs across policy decisions/workflows; routed alerts |
 
 ## 10/10 acceptance gate
@@ -55,7 +57,7 @@ plugs into that single decision point.
 | Identity — OIDC, role checks, TLS, secure sessions | 🟡 | crypto layer (cookies/tokens) done; oauth2-proxy pending |
 | Testing — property tests prove no bypass | ✅ | `tests/test_authorization_properties.py` |
 | Monitoring — trace IDs; routed alerts | ⬜ | OTel/Alertmanager pending |
-| Recovery — backups, restore, key rotation, audit verification exercised | ⬜ | pending |
+| Recovery — backups, restore, key rotation, audit verification exercised | 🟡 | WORM backup/restore drill re-verifies the audit hash chain (`recovery/`, `tests/test_recovery.py`); fail-closed on control-plane outage (`resilience/`); key rotation + restic/Velero wiring pending |
 | Validation — independent review + authorised pentest | ⬜ | pre-production |
 
 ## Sequencing
