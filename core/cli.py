@@ -529,6 +529,55 @@ def events_verify_cmd(spec_file: str) -> None:
     raise SystemExit(0 if ok else 1)
 
 
+@main.command("forensics")
+@click.option("--log-dir", type=click.Path(), default=None,
+              help="Audit-log directory to reconstruct (default: the standard Guardian log).")
+@click.option("--rules", type=click.Path(exists=True), default=None,
+              help="YAML with 'corroboration' and/or 'expected_sequences' for anomaly detection.")
+@click.option("--case", default=None, help="Filter to one case_id / trace_id.")
+def forensics_cmd(log_dir: str | None, rules: str | None, case: str | None) -> None:
+    """Forensic timeline: reconstruct an ordered incident timeline from the audit log and
+    flag anomalies (integrity failures, missing events, unsupported successes).
+
+    Read-only analysis: it draws conclusions and authorises nothing. Exits non-zero when any
+    anomaly is found, so it can gate a pipeline or wake an operator.
+    """
+    from pathlib import Path
+
+    import yaml
+
+    from forensics import ForensicTimeline, events_from_audit_log
+
+    audit = AuditLog(log_dir) if log_dir else AuditLog()
+    events = events_from_audit_log(audit)
+    if case:
+        events = [e for e in events if case in (e.case_id, e.trace_id)]
+
+    corroboration: dict = {}
+    expected: dict = {}
+    if rules:
+        data = yaml.safe_load(Path(rules).read_text(encoding="utf-8")) or {}
+        corroboration = data.get("corroboration", {}) or {}
+        expected = data.get("expected_sequences", {}) or {}
+
+    report = ForensicTimeline(corroboration=corroboration, expected_sequences=expected).build(events)
+    click.echo(f"Timeline: {len(report.entries)} event(s), "
+               f"{report.duplicates_removed} duplicate(s) removed")
+    for c in report.chain_of_custody():
+        flag = "" if c["integrity_ok"] else "  [INTEGRITY-FAIL]"
+        click.echo(f"  {c['corrected_timestamp']:.0f}  {c['source']:9s} "
+                   f"{c['action']:24s} {c['outcome']}{flag}")
+    if report.anomalies:
+        click.echo("Anomalies:")
+        for a in report.anomalies:
+            click.echo(f"  ! {a}")
+    else:
+        click.echo("No anomalies.")
+    audit.record("forensics", actor="cli", decision="denied" if report.anomalies else "allowed",
+                 detail={"events": len(report.entries), "anomalies": len(report.anomalies)})
+    raise SystemExit(1 if report.anomalies else 0)
+
+
 def _federate_from_opts(twin_spec, identity_spec, lineage_spec, bridges_spec):
     """Load + federate a twin / identity / lineage / bridges set of specs (any subset)."""
     from .twin import federate, load_twin
