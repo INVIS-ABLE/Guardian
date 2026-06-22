@@ -37,6 +37,7 @@ plugs into that single decision point.
 | 10 | Mandatory CI gates | dependency-review, scorecard, zizmor, pip-audit, bandit | 🟡 | zizmor + pip-audit + bandit blocking now; dependency-review + scorecard pending |
 | 11 | High-assurance testing | hypothesis, schemathesis, uv, renovate | 🟡 | hypothesis property tests done; uv lockfile + schemathesis next |
 | 21 | Reversible containment | deterministic adapter | 🟡 | reversible-only allowlist + deterministic param validation + audit shipped (`containment/`); concrete IdP/Cilium/Harbor adapters pending |
+| 19 | Detection-as-code | SigmaHQ/sigma | 🟡 | ATT&CK-mapped rules + engine shipped (`detection/`): per-rule positive/negative tests, recommends reversible containment (still gated); Sigma export to Wazuh/Loki pending |
 | 12 | Observability & alerting | OTel (py + collector), Tempo, Alertmanager | ⬜ | trace IDs across policy decisions/workflows; routed alerts |
 
 ## 10/10 acceptance gate

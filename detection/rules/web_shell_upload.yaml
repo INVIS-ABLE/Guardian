@@ -1,0 +1,20 @@
+id: web-shell-upload
+title: Suspicious web shell upload to webroot
+severity: high
+attack: [T1505.003]            # Server Software Component: Web Shell (defensive mapping)
+logsource: webserver
+confidence: 0.85
+detection:
+  all:
+    - { field: event_type, equals: file_upload }
+    - { field: path, contains: /webroot/ }
+    - { field: extension, in: [php, asp, aspx, jsp, jspx] }
+response:
+  action: isolate_pod          # reversible; requires human approval (high impact)
+  target_field: host
+tests:
+  positive:
+    - { event_type: file_upload, path: /var/www/webroot/cmd.php, extension: php, host: web-1 }
+  negative:
+    - { event_type: file_upload, path: /uploads/avatar.png, extension: png, host: web-1 }
+    - { event_type: file_read, path: /var/www/webroot/index.php, extension: php, host: web-1 }

@@ -1,0 +1,18 @@
+id: c2-beacon
+title: Periodic command-and-control beaconing
+severity: high
+attack: [T1071]                # Application Layer Protocol / C2 (defensive mapping)
+logsource: network
+confidence: 0.8
+detection:
+  all:
+    - { field: event_type, equals: outbound_connection }
+    - { field: periodic_beacon, equals: true }
+response:
+  action: block_indicator_temporarily
+  target_field: dest_ip
+tests:
+  positive:
+    - { event_type: outbound_connection, periodic_beacon: true, dest_ip: 5.5.5.5 }
+  negative:
+    - { event_type: outbound_connection, periodic_beacon: false, dest_ip: 5.5.5.5 }
