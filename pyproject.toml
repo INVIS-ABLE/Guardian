@@ -61,6 +61,7 @@ packages = [
     "agents",
     "connectors",
     "simulators",
+    "shadow_guardian",
 ]
 
 [tool.pytest.ini_options]
