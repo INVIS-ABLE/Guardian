@@ -44,3 +44,17 @@ runs on production signals:
 | connector execution | `from_execution` | returncode 0 → `success`; dry-run (None) is *not* claimed success |
 
 Inputs are duck-typed, so `forensics` stays import-light and uncoupled from every producer.
+
+## Operator CLI
+
+```bash
+# Reconstruct the timeline from the live audit log and flag anomalies (read-only).
+guardian forensics
+guardian forensics --case <case_id> --rules forensics-rules.yaml
+```
+
+`--rules` is a small YAML of `corroboration` (successful action → the source that must
+independently back it up) and `expected_sequences` (a trigger action → required follow-ups).
+The command prints the ordered chain of custody, marks `[INTEGRITY-FAIL]` events from a
+tampered chain, lists anomalies, and **exits non-zero when any anomaly is found** — so it can
+gate a pipeline or wake an operator. It authorises nothing.
