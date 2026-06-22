@@ -88,6 +88,54 @@ e.g. touching the E2EE crypto layer — **blocks for review**; a change reaching
 evidence (e.g. the policy authority) is reported but does not block. Unmapped changes (docs,
 tests) pass cleanly. Tune `--fail-on` to raise or lower the bar.
 
+## Cross-domain federation & attack-path forecasting
+
+The twin reaches its full power when the three Wave-1 graphs are **federated** into one
+([`core/twin/federate.py`](../core/twin/federate.py)): the digital twin (infra), the
+[identity attack graph](identity_graph.md) (principals → permissions), and the
+[data lineage graph](data_lineage.md) (fields → flows). They already share an id vocabulary
+(`repo:guardian`, `svc:messaging-relay`, …), so equal ids unify automatically; explicit
+`bridges` connect the rest. Blast radius then spans **all three domains** at once:
+
+```bash
+guardian twin-federate-blast id:human-dev \
+  --twin twin/invisable-sample.yaml \
+  --identity identity_graph/invisable-identity-sample.yaml \
+  --lineage lineage/invisable-lineage-sample.yaml \
+  --bridges twin/invisable-bridges.yaml
+# … id:human-dev → can_write:svc:messaging-relay → reads:db:mailbox → stores:f:ehr.patient_id
+```
+
+A developer who can *escalate* is shown reaching the messaging service, its mailbox store, and
+the regulated **health/PII lineage fields** — a true `identity → infra → data` attack path, not
+three disconnected findings. (Identity *effective* permissions are flattened, so a compromised
+principal reaches everything its full transitive permission set can touch, in one hop.)
+
+### Which control breaks the most paths
+
+[`core/twin/forecast.py`](../core/twin/forecast.py) answers Sovereign system #12's question:
+*which single node, if controlled or removed, cuts the most `source → sink` attack paths to the
+crown jewels* — equally, the biggest single point of failure.
+
+```bash
+guardian twin-chokepoints --twin … --identity … --lineage … --bridges …
+# Attack surface: 42 source→sink path(s) to sensitive sinks.
+#    42 paths  service  svc:messaging-relay  → protects data:ciphertext, db:mailbox, f:ehr.diagnosis, …
+```
+
+Deterministic BFS (NetworkX is the production accelerator for very large graphs; the exact,
+offline algorithm is the point). Read-only — it proposes where a control would help, never
+places one.
+
+## Ingesting the real estate (Cartography / CloudQuery)
+
+[`core/twin/cartography.py`](../core/twin/cartography.py) maps a Cartography/CloudQuery JSON
+export (nodes + relationships) onto twin assets/edges — translating labels (`GitHubRepository`,
+`ECRImage`, `RDSInstance`, `KMSKey`, …) and relationship types to the twin vocabulary. Unknown
+labels become `cloud_resource` and unknown edges `can_access` (conservative), and a dangling
+relationship **fails closed** (an incomplete export must not silently drop edges). The live
+`from_cartography()` service seam remains fail-closed until provisioned.
+
 ## The production path
 
 In production the twin is **continuously populated from Cartography / CloudQuery and persisted in
