@@ -125,7 +125,13 @@ OWASP **WSTG**, **ASVS 5.0**, **SAMM**, **MASVS/MASTG**; **NIST SSDF**; **SLSA**
 - [docs/self_healing_stack.md](docs/self_healing_stack.md) — recommended tools/frameworks per self-healing layer
 - [docs/credential_audit_tools.md](docs/credential_audit_tools.md) — hashcat/John/Hydra, authorised defensive use only
 - [docs/tooling_catalogue.md](docs/tooling_catalogue.md) — every tool Guardian orchestrates, with upstream sources
+- [docs/tool_independence.md](docs/tool_independence.md) — defensive vendor/pin + detection-learning plan
 - [policies/mobile_guardian_modules.yaml](policies/mobile_guardian_modules.yaml) — mobile/PWA defence modules (MASVS/MASTG)
+- **Encryption & hashing layer** — [security/README.md](security/README.md),
+  [docs/crypto_architecture.md](docs/crypto_architecture.md),
+  [docs/crypto_security_policy.md](docs/crypto_security_policy.md),
+  [docs/crypto_threat_model.md](docs/crypto_threat_model.md),
+  [docs/crypto_test_plan.md](docs/crypto_test_plan.md)
 
 ---
 

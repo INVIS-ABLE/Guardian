@@ -1,0 +1,32 @@
+{
+  "name": "@invisable/security-crypto",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "INVISABLE Guardian + PWA encryption/hashing layer — established libraries only, no custom crypto.",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "crypto:check": "tsx crypto/cryptoPolicyChecker.ts .."
+  },
+  "comments": {
+    "pinning": "Crypto libraries are pinned to EXACT versions (no ^/~). The Guardian crypto-policy checker enforces this. Bumps go through review + scanning."
+  },
+  "dependencies": {
+    "argon2": "0.41.1",
+    "cookie": "1.0.2",
+    "jose": "5.9.6",
+    "libsodium-wrappers-sumo": "0.7.15"
+  },
+  "optionalDependencies": {
+    "@signalapp/libsignal-client": "0.62.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.2",
+    "tsx": "4.19.2",
+    "typescript": "5.7.2",
+    "vitest": "2.1.8"
+  }
+}

@@ -1,0 +1,40 @@
+name: Crypto Layer
+
+# Tests + typecheck + Guardian crypto-policy checker for the security/ encryption layer.
+on:
+  push:
+    branches: [main]
+    paths: ["security/**", ".github/workflows/crypto.yml"]
+  pull_request:
+    paths: ["security/**", ".github/workflows/crypto.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  crypto:
+    name: crypto tests + policy checker
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: security
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # Use the committed lockfile for reproducible, pinned installs.
+      - name: Install (npm ci if lockfile present, else npm install)
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests (vitest)
+        run: npm test
+
+      - name: Guardian crypto-policy checker
+        run: npm run crypto:check
