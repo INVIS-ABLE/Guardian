@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-22T23:58:23.169239+00:00",
+  "generated_at": "2026-06-23T00:03:19.000333+00:00",
   "wave": 0,
   "summary": {
     "agents": 17,
@@ -8,7 +8,7 @@
     "simulators": 3,
     "router_capabilities": 12,
     "tool_manifest_capabilities": 8,
-    "tests": 65,
+    "tests": 66,
     "source_directories": [
       "agents",
       "attestation",
@@ -458,6 +458,15 @@
       ]
     },
     {
+      "file": "core/timeline/ingest.py",
+      "markers": [
+        {
+          "line": 110,
+          "marker": "NotImplementedError"
+        }
+      ]
+    },
+    {
       "file": "core/tools/registry.py",
       "markers": [
         {
@@ -603,6 +612,7 @@
     "tests/test_specialists.py",
     "tests/test_supplychain.py",
     "tests/test_target_trust_ownership.py",
+    "tests/test_timeline.py",
     "tests/test_tool_manifest.py",
     "tests/test_trust_producers.py",
     "tests/test_twin.py",
