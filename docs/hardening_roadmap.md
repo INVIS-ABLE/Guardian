@@ -13,9 +13,9 @@ plugs into that single decision point.
 | Scope-file membership not accepted as ownership proof in production | ✅ | `Guardrails._verify_ownership` fail-closed; test |
 | Replace default Grafana password; close exposed internal ports; no `latest` | ✅ | `docker-compose.yml` (version-pinned, private network, fail-closed Grafana pw) |
 | Governance docs skeleton | ✅ | `docs/governance/` (14 docs) |
-| Remove every `\|\| true` / security `continue-on-error`; make security jobs blocking | ⬜ | Now unblocked (code scanning enabled, findings clean). Next PR. |
-| Pin every Action to a full commit SHA | ⬜ | Next PR (resolve + pin all `uses:` refs) |
-| Pin every container by digest (sha256) | 🟡 | version tags pinned now; digest-pin after registry/Harbor mirror (area 8) |
+| Remove every `\|\| true` / security `continue-on-error`; make security jobs blocking | ✅ | `.github/workflows/*` jobs blocking; ruff/bandit/pip-audit/zizmor + Semgrep/Trivy/CodeQL/Gitleaks all gate; `persist-credentials: false` |
+| Pin every Action to a full commit SHA | 🟡 | `renovate.json` (`helpers:pinGitHubActionDigests`) pins on first Renovate PR; zizmor enforces a pinned ref now |
+| Pin every container by digest (sha256) | 🟡 | `renovate.json` (`docker:pinDigests`); zizmor `unpinned-images` enforced |
 | Protected `main`; ruleset (2 reviews, CODEOWNERS, signed commits, no force-push) | ⬜ | repo settings (admin action) |
 | Production GitHub Environment with required reviewers, no self-review/admin bypass | ⬜ | repo settings |
 | Register Guardian as a least-privilege GitHub App | ⬜ | area 2 |
@@ -33,7 +33,7 @@ plugs into that single decision point.
 | 7 | Dashboard identity | oauth2-proxy (OIDC) | ⬜ | proxy in front of FastAPI; internal services off public ports |
 | 8 | Sandbox & runtime detection | gVisor (runsc), Falco | ⬜ | scanners rootless, read-only input, egress allowlist |
 | 9 | Build provenance | actions/attest, cosign, witness | ⬜ | SBOM + provenance + signature; verify by digest before deploy |
-| 10 | Mandatory CI gates | dependency-review, scorecard, zizmor, pip-audit, bandit | ⬜ | required, blocking checks |
+| 10 | Mandatory CI gates | dependency-review, scorecard, zizmor, pip-audit, bandit | 🟡 | zizmor + pip-audit + bandit blocking now; dependency-review + scorecard pending |
 | 11 | High-assurance testing | hypothesis, schemathesis, uv, renovate | 🟡 | hypothesis property tests done; uv lockfile + schemathesis next |
 | 12 | Observability & alerting | OTel (py + collector), Tempo, Alertmanager | ⬜ | trace IDs across policy decisions/workflows; routed alerts |
 

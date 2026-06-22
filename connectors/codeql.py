@@ -19,7 +19,6 @@ class CodeQLConnector(BaseConnector):
 
     def build_command(self, *, repo: str | None = None, target: str | None = None, **kwargs: Any) -> list[str]:
         # Single-step analysis entry point; CI uses the github/codeql-action instead.
-        path = kwargs.get("path", ".")
         language = kwargs.get("language", "javascript")
         db = kwargs.get("db", "codeql/.codeql-db")
         sarif = kwargs.get("sarif", "codeql-results.sarif")
