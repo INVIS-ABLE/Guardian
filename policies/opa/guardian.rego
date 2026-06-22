@@ -1,124 +1,109 @@
-# Guardian authorization policy (Open Policy Agent / Rego).
+# Guardian central authorization policy.
 #
-# This is the *declarative* twin of core/guardrails.py. The same gates from
-# GUARDRAILS.md are expressed here so they can be evaluated by OPA in CI, in a
-# sidecar, or at an API boundary — independently of the Python process. The Python
-# guardrails remain the in-process enforcement; this policy is defence-in-depth.
-#
-# Decision contract:
-#   input  = {
-#     "action": "...",            # e.g. "code_review", "production_scan"
-#     "mode": "...",              # scope mode being requested
-#     "scope": {                  # the active scope file (subset)
-#        "environment": "staging",
-#        "allowed_modes": [...],
-#        "blocked_actions": [...],
-#        "approval_required": [...]
-#     },
-#     "approvals": ["production_scan", ...],   # recorded human approvals
-#     "target": {"kind": "domain"|"repo", "in_scope": true|false, "owned": true|false}
-#   }
-#   output = data.guardian.authz.decision  -> {"allow": bool, "deny": [reasons]}
-#
-# Evaluate:
-#   opa eval -d policies/opa -I 'data.guardian.authz.decision' < input.json
+# This is the external authority (OPA / conftest) and mirrors core/policy_gate.py exactly.
+# Default deny. There is NO allow_production flag — production needs two distinct, unexpired
+# reviewers who approved production_scan.
 package guardian.authz
 
 import future.keywords.in
 
-# Actions that are ALWAYS blocked — mirrors core.guardrails.BLOCKED_ACTIONS.
 blocked_actions := {
-	"third_party_scan",
-	"real_user_data_access",
-	"credential_theft",
-	"stealth",
-	"persistence",
-	"exploit_deployment",
-	"hack_back",
-	"destructive_testing",
+	"third_party_scan", "real_user_data_access", "credential_theft", "stealth",
+	"persistence", "exploit_deployment", "hack_back", "destructive_testing",
 }
 
-# Actions that ALWAYS require a recorded human approval —
-# mirrors core.guardrails.GLOBAL_APPROVAL_REQUIRED.
 global_approval_required := {
-	"production_scan",
-	"high_volume_test",
-	"account_locking_test",
-	"data_export_test",
-	"admin_permission_test",
-	"credential_audit",
+	"production_scan", "high_volume_test", "account_locking_test",
+	"data_export_test", "admin_permission_test", "credential_audit",
 }
 
-default allow := false
+production_min_reviewers := 2
 
-allow if {
-	count(deny) == 0
+# ---- valid (unexpired) approvals ------------------------------------------------
+unexpired(a) if a.expires_at == null
+
+unexpired(a) if {
+	a.expires_at != null
+	input.now < a.expires_at
 }
 
-# --- denials (each adds a human-readable reason) ------------------------------
+# An approval's bindings (target/commit/workflow_run) must match the request when set.
+bound_ok(a) if {
+	commit_ok(a)
+	workflow_ok(a)
+	target_ok(a)
+}
 
-# Globally blocked, or blocked by the scope file.
+commit_ok(a) if a.commit == null
+commit_ok(a) if a.commit == input.commit
+
+workflow_ok(a) if a.workflow_run == null
+workflow_ok(a) if a.workflow_run == input.workflow_run
+
+target_ok(a) if a.target == null
+target_ok(a) if a.target == input.domain
+target_ok(a) if a.target == input.repo
+
+valid_approval(a) if {
+	unexpired(a)
+	bound_ok(a)
+}
+
+valid_approvals_for(action) := {a |
+	some a in input.approvals
+	a.action == action
+	valid_approval(a)
+}
+
+# ---- deny rules (mirror of the embedded evaluator) ------------------------------
 deny contains msg if {
 	input.action in blocked_actions
-	msg := sprintf("action '%v' is globally blocked", [input.action])
+	msg := sprintf("blocked_action:%s", [input.action])
 }
 
 deny contains msg if {
-	some a in input.scope.blocked_actions
-	a == input.action
-	msg := sprintf("action '%v' is blocked by this scope", [input.action])
-}
-
-# Mode must be explicitly allowed by the scope (default-deny).
-deny contains msg if {
-	not mode_allowed
-	msg := sprintf("mode '%v' is not in scope.allowed_modes", [input.mode])
-}
-
-mode_allowed if {
-	some m in input.scope.allowed_modes
-	m == input.mode
-}
-
-# Production requires an approved production_scan.
-deny contains msg if {
-	input.scope.environment == "production"
-	not "production_scan" in approvals_set
-	msg := "production scope requires a recorded 'production_scan' approval"
-}
-
-# Approval-gated actions need a recorded approval.
-deny contains msg if {
-	needs_approval
-	not input.action in approvals_set
-	msg := sprintf("action '%v' requires a recorded human approval", [input.action])
-}
-
-needs_approval if {
-	input.action in global_approval_required
-}
-
-needs_approval if {
-	some a in input.scope.approval_required
-	a == input.action
-}
-
-approvals_set contains a if {
-	some a in input.approvals
-}
-
-# Targets must be in-scope AND ownership-verified.
-deny contains msg if {
-	input.target
-	not input.target.in_scope
-	msg := sprintf("target %v is not in scope", [input.target])
+	input.action in {x | some x in input.blocked_actions}
+	msg := sprintf("blocked_action:%s", [input.action])
 }
 
 deny contains msg if {
-	input.target
-	input.target.in_scope
-	not input.target.owned
-	msg := sprintf("ownership of target %v could not be verified", [input.target])
+	not input.mode in {m | some m in input.allowed_modes}
+	msg := sprintf("mode_not_allowed:%s", [input.mode])
 }
 
-decision := {"allow": allow, "deny": deny}
+deny contains "ownership_unverified" if {
+	has_target
+	not input.ownership_verified
+}
+
+has_target if input.domain != null
+has_target if input.repo != null
+
+deny contains msg if {
+	input.test_account != null
+	not input.test_account in {t | some t in input.allowed_test_accounts}
+	msg := sprintf("non_test_account:%s", [input.test_account])
+}
+
+deny contains msg if {
+	gated
+	count(valid_approvals_for(input.action)) == 0
+	msg := sprintf("missing_approval:%s", [input.action])
+}
+
+gated if input.action in global_approval_required
+gated if input.action in {x | some x in input.approval_required}
+
+deny contains msg if {
+	input.environment == "production"
+	approvers := {a.approver | some a in valid_approvals_for("production_scan")}
+	count(approvers) < production_min_reviewers
+	msg := sprintf("insufficient_production_approvals:%d/%d", [count(approvers), production_min_reviewers])
+}
+
+# ---- decision -------------------------------------------------------------------
+default allow := false
+
+allow if count(deny) == 0
+
+decision := {"allow": allow, "denies": [m | some m in deny]}

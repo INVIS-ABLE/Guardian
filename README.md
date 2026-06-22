@@ -41,7 +41,7 @@ Every action is scoped, logged, and gated. The full control matrix is in
 │   ├── brain.py        controlled orchestrator (Detect→…→Approval→Learn)
 │   ├── router.py       tool router (capability → guarded tool execution)
 │   ├── memory.py       memory/RAG layer (vector backends + offline fallback)
-│   └── opa.py          OPA policy-gate bridge (binary or in-Python twin)
+│   └── policy_gate.py  central authorization authority (mirrors policies/opa/*.rego)
 ├── agents/             the 17 Guardian ECC agents (decide; delegate to the router)
 ├── connectors/         thin, dry-run-aware wrappers around security tools
 ├── simulators/         defensive abuse/attack simulators (owned staging only)
@@ -102,7 +102,7 @@ The first build target ships:
 | Guardian Brain orchestrator | `core/brain.py`, [docs/brain.md](docs/brain.md)  |
 | Tool router               | `core/router.py`                                   |
 | Memory / RAG layer        | `core/memory.py`                                   |
-| Policy gates (OPA + NeMo) | `core/opa.py`, `policies/opa/`, `policies/guardrails/nemo/` |
+| Policy gates (OPA + NeMo) | `core/policy_gate.py`, `policies/opa/`, `policies/guardrails/nemo/` |
 | Evaluation harness        | `eval/` (DeepEval · Promptfoo · Ragas)             |
 | Asset registry            | `scope/assets.yaml`                                |
 | Scope file + schema       | `scope/invisable-staging.yaml`, `SCOPE_SCHEMA.yaml`|
@@ -139,7 +139,15 @@ OWASP **WSTG**, **ASVS 5.0**, **SAMM**, **MASVS/MASTG**; **NIST SSDF**; **SLSA**
 - [docs/self_healing_stack.md](docs/self_healing_stack.md) — recommended tools/frameworks per self-healing layer
 - [docs/credential_audit_tools.md](docs/credential_audit_tools.md) — hashcat/John/Hydra, authorised defensive use only
 - [docs/tooling_catalogue.md](docs/tooling_catalogue.md) — every tool Guardian orchestrates, with upstream sources
+- [docs/authorization.md](docs/authorization.md) — central OPA-backed authorization (no `allow_production`)
+- [docs/hardening_roadmap.md](docs/hardening_roadmap.md) — 12-area hardening blueprint → 10/10 acceptance gate
+- [docs/tool_independence.md](docs/tool_independence.md) — defensive vendor/pin + detection-learning plan
 - [policies/mobile_guardian_modules.yaml](policies/mobile_guardian_modules.yaml) — mobile/PWA defence modules (MASVS/MASTG)
+- **Encryption & hashing layer** — [security/README.md](security/README.md),
+  [docs/crypto_architecture.md](docs/crypto_architecture.md),
+  [docs/crypto_security_policy.md](docs/crypto_security_policy.md),
+  [docs/crypto_threat_model.md](docs/crypto_threat_model.md),
+  [docs/crypto_test_plan.md](docs/crypto_test_plan.md)
 
 ---
 

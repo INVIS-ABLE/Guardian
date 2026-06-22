@@ -1,13 +1,13 @@
-"""Tests for the Guardian Brain orchestrator and OPA policy gate."""
+"""Tests for the Guardian Brain orchestrator and the central policy gate."""
 
 from __future__ import annotations
 
 import pytest
 
-from core.brain import GuardianBrain
+from core.brain import GuardianBrain, build_policy_input
 from core.guardrails import Approval
 from core.memory import GuardianMemory, InMemoryBackend
-from core.opa import build_input, evaluate
+from core.policy_gate import evaluate
 
 
 @pytest.fixture()
@@ -15,26 +15,30 @@ def memory(tmp_path):
     return GuardianMemory(backend=InMemoryBackend(store_dir=tmp_path))
 
 
-# --- OPA policy gate ----------------------------------------------------------
+# --- central policy gate ------------------------------------------------------
 def test_policy_allows_in_scope_action(staging_scope):
-    d = evaluate(build_input(staging_scope, action="code_review", mode="code_review"))
-    assert d.allow and not d.deny
+    d = evaluate(build_policy_input(staging_scope, action="code_review", mode="code_review"))
+    assert d.allow and not d.denies
 
 
 def test_policy_denies_blocked_action(staging_scope):
-    d = evaluate(build_input(staging_scope, action="hack_back", mode="code_review"))
+    d = evaluate(build_policy_input(staging_scope, action="hack_back", mode="code_review"))
     assert not d.allow
 
 
 def test_policy_denies_mode_not_in_scope(staging_scope):
-    d = evaluate(build_input(staging_scope, action="runtime_monitoring", mode="runtime_monitoring"))
+    d = evaluate(build_policy_input(staging_scope, action="runtime_monitoring", mode="runtime_monitoring"))
     assert not d.allow
 
 
 def test_policy_denies_unowned_target(staging_scope):
-    d = evaluate(build_input(
-        staging_scope, action="code_review", mode="code_review",
-        target={"kind": "domain", "in_scope": True, "owned": False},
+    # When a target is named but ownership is unverified, the gate denies.
+    from core.policy_gate import PolicyInput
+
+    d = evaluate(PolicyInput(
+        actor="t", action="code_review", mode="code_review", environment="staging",
+        domain="staging.invisable.co.uk", ownership_verified=False,
+        allowed_modes=["code_review"],
     ))
     assert not d.allow
 

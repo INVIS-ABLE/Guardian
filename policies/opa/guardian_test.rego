@@ -1,88 +1,62 @@
-# Tests for the Guardian OPA authorization policy.
-# Run:  opa test policies/opa -v
+# Tests for the Guardian authorization policy. Run with: opa test policies/opa
+# Also usable via conftest in CI to validate the same Rego the Python gate mirrors.
 package guardian.authz
 
-import future.keywords.in
-
-staging_scope := {
-	"environment": "staging",
-	"allowed_modes": ["code_review", "secrets_scan"],
-	"blocked_actions": [],
-	"approval_required": ["production_scan", "credential_audit"],
-}
-
-test_allows_in_scope_code_review if {
+# A plain in-scope staging action is allowed.
+test_staging_action_allowed if {
 	allow with input as {
-		"action": "code_review",
-		"mode": "code_review",
-		"scope": staging_scope,
-		"approvals": [],
-		"target": {"kind": "repo", "in_scope": true, "owned": true},
+		"action": "code_review", "mode": "code_review", "environment": "staging",
+		"ownership_verified": true, "allowed_modes": ["code_review"],
+		"blocked_actions": [], "approval_required": [], "allowed_test_accounts": [],
+		"approvals": [], "now": 1000,
 	}
 }
 
-test_denies_globally_blocked_action if {
+# A blocked action is denied no matter what.
+test_blocked_action_denied if {
 	not allow with input as {
-		"action": "hack_back",
-		"mode": "code_review",
-		"scope": staging_scope,
-		"approvals": [],
+		"action": "hack_back", "mode": "abuse_simulation", "environment": "staging",
+		"ownership_verified": true, "allowed_modes": ["abuse_simulation"],
+		"blocked_actions": [], "approval_required": [], "allowed_test_accounts": [],
+		"approvals": [], "now": 1000,
 	}
 }
 
-test_denies_mode_not_in_scope if {
+# Production with a single approver is denied (two-person rule).
+test_production_single_approver_denied if {
 	not allow with input as {
-		"action": "api_security",
-		"mode": "api_security",
-		"scope": staging_scope,
-		"approvals": [],
+		"action": "code_review", "mode": "code_review", "environment": "production",
+		"ownership_verified": true, "allowed_modes": ["code_review"],
+		"blocked_actions": [], "approval_required": ["production_scan"],
+		"allowed_test_accounts": [],
+		"approvals": [{"action": "production_scan", "approver": "ciso", "expires_at": null}],
+		"now": 1000,
 	}
 }
 
-test_denies_production_without_approval if {
-	not allow with input as {
-		"action": "code_review",
-		"mode": "code_review",
-		"scope": {
-			"environment": "production",
-			"allowed_modes": ["code_review"],
-			"blocked_actions": [],
-			"approval_required": ["production_scan"],
-		},
-		"approvals": [],
-	}
-}
-
-test_allows_production_with_approval if {
+# Production with two distinct approvers is allowed.
+test_production_two_distinct_allowed if {
 	allow with input as {
-		"action": "code_review",
-		"mode": "code_review",
-		"scope": {
-			"environment": "production",
-			"allowed_modes": ["code_review"],
-			"blocked_actions": [],
-			"approval_required": ["production_scan"],
-		},
-		"approvals": ["production_scan"],
-		"target": {"kind": "repo", "in_scope": true, "owned": true},
+		"action": "code_review", "mode": "code_review", "environment": "production",
+		"ownership_verified": true, "allowed_modes": ["code_review"],
+		"blocked_actions": [], "approval_required": ["production_scan"],
+		"allowed_test_accounts": [],
+		"approvals": [
+			{"action": "production_scan", "approver": "ciso", "expires_at": null},
+			{"action": "production_scan", "approver": "head_of_eng", "expires_at": null},
+		],
+		"now": 1000,
 	}
 }
 
-test_denies_unowned_target if {
+# An expired approval does not satisfy an approval-gated action.
+test_expired_approval_denied if {
 	not allow with input as {
-		"action": "code_review",
-		"mode": "code_review",
-		"scope": staging_scope,
-		"approvals": [],
-		"target": {"kind": "domain", "in_scope": true, "owned": false},
-	}
-}
-
-test_denies_approval_gated_without_approval if {
-	not allow with input as {
-		"action": "credential_audit",
-		"mode": "code_review",
-		"scope": staging_scope,
-		"approvals": [],
+		"action": "credential_audit", "mode": "credential_audit", "environment": "staging",
+		"ownership_verified": true, "allowed_modes": ["credential_audit"],
+		"blocked_actions": [], "approval_required": ["credential_audit"],
+		"allowed_test_accounts": [],
+		"approvals": [{"action": "credential_audit", "approver": "ciso", "expires_at": 500}],
+		"now": 1000,
 	}
 }

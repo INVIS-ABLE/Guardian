@@ -64,15 +64,22 @@ load scope ──▶ verify ownership ──▶ check mode is allowed ──▶ 
                                 yes ──▶ require recorded approval ──▶ else REFUSE
 ```
 
-Pseudocode (see `core/guardrails.py` for the implementation):
+**One central path.** Connectors, agents, and simulators never decide authorization
+themselves — they call a single `authorize()`, which asks the central policy
+(`core/policy_gate.py`, mirrored by `policies/opa/guardian.rego`) for one decision.
+There is **no `allow_production` escape parameter**: production requires two distinct,
+unexpired `production_scan` approvers. Denied actions are audited too. See
+[docs/authorization.md](docs/authorization.md).
 
 ```python
-gate = Guardrails(scope)
-gate.assert_owned(target)          # DNS / repo ownership
-gate.assert_mode_allowed(mode)     # mode in scope.allowed_modes
-gate.assert_not_blocked(action)    # action not in BLOCKED_ACTIONS ∪ scope.blocked_actions
-gate.assert_approved(action)       # if action in scope.approval_required
-gate.assert_test_account(account)  # account in test-account registry
+gate = Guardrails(scope, approvals=[...])
+gate.authorize(                      # the ONLY authorization call sites use
+    mode=mode,                       # mode in scope.allowed_modes
+    action=action,                   # not blocked; valid approval if gated
+    domain=target_domain,            # ownership verified (expires)
+    repo=target_repo,
+    test_account=account,            # registered test account only
+)  # → allow, or audit("denied") + raise GuardrailViolation
 ```
 
 ---

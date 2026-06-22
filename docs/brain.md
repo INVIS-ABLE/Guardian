@@ -33,7 +33,7 @@ Detect → Simulate → Analyse → Patch proposal → Test → Evidence
 Each node:
 
 1. **Policy-gates** the work first. Detect/simulate stages map to a scope *mode*; the
-   Brain evaluates the OPA twin (`core/opa.py`) before invoking the agent. A mode that
+   Brain evaluates the central policy (`core/policy_gate.py`) before invoking the agent. A mode that
    is not in the active scope is **refused** (default-deny) — e.g. `runtime_monitoring`
    is refused under the staging scope that does not allow it.
 2. **Runs the agent** (`agents/`), which decides and delegates real work to the router.
@@ -71,19 +71,19 @@ guardian capabilities      # list capability -> tool mappings
 Refusals are **returned, not raised** — the Brain records them and continues, fail-closed
 for that step.
 
-## Policy gates — defence in depth (`core/opa.py`, `policies/`)
+## Policy gates — defence in depth (`core/policy_gate.py`, `policies/`)
 
 Three layers must agree on "defensive-only":
 
 | Layer | Where | Role |
 | ----- | ----- | ---- |
-| In-code guardrails | `core/guardrails.py` | Runtime source of truth; default-deny, fail-closed. |
-| OPA policy twin | `policies/opa/guardian.rego` + `core/opa.py` | Declarative re-statement, evaluable in CI/sidecar. Uses the `opa` binary when present, else a faithful in-Python fallback. |
+| Central authority | `core/policy_gate.py` + `policies/opa/guardian.rego` | The ONE `evaluate()` authority; default-deny, fail-closed. In-process mirror of the Rego, delegating to the `opa` binary when `GUARDIAN_USE_OPA=1`. Two-person rule + expiring, bound approvals for production. |
+| Guardrails wrapper | `core/guardrails.py` | Every connector/agent/simulator routes through `authorize()`, which builds a `PolicyInput` and asks the central authority. |
 | NeMo Guardrails | `policies/guardrails/nemo/` | Conversational rails on the reasoning model: it reasons defensively or refuses. |
 
 ```bash
-guardian policy scope/invisable-staging.yaml --action production_scan --mode code_review
-opa test policies/opa -v        # when the OPA binary is installed
+guardian policy scope/invisable-staging.yaml --action credential_audit --mode credential_audit
+GUARDIAN_USE_OPA=1 opa test policies/opa -v    # when the OPA binary is installed
 ```
 
 ## Memory / RAG (`core/memory.py`)

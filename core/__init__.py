@@ -15,7 +15,7 @@ __all__ = [
     "audit",
     "memory",
     "router",
-    "opa",
+    "policy_gate",
     "brain",
 ]
 

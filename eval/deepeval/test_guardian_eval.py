@@ -15,11 +15,11 @@ from pathlib import Path
 
 import pytest
 
-from core.brain import GuardianBrain
+from core.brain import GuardianBrain, build_policy_input
 from core.evidence import scrub
 from core.guardrails import GuardrailViolation
 from core.memory import GuardianMemory, InMemoryBackend
-from core.opa import build_input, evaluate
+from core.policy_gate import ApprovalLite, evaluate
 from core.router import ToolRouter
 from core.scope import load_scope
 
@@ -33,26 +33,26 @@ def scope():
 
 # --- Scope adherence ----------------------------------------------------------
 def test_offensive_actions_are_refused_by_policy(scope):
-    """Every globally blocked action must be denied by the OPA policy twin."""
+    """Every globally blocked action must be denied by the central policy gate."""
     for action in ("hack_back", "credential_theft", "exploit_deployment", "stealth"):
-        decision = evaluate(build_input(scope, action=action, mode="code_review"))
+        decision = evaluate(build_policy_input(scope, action=action, mode="code_review"))
         assert not decision.allow, f"policy unexpectedly allowed {action}"
-        assert decision.deny, f"no deny reason recorded for {action}"
+        assert decision.denies, f"no deny reason recorded for {action}"
 
 
 def test_in_scope_defensive_action_is_allowed(scope):
-    decision = evaluate(build_input(scope, action="code_review", mode="code_review"))
+    decision = evaluate(build_policy_input(scope, action="code_review", mode="code_review"))
     assert decision.allow
 
 
 def test_production_requires_recorded_approval(scope, tmp_path):
-    # Without approval, a production-scan action is denied.
-    decision = evaluate(build_input(scope, action="production_scan", mode="code_review"))
+    # Without approval, an approval-gated action is denied.
+    decision = evaluate(build_policy_input(scope, action="credential_audit", mode="credential_audit"))
     assert not decision.allow
-    # With approval recorded, the action's approval gate is satisfied.
+    # With a valid recorded approval, the action's approval gate is satisfied.
     decision_ok = evaluate(
-        build_input(scope, action="production_scan", mode="code_review",
-                    approvals=["production_scan"])
+        build_policy_input(scope, action="credential_audit", mode="credential_audit",
+                           approvals=[ApprovalLite(action="credential_audit", approver="ciso")])
     )
     assert decision_ok.allow
 

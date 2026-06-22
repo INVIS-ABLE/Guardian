@@ -64,12 +64,14 @@ See [brain.md](brain.md). New `core` modules:
 - `brain.py` — the gated state machine over the 17 agents, with a hard human-approval stop.
 - `router.py` — the **tool router**: one guarded chokepoint mapping capabilities → tools.
 - `memory.py` — the **memory/RAG** layer (pluggable vector backends + offline fallback).
-- `opa.py` — the **policy gate** bridge to `policies/opa/` (OPA binary or in-Python twin).
 
-Defence in depth on "defensive-only" = `core/guardrails.py` (runtime) **+**
-`policies/opa/guardian.rego` (declarative twin) **+** `policies/guardrails/nemo/`
-(NeMo rails on the reasoning model). Behaviour is checked by the `eval/` harness
-(DeepEval / Promptfoo / Ragas).
+The Brain's policy pre-flight uses the existing central authority `core/policy_gate.py`
+(which mirrors `policies/opa/guardian.rego`); it does not add a second policy engine.
+
+Defence in depth on "defensive-only" = `core/policy_gate.py` + `core/guardrails.py`
+(runtime authority) **+** `policies/opa/guardian.rego` (the OPA twin) **+**
+`policies/guardrails/nemo/` (NeMo rails on the reasoning model). Behaviour is checked by
+the `eval/` harness (DeepEval / Promptfoo / Ragas).
 
 ## RAG memory & models
 

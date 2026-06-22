@@ -27,6 +27,7 @@ dev = [
     "pytest-cov>=4.1",
     "ruff>=0.3",
     "mypy>=1.8",
+    "hypothesis>=6.100",  # property-based proofs that guardrails can't be bypassed
 ]
 # Optional Brain backends — Guardian degrades gracefully without these (in-memory
 # store + in-Python policy fallback), so they are not required to run the MVP.

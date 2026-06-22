@@ -1,6 +1,15 @@
 # Guardian local stack — dashboard + RAG vector DB + monitoring.
 # Defensive/observability services only. No service here scans third parties or
 # performs offensive actions. Bring up:  docker compose up -d
+#
+# Hardening (blueprint Phase 0):
+#   - No `latest` tags — pinned to specific versions. (Digest-pinning by sha256 is the
+#     next step once an internal registry/Harbor mirror is in place — area 8.)
+#   - Internal services (qdrant, prometheus, grafana, loki) bind to 127.0.0.1 only and are
+#     NOT published to the host network. They sit on a private network.
+#   - The dashboard is NOT published directly: it must sit behind oauth2-proxy (OIDC) before
+#     any exposure (blueprint area 7). Bind to localhost for local dev only.
+#   - Grafana has no fallback password — GRAFANA_ADMIN_PW must be provided (fail closed).
 services:
   guardian-dashboard:
     build:
@@ -8,8 +17,11 @@ services:
       dockerfile: dashboard/Dockerfile
     image: invisable/guardian-dashboard:0.1.0
     command: uvicorn dashboard.app:app --host 0.0.0.0 --port 8080
+    # Localhost-only for local dev. Production MUST front this with oauth2-proxy (OIDC) +
+    # TLS — never publish 8080 directly (blueprint area 7).
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
+    networks: [guardian]
     volumes:
       - ./:/app:ro
       - ./reports:/app/reports          # reports are writable
@@ -18,27 +30,30 @@ services:
     restart: unless-stopped
 
   qdrant:
-    image: qdrant/qdrant:latest
-    ports:
-      - "6333:6333"
+    image: qdrant/qdrant:v1.12.4
+    networks: [guardian]                 # private network; no host ports
+    expose: ["6333"]
     volumes:
       - qdrant_data:/qdrant/storage
     restart: unless-stopped
 
   prometheus:
-    image: prom/prometheus:latest
-    ports:
-      - "9090:9090"
+    image: prom/prometheus:v3.0.1
+    networks: [guardian]
+    expose: ["9090"]
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     restart: unless-stopped
 
   grafana:
-    image: grafana/grafana:latest
-    ports:
-      - "3000:3000"
+    image: grafana/grafana:11.3.1
+    networks: [guardian]
+    expose: ["3000"]
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PW:-change-me}"
+      # No fallback — fail closed if the admin password isn't supplied.
+      GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PW:?set GRAFANA_ADMIN_PW}"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
     depends_on:
       - prometheus
       - loki
@@ -47,11 +62,15 @@ services:
     restart: unless-stopped
 
   loki:
-    image: grafana/loki:latest
+    image: grafana/loki:3.3.2
     command: -config.file=/etc/loki/local-config.yaml
-    ports:
-      - "3100:3100"
+    networks: [guardian]
+    expose: ["3100"]
     restart: unless-stopped
+
+networks:
+  guardian:
+    driver: bridge
 
 volumes:
   qdrant_data:

@@ -26,9 +26,38 @@ from agents.base import AgentContext
 from .audit import AuditLog
 from .guardrails import Approval, Guardrails
 from .memory import GuardianMemory
-from .opa import build_input, evaluate
+from .policy_gate import PolicyInput, evaluate
 from .router import ToolRouter
 from .scope import Scope, load_scope
+
+
+def build_policy_input(
+    scope: Scope,
+    *,
+    action: str,
+    mode: str,
+    approvals=None,
+    actor: str = "guardian_brain",
+    ownership_verified: bool = True,
+) -> PolicyInput:
+    """Assemble a central-policy ``PolicyInput`` from a scope + requested action.
+
+    This is the one place the Brain (and the ``guardian policy`` CLI) builds the input
+    for ``core.policy_gate.evaluate`` — the single authorization authority that mirrors
+    ``policies/opa/guardian.rego`` (and delegates to OPA when ``GUARDIAN_USE_OPA=1``).
+    """
+    return PolicyInput(
+        actor=actor,
+        action=action,
+        mode=mode,
+        environment=scope.environment,
+        allowed_modes=scope.allowed_modes,
+        blocked_actions=scope.blocked_actions,
+        approval_required=scope.approval_required,
+        allowed_test_accounts=scope.allowed_test_accounts,
+        approvals=list(approvals or []),
+        ownership_verified=ownership_verified,
+    )
 
 # The defensive workflow as an ordered list of (stage, agent-name) nodes. Stages map
 # to the pipeline in README/GUARDRAILS; agent names resolve against agents.REGISTRY.
@@ -137,15 +166,15 @@ class GuardianBrain:
 
     # --- policy pre-flight -----------------------------------------------------
     def policy_check(self, *, action: str, mode: str) -> bool:
-        """Evaluate the OPA policy twin before a stage's work. Fail-closed."""
-        approvals = [a.action for a in self.guardrails.approvals]
-        decision = evaluate(build_input(self.scope, action=action, mode=mode, approvals=approvals))
+        """Evaluate the central authorization policy before a stage's work. Fail-closed."""
+        approvals = [a._lite() for a in self.guardrails.approvals]
+        decision = evaluate(build_policy_input(self.scope, action=action, mode=mode, approvals=approvals))
         self.audit.record(
             "brain:policy_check",
             actor="guardian_brain",
             scope=self.scope.asset,
             decision="allowed" if decision.allow else "refused",
-            detail={"action": action, "mode": mode, "engine": decision.engine, "deny": decision.deny},
+            detail={"action": action, "mode": mode, "denies": decision.denies},
         )
         return decision.allow
 

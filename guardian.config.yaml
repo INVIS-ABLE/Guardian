@@ -60,13 +60,16 @@ guardian:
     memory_writes: true            # persist detect/simulate/evidence outputs to memory
 
   # --- Policy gates -----------------------------------------------------------
-  # Defence-in-depth: in-code guardrails + a declarative OPA twin + NeMo rails on
-  # the reasoning model. All three must agree on "defensive-only".
+  # Defence-in-depth on "defensive-only": the central authority core/policy_gate.py
+  # (mirrors policies/opa/guardian.rego) + the in-code guardrails wrapper + NeMo rails
+  # on the reasoning model. All must agree.
   policy:
+    authority: core/policy_gate.py   # the single authorize() path
     opa:
-      enabled: true
       policy_dir: policies/opa
-      fallback: python              # if the `opa` binary is absent, evaluate in-process
+      # The embedded evaluator mirrors the Rego and is used by default; set
+      # GUARDIAN_USE_OPA=1 (with the opa binary present) to delegate to OPA itself.
+      use_opa_env: GUARDIAN_USE_OPA
     nemo_guardrails:
       enabled: true
       config_dir: policies/guardrails/nemo

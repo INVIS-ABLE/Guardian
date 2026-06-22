@@ -55,7 +55,7 @@ def test_approval_gate_passes_with_recorded_approval(staging_scope):
     gr.assert_approved("production_scan")  # should not raise
 
 
-def test_production_environment_refused_by_default(tmp_path):
+def _production_scope(tmp_path):
     from core.scope import load_scope
 
     prod = tmp_path / "prod.yaml"
@@ -70,11 +70,72 @@ def test_production_environment_refused_by_default(tmp_path):
         "approval_required: [production_scan]\n",
         encoding="utf-8",
     )
-    scope = load_scope(prod)
+    return load_scope(prod)
+
+
+def test_production_refused_without_two_distinct_approvers(tmp_path):
+    scope = _production_scope(tmp_path)
     gr = Guardrails(scope=scope)
+    # No approvals → denied. There is no allow_production escape parameter.
     with pytest.raises(GuardrailViolation):
-        gr.assert_environment()  # production without allow_production must refuse
-    gr.assert_environment(allow_production=True)  # explicit allow does not raise
+        gr.authorize(mode="code_review", action="code_review")
+    # A single approver is still insufficient (two-person rule).
+    gr.record_approval(Approval(action="production_scan", approver="ciso", ticket="SEC-1"))
+    with pytest.raises(GuardrailViolation):
+        gr.authorize(mode="code_review", action="code_review")
+
+
+def test_production_allowed_with_two_distinct_approvers(tmp_path):
+    scope = _production_scope(tmp_path)
+    gr = Guardrails(scope=scope)
+    gr.record_approval(Approval(action="production_scan", approver="ciso", ticket="SEC-1"))
+    gr.record_approval(Approval(action="production_scan", approver="ciso", ticket="SEC-1b"))
+    # Same approver twice is NOT two distinct reviewers.
+    with pytest.raises(GuardrailViolation):
+        gr.authorize(mode="code_review", action="code_review")
+    gr.record_approval(Approval(action="production_scan", approver="head_of_eng", ticket="SEC-2"))
+    gr.authorize(mode="code_review", action="code_review")  # now two distinct → allowed
+
+
+def test_expired_approval_is_rejected(staging_scope):
+    gr = Guardrails(scope=staging_scope)
+    gr.record_approval(
+        Approval(action="production_scan", approver="ciso", ticket="SEC-1", expires_at=0.0)
+    )
+    with pytest.raises(GuardrailViolation):
+        gr.assert_approved("production_scan")  # expired ⇒ not a valid approval
+
+
+def test_authorize_has_no_allow_production_parameter():
+    # Acceptance gate: no allow_production escape parameter may exist.
+    import inspect
+
+    params = inspect.signature(Guardrails.authorize).parameters
+    assert "allow_production" not in params
+
+
+def test_production_ownership_fails_closed_without_verifier(tmp_path):
+    scope = _production_scope(tmp_path)
+    gr = Guardrails(scope=scope)
+    # Two distinct approvers present, but a named production target with NO real ownership
+    # verifier must be refused — scope membership is not proof of ownership in production.
+    gr.record_approval(Approval(action="production_scan", approver="ciso", ticket="SEC-1"))
+    gr.record_approval(Approval(action="production_scan", approver="head_of_eng", ticket="SEC-2"))
+    with pytest.raises(GuardrailViolation):
+        gr.authorize(mode="code_review", action="code_review", domain="invisable.co.uk")
+    # With a real verifier asserting ownership, it proceeds.
+    gr.ownership_verifier = lambda kind, target: True
+    gr.authorize(mode="code_review", action="code_review", domain="invisable.co.uk")
+
+
+def test_commit_bound_approval_rejected_for_other_commit(staging_scope):
+    gr = Guardrails(scope=staging_scope)
+    gr.record_approval(
+        Approval(action="high_volume_test", approver="ciso", ticket="SEC-1", commit="abc")
+    )
+    with pytest.raises(GuardrailViolation):
+        gr.authorize(mode="abuse_simulation", action="high_volume_test", commit="def")
+    gr.authorize(mode="abuse_simulation", action="high_volume_test", commit="abc")  # matches
 
 
 def test_full_authorize_happy_path(staging_scope):

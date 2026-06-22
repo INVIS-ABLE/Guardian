@@ -73,14 +73,15 @@ def capabilities_cmd() -> None:
 @click.option("--mode", required=True, help="Scope mode requested (e.g. code_review).")
 @click.option("--approve", multiple=True, help="Recorded approval action(s).")
 def policy_cmd(scope_file: str, action: str, mode: str, approve: tuple[str, ...]) -> None:
-    """Evaluate the OPA policy gate for an action against a scope (fail-closed)."""
-    from .opa import build_input, evaluate
+    """Evaluate the central authorization policy for an action against a scope (fail-closed)."""
+    from .brain import build_policy_input
+    from .policy_gate import ApprovalLite, evaluate
 
     scope = load_scope(scope_file)
-    decision = evaluate(build_input(scope, action=action, mode=mode, approvals=list(approve)))
-    click.echo(f"engine: {decision.engine}")
+    approvals = [ApprovalLite(action=a, approver="cli-user") for a in approve]
+    decision = evaluate(build_policy_input(scope, action=action, mode=mode, approvals=approvals))
     click.echo("decision: ALLOW" if decision.allow else "decision: DENY")
-    for reason in decision.deny:
+    for reason in decision.denies:
         click.echo(f"  - {reason}")
     raise SystemExit(0 if decision.allow else 1)
 
