@@ -9,6 +9,14 @@ envelope; it draws conclusions, it authorises nothing.
 
 from __future__ import annotations
 
+from .sources import (
+    events_from_audit_log,
+    from_audit_entry,
+    from_evidence_receipt,
+    from_execution,
+    from_policy_decision,
+    from_shadow_report,
+)
 from .timeline import (
     ForensicTimeline,
     TimelineEntry,
@@ -16,4 +24,8 @@ from .timeline import (
     TimelineReport,
 )
 
-__all__ = ["ForensicTimeline", "TimelineEvent", "TimelineEntry", "TimelineReport"]
+__all__ = [
+    "ForensicTimeline", "TimelineEvent", "TimelineEntry", "TimelineReport",
+    "from_audit_entry", "events_from_audit_log", "from_policy_decision",
+    "from_evidence_receipt", "from_shadow_report", "from_execution",
+]

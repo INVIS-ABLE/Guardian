@@ -29,3 +29,18 @@ receipt: three independent angles on *"did the thing it claims to have done actu
 the evidence it should have?"*
 
 `TimelineReport.chain_of_custody()` exports the ordered record for evidence hand-off.
+
+## Live signals, not hand-built events
+
+`forensics/sources.py` adapts Guardian's real emitters into `TimelineEvent`s so the timeline
+runs on production signals:
+
+| Emitter | Adapter | Notes |
+| ------- | ------- | ----- |
+| tamper-evident audit log (`core.audit`) | `events_from_audit_log` / `from_audit_entry` | whole-chain verify gates per-event `integrity_ok` — a tampered log marks its events integrity-failed |
+| central policy gate (`core.policy_gate`) | `from_policy_decision` | allow → `success`, deny → `denied` (+ the deny reasons) |
+| evidence ledger (`core.evidence`) | `from_evidence_receipt` | `integrity_ok` tracks the receipt's `verifiable` flag — the corroborating source for unsupported-success |
+| Shadow Guardian (`shadow_guardian`) | `from_shadow_report` | a failed/ frozen verification surfaces as an anomaly |
+| connector execution | `from_execution` | returncode 0 → `success`; dry-run (None) is *not* claimed success |
+
+Inputs are duck-typed, so `forensics` stays import-light and uncoupled from every producer.
