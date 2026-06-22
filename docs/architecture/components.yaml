@@ -111,6 +111,13 @@ components:
     roadmap_area: 1
     phase: 0
     status: present          # core/inventory.py + reports/audit/current_state.json
+  - id: schema_registry
+    component: invis-able/guardian-schemas
+    function: canonical typed-contract registry + JSON Schema export + event envelope
+    trust_zone: management
+    roadmap_area: 1
+    phase: 1
+    status: present          # core/schemas/ + schemas/*.json
   - id: k8s_admission
     component: open-policy-agent/gatekeeper
     function: Kubernetes admission-policy enforcement

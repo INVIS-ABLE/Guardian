@@ -1,0 +1,169 @@
+{
+  "$defs": {
+    "AssetRef": {
+      "additionalProperties": false,
+      "description": "A reference into the security knowledge graph / digital twin (\u00a75, \u00a714).",
+      "properties": {
+        "identifier": {
+          "title": "Identifier",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "schema_version": {
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "identifier"
+      ],
+      "title": "AssetRef",
+      "type": "object"
+    },
+    "TestProposal": {
+      "additionalProperties": false,
+      "description": "A falsification test that would confirm or disprove a hypothesis.",
+      "properties": {
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "expected_if_false": {
+          "title": "Expected If False",
+          "type": "string"
+        },
+        "expected_if_true": {
+          "title": "Expected If True",
+          "type": "string"
+        },
+        "safe_to_run": {
+          "default": false,
+          "title": "Safe To Run",
+          "type": "boolean"
+        },
+        "schema_version": {
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "description",
+        "expected_if_true",
+        "expected_if_false"
+      ],
+      "title": "TestProposal",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "A claim with explicit supporting AND contradicting evidence (\u00a74).\n\nConfidence is never asserted on its own: a high-confidence ``confirmed``\nhypothesis with an incomplete evidence graph is exactly what the Brain must\nrefuse to produce. ``uncertainty_reasons`` and ``falsification_tests`` force the\nmodel to show its work and to say what would change its mind.",
+  "properties": {
+    "affected_assets": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/AssetRef"
+      },
+      "title": "Affected Assets",
+      "type": "array"
+    },
+    "attack_techniques": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Attack Techniques",
+      "type": "array"
+    },
+    "confidence": {
+      "default": 0.0,
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Confidence",
+      "type": "number"
+    },
+    "contradicting_evidence_ids": {
+      "default": [],
+      "items": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "title": "Contradicting Evidence Ids",
+      "type": "array"
+    },
+    "falsification_tests": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/TestProposal"
+      },
+      "title": "Falsification Tests",
+      "type": "array"
+    },
+    "id": {
+      "format": "uuid",
+      "title": "Id",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "statement": {
+      "maxLength": 4000,
+      "title": "Statement",
+      "type": "string"
+    },
+    "status": {
+      "default": "unverified",
+      "enum": [
+        "unverified",
+        "supported",
+        "contradicted",
+        "inconclusive",
+        "confirmed"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "supporting_evidence_ids": {
+      "default": [],
+      "items": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "title": "Supporting Evidence Ids",
+      "type": "array"
+    },
+    "uncertainty_reasons": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Uncertainty Reasons",
+      "type": "array"
+    }
+  },
+  "required": [
+    "statement"
+  ],
+  "title": "Hypothesis",
+  "type": "object"
+}
