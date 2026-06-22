@@ -1,0 +1,21 @@
+# Cross-domain bridges that federate the three Wave-1 graphs of the INVISABLE estate:
+#   twin/invisable-sample.yaml (infra) + identity_graph/invisable-identity-sample.yaml
+#   (principals) + lineage/invisable-lineage-sample.yaml (data fields).
+#
+# Identity grants and twin assets already share ids (repo:guardian, svc:messaging-relay), so
+# those domains join automatically. These explicit bridges connect the infra layer to the data
+# layer — illustrating how a service's blast radius reaches a regulated data field.
+#
+# Run:
+#   guardian twin-federate-blast id:human-dev \
+#     --twin twin/invisable-sample.yaml \
+#     --identity identity_graph/invisable-identity-sample.yaml \
+#     --lineage lineage/invisable-lineage-sample.yaml \
+#     --bridges twin/invisable-bridges.yaml
+#
+#   guardian twin-chokepoints --twin twin/invisable-sample.yaml \
+#     --identity identity_graph/invisable-identity-sample.yaml \
+#     --lineage lineage/invisable-lineage-sample.yaml --bridges twin/invisable-bridges.yaml
+bridges:
+  - { src: "svc:messaging-relay", relation: reads,  dst: "f:ehr.diagnosis" }   # service → health field
+  - { src: "db:mailbox",          relation: stores, dst: "f:ehr.patient_id" }  # store   → PII field

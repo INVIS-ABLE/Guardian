@@ -88,6 +88,9 @@ class LineageGraph:
     def fields(self) -> Iterator[Field]:
         return iter(self._fields.values())
 
+    def flows(self) -> tuple[Flow, ...]:
+        return tuple(self._flows)
+
     def boundary(self, boundary_id: str) -> Boundary:
         try:
             return self._boundaries[boundary_id]

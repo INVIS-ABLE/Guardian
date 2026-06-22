@@ -76,6 +76,9 @@ class DigitalTwin:
     def assets(self) -> Iterator[AssetNode]:
         return iter(self._assets.values())
 
+    def relationships(self) -> tuple[Relationship, ...]:
+        return tuple(self._edges)
+
     def assets_of_kind(self, kind: AssetKind) -> tuple[AssetNode, ...]:
         return tuple(a for a in self._assets.values() if a.kind == kind)
 

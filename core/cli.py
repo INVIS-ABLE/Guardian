@@ -529,5 +529,71 @@ def events_verify_cmd(spec_file: str) -> None:
     raise SystemExit(0 if ok else 1)
 
 
+def _federate_from_opts(twin_spec, identity_spec, lineage_spec, bridges_spec):
+    """Load + federate a twin / identity / lineage / bridges set of specs (any subset)."""
+    from .twin import federate, load_twin
+
+    twin = load_twin(twin_spec) if twin_spec else None
+    identity = lineage = None
+    if identity_spec:
+        from .identity_graph import load_graph as load_identity
+        identity = load_identity(identity_spec)
+    if lineage_spec:
+        from .lineage import load_graph as load_lineage
+        lineage = load_lineage(lineage_spec)
+    bridges = ()
+    if bridges_spec:
+        from pathlib import Path
+
+        import yaml
+        data = yaml.safe_load(Path(bridges_spec).read_text(encoding="utf-8")) or {}
+        bridges = tuple((b["src"], b["relation"], b["dst"]) for b in data.get("bridges", []))
+    return federate(twin, identity=identity, lineage=lineage, bridges=bridges)
+
+
+@main.command("twin-federate-blast")
+@click.argument("asset_id")
+@click.option("--twin", "twin_spec", type=click.Path(exists=True), help="Digital-twin spec.")
+@click.option("--identity", "identity_spec", type=click.Path(exists=True), help="Identity-graph spec.")
+@click.option("--lineage", "lineage_spec", type=click.Path(exists=True), help="Lineage-graph spec.")
+@click.option("--bridges", "bridges_spec", type=click.Path(exists=True), help="Cross-domain bridges spec.")
+def twin_federate_blast_cmd(asset_id, twin_spec, identity_spec, lineage_spec, bridges_spec) -> None:
+    """Cross-domain blast radius: fold identity + lineage into the twin, then trace from ASSET_ID."""
+    fed = _federate_from_opts(twin_spec, identity_spec, lineage_spec, bridges_spec)
+    radius = fed.blast_radius(asset_id)
+    origin = fed.asset(asset_id)
+    click.echo(f"Cross-domain blast radius of {origin.kind.value} '{origin.name}' ({asset_id}):")
+    if not radius.impacted:
+        click.echo("  (no downstream assets — isolated)")
+    for item in radius.impacted:
+        trail = " → ".join(f"{s.via.value}:{s.asset}" for s in item.path)
+        click.echo(f"  [{item.distance}] {item.asset.kind.value:16s} {item.asset.id}   ({trail})")
+    AuditLog().record("twin-federate-blast", actor="cli", scope=asset_id, decision="allowed",
+                      detail={"impacted": len(radius.impacted)})
+
+
+@main.command("twin-chokepoints")
+@click.option("--twin", "twin_spec", type=click.Path(exists=True), help="Digital-twin spec.")
+@click.option("--identity", "identity_spec", type=click.Path(exists=True), help="Identity-graph spec.")
+@click.option("--lineage", "lineage_spec", type=click.Path(exists=True), help="Lineage-graph spec.")
+@click.option("--bridges", "bridges_spec", type=click.Path(exists=True), help="Cross-domain bridges spec.")
+@click.option("--top", type=int, default=10, show_default=True, help="Show the top N chokepoints.")
+def twin_chokepoints_cmd(twin_spec, identity_spec, lineage_spec, bridges_spec, top) -> None:
+    """Forecast: which single node, if controlled/removed, cuts the most attack paths to sinks."""
+    from .twin import attack_surface, chokepoint_ranking
+
+    fed = _federate_from_opts(twin_spec, identity_spec, lineage_spec, bridges_spec)
+    surface = attack_surface(fed)
+    ranking = chokepoint_ranking(fed)
+    click.echo(f"Attack surface: {len(surface)} source→sink path(s) to sensitive sinks.")
+    if not ranking:
+        click.echo("  (no chokepoints — no attacker path reaches a sensitive sink)")
+    for c in ranking[:top]:
+        click.echo(f"  {c.paths_cut:3d} paths  {c.kind.value:16s} {c.node}  "
+                   f"→ protects {', '.join(c.protects_sinks)}")
+    AuditLog().record("twin-chokepoints", actor="cli", decision="allowed",
+                      detail={"surface": len(surface), "chokepoints": len(ranking)})
+
+
 if __name__ == "__main__":  # pragma: no cover
     main()
