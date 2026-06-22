@@ -48,6 +48,17 @@ BLOCKED_ACTIONS: frozenset[str] = frozenset(
         "create_master_access_key",
         "plaintext_in_observability",
         "train_on_user_content",
+        # --- AI-agent boundary ---------------------------------------------------------
+        # The model recommends; the central policy decides. These agent capabilities are
+        # globally blocked so a compromised or over-eager model cannot self-escalate.
+        # See policies/agent_boundary.yaml and docs/defence_catalogue.md.
+        "expand_scope",
+        "change_policy",
+        "disable_logging",
+        "merge_own_security_patch",
+        "resolve_own_finding",
+        "unrestricted_secret_access",
+        "arbitrary_command_execution",
     }
 )
 

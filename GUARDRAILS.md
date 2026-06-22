@@ -45,6 +45,23 @@ Also always blocked (see [docs/privacy_fabric/](docs/privacy_fabric/) and
 - `plaintext_in_observability`
 - `train_on_user_content`
 
+### AI-agent boundary — the model recommends; the policy decides
+
+Also always blocked, so a compromised or over-eager model cannot self-escalate (see
+[policies/agent_boundary.yaml](policies/agent_boundary.yaml) and
+[docs/defence_catalogue.md](docs/defence_catalogue.md)):
+
+- `expand_scope`
+- `change_policy`
+- `disable_logging`
+- `merge_own_security_patch`
+- `resolve_own_finding`
+- `unrestricted_secret_access`
+- `arbitrary_command_execution`
+
+`approve_production` (two-person human rule) and `execute_outside_connector` (the
+[connector contract](connectors/contract.py)) are enforced by complementary controls.
+
 ## 3. Approval gates (human-in-the-loop)
 
 These actions are refused unless an explicit, recorded **human approval** exists for the

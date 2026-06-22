@@ -54,3 +54,29 @@ def test_opa_is_the_present_authority():
     assert by_id["policy_engine"]["component"] == "open-policy-agent/opa"
     assert by_id["policy_engine"]["status"] == "present"
     assert by_id["policy_engine"]["roadmap_area"] == 1
+
+
+def test_alternatives_are_never_a_second_authority():
+    # An alternative listed under `not_as_second_authority` must NOT also appear as an
+    # authoritative component — that would create a duplicate/conflicting control plane.
+    data = _manifest()
+    authoritative = {c["component"] for c in data["components"]}
+    for choice in data.get("authoritative_choices", []):
+        for alt in choice.get("not_as_second_authority", []):
+            assert alt not in authoritative, (
+                f"{alt} is an alternative for {choice['function']} but is also an "
+                "authoritative component — pick one authority."
+            )
+
+
+def test_every_authoritative_choice_selection_is_real():
+    # Each choice's `selected` owner should reference a component we actually list
+    # (allowing '+'-composed selections like 'coraza + coreruleset').
+    data = _manifest()
+    listed = {c["component"] for c in data["components"]}
+    for choice in data.get("authoritative_choices", []):
+        parts = [p.strip() for p in choice["selected"].split("+")]
+        assert any(p in listed for p in parts), (
+            f"authoritative choice {choice['function']} selects {choice['selected']!r}, "
+            "which is not in the component manifest."
+        )

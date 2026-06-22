@@ -1,0 +1,51 @@
+# Guardian AI-agent action boundary
+#
+# Guardian is designed around security agents, so the system must control model-generated
+# actions. The rule is simple: the model RECOMMENDS; the central policy DECIDES. Every
+# AI-generated action is converted into a typed request and independently evaluated by the
+# one authorization authority (core/policy_gate.py / policies/opa/guardian.rego).
+#
+# This file is the single, machine-readable statement of that boundary. The `may_not`
+# entries marked enforcement=blocked_action are mirrored as globally BLOCKED_ACTIONS and are
+# denied for every input. Other entries are enforced by complementary controls (the
+# two-person production rule, the connector contract, recorded human approval).
+#
+# Kept in sync with the code by tests/test_agent_boundary.py.
+
+version: "1.0.0"
+
+principle: >
+  The model may propose, classify, draft and explain. It may never directly widen its own
+  authority, bypass logging/policy, run arbitrary commands, or sign off its own work.
+
+model_may:
+  - recommend_actions
+  - assemble_proposed_plans
+  - classify_findings
+  - produce_draft_patches
+  - explain_evidence
+
+model_may_not:
+  - id: expand_scope
+    enforcement: blocked_action
+  - id: change_policy
+    enforcement: blocked_action
+    note: The model cannot modify OPA/policy_gate rules.
+  - id: disable_logging
+    enforcement: blocked_action
+  - id: merge_own_security_patch
+    enforcement: blocked_action
+  - id: resolve_own_finding
+    enforcement: blocked_action
+    note: The model cannot mark its own finding as resolved in the findings ledger.
+  - id: unrestricted_secret_access
+    enforcement: blocked_action
+  - id: arbitrary_command_execution
+    enforcement: blocked_action
+    note: Also structurally prevented by the connector contract (no raw command strings).
+  - id: approve_production
+    enforcement: two_person_rule
+    note: Production needs two distinct, unexpired human reviewers (core/policy_gate.py).
+  - id: execute_outside_connector
+    enforcement: connector_contract
+    note: All execution funnels through the typed GuardianConnector (connectors/contract.py).

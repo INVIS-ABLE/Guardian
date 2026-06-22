@@ -14,6 +14,9 @@ blocked_actions := {
 	"decrypt_private_content", "access_message_plaintext", "copy_private_content_to_memory",
 	"send_private_content_to_model", "store_decryption_keys", "silent_moderation_participant",
 	"create_master_access_key", "plaintext_in_observability", "train_on_user_content",
+	# AI-agent boundary — the model recommends; the policy decides. No self-escalation.
+	"expand_scope", "change_policy", "disable_logging", "merge_own_security_patch",
+	"resolve_own_finding", "unrestricted_secret_access", "arbitrary_command_execution",
 }
 
 global_approval_required := {
