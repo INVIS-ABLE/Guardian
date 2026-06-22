@@ -19,16 +19,24 @@ import os
 from dataclasses import dataclass
 
 def _ed25519_works() -> bool:
-    """Import AND functionally exercise Ed25519. ``cryptography`` can import yet panic at
-    runtime if its native backend (cffi) is missing — so we self-test, not just import.
-    Catches BaseException because a missing backend surfaces as a Rust ``PanicException``."""
+    """Import AND functionally exercise Ed25519.
+
+    ``cryptography`` can import yet *panic* at runtime if its native backend (cffi) is
+    missing. Rather than catch that panic (a ``BaseException``), we first confirm the
+    ``_cffi_backend`` extension is importable — its absence is exactly what makes Ed25519
+    panic — and only then exercise the primitive, catching ordinary exceptions.
+    """
+    import importlib.util
+
+    if importlib.util.find_spec("_cffi_backend") is None:
+        return False
     try:
         from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
         sk = Ed25519PrivateKey.generate()
         sk.public_key().verify(sk.sign(b"selftest"), b"selftest")
         return True
-    except BaseException:  # noqa: BLE001 - includes pyo3 PanicException
+    except Exception:
         return False
 
 
