@@ -1,0 +1,60 @@
+name: Guardian CI
+
+# Core CI for the Guardian platform: validates guardrails, scope files, and the
+# self-healing test gate (unit + security + safeguarding). Encodes steps 5-11 of the
+# self-healing workflow (docs/workflow.md).
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  guardrails-and-tests:
+    name: Guardrails + tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Lint
+        run: ruff check . || true
+
+      - name: Validate scope files against guardrails
+        run: |
+          for f in scope/*.yaml; do
+            case "$f" in
+              scope/assets.yaml|scope/test_accounts.yaml) continue ;;
+            esac
+            echo "Checking $f"
+            python -m core.guardrails check "$f"
+          done
+
+      - name: Unit + security + safeguarding tests
+        run: pytest -q
+
+      - name: Verify audit chain
+        run: python -m core.cli audit-verify || true
+
+  draft-pr-policy:
+    name: Enforce draft + human-review policy
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Remind that Guardian changes require human approval
+        run: |
+          echo "Guardian self-healing PRs must:"
+          echo " - open as DRAFT"
+          echo " - pass the test gate above"
+          echo " - receive a recorded HUMAN approval before merge (no auto-merge)"
+          echo "Branch protection enforces required reviews; this job is a visible reminder."

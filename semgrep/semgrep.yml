@@ -1,0 +1,55 @@
+# Guardian Semgrep configuration.
+# In CI we also pull registry rulesets (p/owasp-top-ten, p/secrets, p/security-audit);
+# these local rules capture INVISABLE-specific safeguarding/privacy concerns.
+rules:
+  - id: hardcoded-secret-assignment
+    languages: [python, javascript, typescript]
+    severity: ERROR
+    message: >
+      Possible hardcoded secret. Move to a secrets manager / environment variable.
+    pattern-either:
+      - pattern: $X = "..."
+    metadata:
+      category: security
+      cwe: "CWE-798: Use of Hard-coded Credentials"
+      owasp: "A07:2021 Identification and Authentication Failures"
+    paths:
+      include:
+        - "**/*.py"
+        - "**/*.js"
+        - "**/*.ts"
+
+  - id: pii-field-logged
+    languages: [python, javascript, typescript]
+    severity: WARNING
+    message: >
+      Potential PII written to logs. Vulnerable-user PII/health data must never be logged.
+    pattern-either:
+      - pattern: console.log(..., $USER.email, ...)
+      - pattern: console.log(..., $USER.health_data, ...)
+      - pattern: logger.info(..., $USER.email, ...)
+    metadata:
+      category: privacy
+      safeguarding: true
+
+  - id: missing-authorization-check
+    languages: [python]
+    severity: WARNING
+    message: >
+      Endpoint handler appears to access another user's record by id without an
+      explicit ownership/authorization check (possible IDOR).
+    patterns:
+      - pattern: |
+          def $H(...):
+            ...
+            $OBJ = $MODEL.objects.get(id=$ID)
+            ...
+      - pattern-not-inside: |
+          def $H(...):
+            ...
+            authorize(...)
+            ...
+    metadata:
+      category: security
+      cwe: "CWE-639: Authorization Bypass Through User-Controlled Key"
+      owasp: "A01:2021 Broken Access Control"

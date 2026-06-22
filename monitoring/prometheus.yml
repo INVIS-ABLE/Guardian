@@ -1,0 +1,14 @@
+# Minimal Prometheus config for the Guardian local stack.
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  - job_name: guardian-dashboard
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["guardian-dashboard:8080"]

@@ -1,0 +1,2 @@
+# Audit log directory. Generated tamper-evident logs are written here at runtime
+# (guardian-audit.jsonl) and are git-ignored. This file keeps the directory in git.

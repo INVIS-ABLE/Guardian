@@ -1,0 +1,17 @@
+# CodeQL configuration used by .github/workflows/codeql.yml
+name: "Guardian CodeQL config"
+
+# Use the security-extended + quality suites for thorough defensive coverage.
+queries:
+  - uses: security-extended
+  - uses: security-and-quality
+
+paths-ignore:
+  - "**/node_modules/**"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/*.test.*"
+  - "playwright/**"
+
+# Languages are selected in the workflow matrix; keep this list in sync with the
+# in-scope repo's stack (allowed_repos in the active scope file).

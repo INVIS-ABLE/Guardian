@@ -1,0 +1,37 @@
+name: ZAP Staging Baseline
+
+# Controlled DAST against OWNED staging only. Manual dispatch + scheduled, never on PRs
+# from forks. Targets are fixed to the in-scope staging domain via the AF plan.
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: "Type 'staging' to confirm a controlled scan of OWNED staging"
+        required: true
+        default: "staging"
+  schedule:
+    - cron: "0 2 * * 2"   # weekly, off-peak
+
+permissions:
+  contents: read
+  issues: write           # ZAP action can file findings as issues
+
+jobs:
+  zap:
+    name: ZAP automation framework
+    runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.confirm == 'staging'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Guardrail — confirm target is in scope
+        run: |
+          python -m core.guardrails check scope/invisable-staging.yaml
+          echo "Target domain restricted to staging.invisable.co.uk by the AF plan."
+
+      - name: ZAP scan (automation framework plan)
+        uses: zaproxy/action-af@v0.1.0
+        with:
+          plan: zap/staging-baseline.yaml
+        env:
+          GUARDIAN_TEST_PW: ${{ secrets.GUARDIAN_STAGING_TEST_PW }}

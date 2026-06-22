@@ -1,0 +1,65 @@
+# OWASP ZAP Automation Framework plan — INVISABLE staging baseline.
+# Controlled, low-impact DAST against an OWNED staging domain only.
+# Run:  zap.sh -cmd -autorun zap/staging-baseline.yaml
+#
+# SAFETY:
+#  * context urls are restricted to staging.invisable.co.uk (in-scope, owned).
+#  * uses passive + a bounded baseline active scan (no destructive attack strengths).
+#  * authentication uses a SYNTHETIC test account, never a real user.
+env:
+  contexts:
+    - name: "invisable-staging"
+      urls:
+        - "https://staging.invisable.co.uk"
+      includePaths:
+        - "https://staging.invisable.co.uk.*"
+      excludePaths:
+        - ".*/logout.*"
+        - ".*/admin/.*"          # admin paths require admin_permission_test approval
+      authentication:
+        method: "json"
+        parameters:
+          loginPageUrl: "https://staging.invisable.co.uk/login"
+          loginRequestUrl: "https://staging.invisable.co.uk/api/auth/login"
+          loginRequestBody: '{"username":"standard_user_test","password":"{%env:GUARDIAN_TEST_PW%}"}'
+      users:
+        - name: "standard_user_test"
+          credentials:
+            username: "standard_user_test"
+  parameters:
+    failOnError: true
+    progressToStdout: true
+
+jobs:
+  - type: passiveScan-config
+    parameters:
+      maxAlertsPerRule: 10
+
+  - type: spider
+    parameters:
+      context: "invisable-staging"
+      user: "standard_user_test"
+      maxDuration: 5            # minutes — keep it controlled
+      maxDepth: 5
+
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 5
+
+  - type: activeScan
+    parameters:
+      context: "invisable-staging"
+      user: "standard_user_test"
+      maxRuleDurationInMins: 2
+      maxScanDurationInMins: 15  # bounded; within scope rate limits
+      policy: "Baseline"
+
+  - type: report
+    parameters:
+      template: "traditional-json"
+      reportDir: "reports/generated"
+      reportFile: "zap-staging-baseline"
+    risks:
+      - low
+      - medium
+      - high

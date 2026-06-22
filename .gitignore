@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.env
+.envrc
+
+# Node / Playwright
+node_modules/
+playwright-report/
+test-results/
+.playwright/
+
+# Guardian generated artifacts (evidence is committed deliberately, not auto)
+reports/generated/
+reports/audit/*.log
+reports/audit/*.jsonl
+!reports/audit/.gitkeep
+*.sarif
+*.tmp
+
+# Tool outputs
+zap-report.*
+trivy-results.*
+gitleaks-report.*
+semgrep-results.*
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/

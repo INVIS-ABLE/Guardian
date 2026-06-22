@@ -1,0 +1,14 @@
+{
+  "name": "guardian-playwright",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Guardian safeguarding user-journey tests (owned staging, synthetic accounts only).",
+  "scripts": {
+    "test": "playwright test",
+    "test:safeguarding": "playwright test safeguarding.spec.ts",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.44.0"
+  }
+}

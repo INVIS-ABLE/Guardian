@@ -1,0 +1,26 @@
+# Guardian Trivy configuration.
+# Scans owned filesystems / repos / containers / IaC for vulnerabilities and
+# misconfigurations. Non-destructive and read-only.
+severity:
+  - MEDIUM
+  - HIGH
+  - CRITICAL
+
+scan:
+  security-checks:
+    - vuln
+    - secret
+    - misconfig
+  skip-dirs:
+    - node_modules
+    - .git
+    - playwright-report
+
+vulnerability:
+  ignore-unfixed: false
+
+misconfiguration:
+  include-non-failures: false
+
+# Fail CI on HIGH/CRITICAL by default (overridable per workflow).
+exit-code: 1
