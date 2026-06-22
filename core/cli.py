@@ -450,5 +450,84 @@ def endpoint_vet_cmd(spec_file: str, sql: str) -> None:
     raise SystemExit(0 if verdict.approved else 1)
 
 
+@main.command("events-tail")
+@click.argument("spec_file", type=click.Path(exists=True))
+@click.option("--source", default=None, help="Filter to one source (opa, github, falco, …).")
+@click.option("--min-severity", default=None, help="Minimum severity (info|low|medium|high|critical).")
+def events_tail_cmd(spec_file: str, source: str | None, min_severity: str | None) -> None:
+    """Event fabric: print the ordered stream (optionally filtered)."""
+    from .event_fabric import EventSeverity, EventSource, load_stream
+
+    fabric = load_stream(spec_file)
+    src = EventSource(source) if source else None
+    sev = EventSeverity(min_severity) if min_severity else None
+    rows = fabric.query(source=src, min_severity=sev)
+    click.echo(f"Stream: {len(fabric)} event(s), showing {len(rows)}:")
+    for s in rows:
+        e = s.event
+        who = f" {e.actor or '·'}→{e.target}" if e.target else (f" {e.actor}" if e.actor else "")
+        out = f" [{e.outcome.value}]" if e.outcome else ""
+        click.echo(f"  #{s.offset:<3d} {e.ts.isoformat()} {e.source.value:9s} "
+                   f"{e.severity.value:8s} {e.action}{out}{who}")
+    AuditLog().record("events-tail", actor="cli", scope=spec_file, decision="allowed",
+                      detail={"shown": len(rows)})
+
+
+@main.command("events-stats")
+@click.argument("spec_file", type=click.Path(exists=True))
+@click.option("--by", "field", default="source", help="Group by: source|severity|outcome|actor|target|action.")
+def events_stats_cmd(spec_file: str, field: str) -> None:
+    """Event fabric: aggregate event counts grouped by a field."""
+    from .event_fabric import load_stream
+
+    fabric = load_stream(spec_file)
+    counts = fabric.counts_by(field)
+    click.echo(f"Counts by {field} ({len(fabric)} events):")
+    for key, n in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0])):
+        click.echo(f"  {key:24s} {n}")
+    AuditLog().record("events-stats", actor="cli", scope=spec_file, decision="allowed",
+                      detail={"field": field, "groups": len(counts)})
+
+
+@main.command("events-spikes")
+@click.argument("spec_file", type=click.Path(exists=True))
+@click.option("--window", "window_seconds", type=int, default=60, show_default=True,
+              help="Sliding window in seconds.")
+@click.option("--threshold", type=int, default=3, show_default=True, help="Events to flag a spike.")
+@click.option("--outcome", default=None, help="Restrict to one outcome (e.g. deny).")
+def events_spikes_cmd(spec_file: str, window_seconds: int, threshold: int, outcome: str | None) -> None:
+    """Event fabric: per-actor burst detection (gate — exits non-zero when spikes are found)."""
+    from .event_fabric import Outcome, load_stream
+
+    fabric = load_stream(spec_file)
+    oc = Outcome(outcome) if outcome else None
+    spikes = fabric.spikes(window_seconds=window_seconds, threshold=threshold, outcome=oc)
+    click.echo(f"Spikes (≥{threshold} events in {window_seconds}s"
+               f"{f', outcome={outcome}' if outcome else ''}):")
+    if not spikes:
+        click.echo("  (none)")
+    for sp in spikes:
+        click.echo(f"  {sp.actor:18s} {sp.count} events  "
+                   f"{sp.first_ts.isoformat()} → {sp.last_ts.isoformat()}")
+    AuditLog().record("events-spikes", actor="cli", scope=spec_file,
+                      decision="denied" if spikes else "allowed",
+                      detail={"spikes": len(spikes)})
+    raise SystemExit(1 if spikes else 0)
+
+
+@main.command("events-verify")
+@click.argument("spec_file", type=click.Path(exists=True))
+def events_verify_cmd(spec_file: str) -> None:
+    """Event fabric: verify the stream's tamper-evident hash chain."""
+    from .event_fabric import load_stream
+
+    fabric = load_stream(spec_file)
+    ok = fabric.verify()
+    click.echo(f"event stream ({len(fabric)} events): {'OK' if ok else 'TAMPERED'}")
+    AuditLog().record("events-verify", actor="cli", scope=spec_file,
+                      decision="allowed" if ok else "denied", detail={"ok": ok})
+    raise SystemExit(0 if ok else 1)
+
+
 if __name__ == "__main__":  # pragma: no cover
     main()

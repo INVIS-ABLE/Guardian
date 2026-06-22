@@ -72,7 +72,7 @@ The authoritative, machine-checked list is
 | 2 | **Identity & permission attack graph** (BloodHound) — *[first slice implemented](identity_graph.md)* | effective + transitive permissions, escalation paths, dormant privilege, separation-of-duties breaks |
 | 3 | **Data lineage & privacy graph** (DataHub / OpenLineage) — *[first slice implemented](data_lineage.md)* | field-level lineage + classification propagation — detect *"a new integration moves a health field outside its approved boundary"* |
 | 4 | **Endpoint intelligence fabric** (osquery / Fleet) — *[first slice implemented](endpoint_fabric.md)* | structured OS state via **signed, reviewed query packs only** — never model-generated commands |
-| 5 | **Real-time security event fabric** (ClickHouse / Redpanda) | Guardian's nervous system: OPA/Temporal/GitHub/identity/Cilium/Falco/build/model events in one durable stream + analytical store |
+| 5 | **Real-time security event fabric** (ClickHouse / Redpanda) — *[first slice implemented](event_fabric.md)* | Guardian's nervous system: OPA/Temporal/GitHub/identity/Cilium/Falco/build/model events in one durable stream + analytical store |
 | 6 | **Forensic timeline reconstruction** (Timesketch) | automatic chronologies so the Brain reasons from *sequence*, not isolated alerts |
 
 ### Wave 2 — Intelligence (deeper reasoning)
