@@ -412,5 +412,43 @@ def twin_gate_cmd(spec_file, files_from, fail_on: str) -> None:
     raise SystemExit(1 if breached else 0)
 
 
+@main.command("endpoint-packs")
+@click.argument("spec_file", type=click.Path(exists=True))
+def endpoint_packs_cmd(spec_file: str) -> None:
+    """Endpoint fabric: admit signed, reviewed osquery packs and list the approved surface."""
+    from .endpoint import load_reviewed_packs, seal_and_admit
+
+    packs = load_reviewed_packs(spec_file)
+    fabric = seal_and_admit(packs)  # signs each with a one-off demo reviewer key, then admits
+    click.echo(f"Admitted {len(fabric)} signed, reviewed pack(s):")
+    for pack in fabric.packs():
+        click.echo(f"  {pack.id}  (author {pack.author} → reviewed by {pack.reviewed_by}, "
+                   f"signed by {fabric.admitting_key(pack.id)})")
+        for q in pack.queries:
+            click.echo(f"      {q.name:18s} [{q.platform.value:7s} @ {q.interval}s] {q.query}")
+    AuditLog().record("endpoint-packs", actor="cli", scope=spec_file, decision="allowed",
+                      detail={"packs": len(fabric), "queries": len(fabric.approved_queries())})
+
+
+@main.command("endpoint-vet")
+@click.argument("spec_file", type=click.Path(exists=True))
+@click.argument("sql")
+def endpoint_vet_cmd(spec_file: str, sql: str) -> None:
+    """Endpoint fabric: is SQL allowed? Only verbatim queries from signed packs pass (gate)."""
+    from .endpoint import load_reviewed_packs, seal_and_admit
+
+    fabric = seal_and_admit(load_reviewed_packs(spec_file))
+    verdict = fabric.vet_query(sql)
+    if verdict.approved:
+        click.echo(f"APPROVED — {verdict.pack}:{verdict.query}")
+    else:
+        click.echo("REFUSED — ad-hoc / model-generated osquery is not allowed")
+        click.echo(f"  {verdict.reason}")
+    AuditLog().record("endpoint-vet", actor="cli", scope=spec_file,
+                      decision="allowed" if verdict.approved else "denied",
+                      detail={"query": verdict.query})
+    raise SystemExit(0 if verdict.approved else 1)
+
+
 if __name__ == "__main__":  # pragma: no cover
     main()
