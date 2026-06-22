@@ -34,6 +34,24 @@ is server-asserted but **client-verified**; a conversation never silently downgr
 3. **1:1 ↔ group migration** and emergency key/device **revocation** procedures.
 4. Interop boundary between Signal (1:1) and MLS (groups) — explicitly *not* casually mixed.
 
+## Recommended resolutions (for cryptographer ratification)
+
+Engineering's proposed answers to the open items, to be ratified (not replaced) by the
+cryptographer before this ADR moves to *Accepted*:
+
+1. **libsignal** — adopt an **independently reviewed** Signal Protocol implementation behind
+   a pinned compatibility layer rather than vendoring AGPL libsignal, unless legal clears
+   AGPL for our distribution model. Either way: pin a single version, wrap it, and own a
+   maintenance/upgrade cadence.
+2. **MLS** — use an RFC 9420 implementation with a **post-quantum-capable** cipher suite
+   where available; otherwise classical with a documented PQ migration path.
+3. **Migration & revocation** — version every conversation's suite; transitions are
+   **explicit and client-verified**; emergency revocation invalidates device sessions and
+   raises a displayed security event (never silent).
+4. **Signal↔MLS** — keep them strictly separated by conversation type; no automatic bridging.
+
+These remain **recommendations**; the cryptographer sign-off gate is unchanged.
+
 ## Consequences
 
 - **Positive:** Signal-level guarantees per type; group efficiency from MLS; calls stay E2EE

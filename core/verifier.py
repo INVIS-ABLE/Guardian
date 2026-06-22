@@ -19,10 +19,11 @@ is the point.
 from __future__ import annotations
 
 import hashlib
-import hmac
 import json
 from dataclasses import dataclass, field
 from typing import Any
+
+from . import signing
 
 # Fields that must never appear in the public key directory the Verifier ingests.
 _FORBIDDEN_LEAF_FIELDS = frozenset(
@@ -124,28 +125,30 @@ class KeyTransparencyLog:
             prev = self._chain(prev, leaf)
         return prev
 
-    def checkpoint(self, signer_key: bytes, epoch: int) -> SignedCheckpoint:
+    @staticmethod
+    def _checkpoint_message(size: int, root: str, epoch: int) -> bytes:
+        return f"{size}:{root}:{epoch}".encode()
+
+    def checkpoint(self, signer_private_key: str, epoch: int) -> SignedCheckpoint:
         root = self.root()
-        sig = hmac.new(signer_key, f"{self.size}:{root}:{epoch}".encode(), hashlib.sha256).hexdigest()
+        sig = signing.sign(signer_private_key, self._checkpoint_message(self.size, root, epoch))
         return SignedCheckpoint(size=self.size, root=root, epoch=epoch, signature=sig)
 
 
 class GuardianVerifier:
     """Independently verifies a key-transparency log. Public data only."""
 
-    def __init__(self, signer_key: bytes) -> None:
-        # The trusted checkpoint-signing key (Ed25519 public key in production).
-        self._signer_key = signer_key
+    def __init__(self, signer_public_key: str) -> None:
+        # The trusted checkpoint-signing PUBLIC key (Ed25519 in production; hex-encoded).
+        self._signer_public_key = signer_public_key
 
     # --- checkpoint signature --------------------------------------------------
     def verify_checkpoint(self, log: KeyTransparencyLog, checkpoint: SignedCheckpoint) -> bool:
-        expected = hmac.new(
-            self._signer_key, f"{checkpoint.size}:{checkpoint.root}:{checkpoint.epoch}".encode(),
-            hashlib.sha256,
-        ).hexdigest()
-        return hmac.compare_digest(expected, checkpoint.signature) and checkpoint.root == log.root_at(
-            checkpoint.size
+        message = KeyTransparencyLog._checkpoint_message(
+            checkpoint.size, checkpoint.root, checkpoint.epoch
         )
+        signed_ok = signing.verify(self._signer_public_key, message, checkpoint.signature)
+        return signed_ok and checkpoint.root == log.root_at(checkpoint.size)
 
     # --- consistency (append-only) ---------------------------------------------
     def verify_consistency(self, log: KeyTransparencyLog, earlier: SignedCheckpoint) -> bool:

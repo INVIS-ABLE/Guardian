@@ -20,10 +20,13 @@ independently of any one connector.
 
 from __future__ import annotations
 
+import json
 import re
 from dataclasses import dataclass, field
 from time import time
 from typing import Any, Protocol, runtime_checkable
+
+from core import signing
 
 
 class ContractViolation(PermissionError):
@@ -193,10 +196,50 @@ def validate_request(
     assert_no_raw_command(request.args)
 
 
-def authorize_execution(authorization: SignedAuthorization, *, now: float | None = None) -> None:
-    """Require a present, unexpired signed authorization before execution."""
+def canonical_request(request: ActionRequest) -> bytes:
+    """Stable byte encoding of a request — what an authorization signs over."""
+    return json.dumps(
+        {
+            "action": request.action, "target": request.target,
+            "args": request.args, "repo": request.repo, "commit": request.commit,
+        },
+        sort_keys=True, separators=(",", ":"),
+    ).encode("utf-8")
+
+
+def sign_authorization(
+    request: ActionRequest,
+    *,
+    signer_private_key: str,
+    approver: str,
+    ttl_s: int = 600,
+    now: float | None = None,
+    workflow_run: str | None = None,
+) -> SignedAuthorization:
+    """Mint a signed, time-boxed capability to execute exactly this request.
+
+    In production the signer is the human-approval gate's key (Ed25519); the signature
+    binds the authorization to the specific action+target+args so it cannot be replayed
+    against a different request.
+    """
+    now = time() if now is None else now
+    signature = signing.sign(signer_private_key, canonical_request(request))
+    return SignedAuthorization(
+        request=request, approver=approver, signature=signature,
+        expires_at=now + ttl_s, commit=request.commit, workflow_run=workflow_run,
+    )
+
+
+def authorize_execution(
+    authorization: SignedAuthorization, *, verify_key: str | None = None, now: float | None = None
+) -> None:
+    """Require a present, unexpired authorization; verify its signature when a key is given."""
     if not authorization.signature:
         raise ContractViolation("execute() requires a SignedAuthorization with a signature.")
     now = time() if now is None else now
     if authorization.expires_at is not None and now >= authorization.expires_at:
         raise ContractViolation("authorization has expired; obtain a fresh approval.")
+    if verify_key is not None and not signing.verify(
+        verify_key, canonical_request(authorization.request), authorization.signature
+    ):
+        raise ContractViolation("authorization signature is invalid for this request.")

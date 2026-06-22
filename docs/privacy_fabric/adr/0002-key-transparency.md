@@ -51,8 +51,12 @@ content or keys.
 - **Positive:** silent identity-key substitution is detectable by clients *and* an
   independent Guardian monitor; Guardian gains a real privacy-protective role without ever
   touching plaintext.
-- **Negative / pending:** the reference uses HMAC-signed checkpoints for offline testability;
-  production must use Ed25519 with checkpoints stored outside the messaging service, plus a
-  real verifiable-log backend (e.g. a transparency log) and >1 independent monitor.
+- **Signing:** checkpoints are signed via [`core/signing.py`](../../../core/signing.py),
+  which uses **Ed25519** when the `cryptography` backend is functional and falls back to a
+  deterministic HMAC only where it is not (CI/offline), selected by a runtime self-test. The
+  primitive is swappable; the verification logic is fixed. The same module signs connector
+  execution authorizations (see below).
+- **Pending:** checkpoints must be stored **outside** the messaging service, backed by a real
+  verifiable-log/transparency backend, with **>1 independent monitor** beyond the Guardian Verifier.
 - **Guardian impact:** the Verifier is Guardian's single privacy-adjacent active role; all
   other privacy "must never" actions remain globally blocked.

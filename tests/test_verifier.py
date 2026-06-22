@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pytest
 
+from core import signing
 from core.verifier import (
     GuardianVerifier,
     KeyLeaf,
@@ -11,7 +12,9 @@ from core.verifier import (
     VerifierBoundaryError,
 )
 
-SIGNER = b"trusted-checkpoint-key"
+_KEYS = signing.generate_keypair()
+SIGNER = _KEYS.private          # checkpoints are signed with the private key
+SIGNER_PUB = _KEYS.public       # the Verifier trusts the public key
 
 
 def _log(*leaves: KeyLeaf) -> KeyTransparencyLog:
@@ -26,7 +29,7 @@ def test_clean_log_passes_with_valid_checkpoint():
         KeyLeaf("alice", "phone", "pkA1", epoch=1),
         KeyLeaf("bob", "phone", "pkB1", epoch=1),
     )
-    v = GuardianVerifier(SIGNER)
+    v = GuardianVerifier(SIGNER_PUB)
     cp = log.checkpoint(SIGNER, epoch=1)
     report = v.monitor(log, current_checkpoint=cp)
     assert report.ok
@@ -35,9 +38,10 @@ def test_clean_log_passes_with_valid_checkpoint():
 
 def test_forged_checkpoint_is_rejected():
     log = _log(KeyLeaf("alice", "phone", "pkA1", epoch=1))
-    v = GuardianVerifier(SIGNER)
+    v = GuardianVerifier(SIGNER_PUB)
     # A checkpoint signed with the wrong key must not verify against our trusted signer.
-    bad_cp = _log(KeyLeaf("alice", "phone", "pkA1", epoch=1)).checkpoint(b"attacker-key", epoch=1)
+    attacker = signing.generate_keypair()
+    bad_cp = _log(KeyLeaf("alice", "phone", "pkA1", epoch=1)).checkpoint(attacker.private, epoch=1)
     assert not v.verify_checkpoint(log, bad_cp)
     assert "checkpoint_invalid" in v.monitor(log, current_checkpoint=bad_cp).alerts
 
@@ -48,7 +52,7 @@ def test_silent_key_replacement_is_detected():
         KeyLeaf("alice", "phone", "pkA1", epoch=1),
         KeyLeaf("alice", "phone", "pkA2", epoch=2, recovery=False),
     )
-    v = GuardianVerifier(SIGNER)
+    v = GuardianVerifier(SIGNER_PUB)
     report = v.monitor(log)
     assert not report.ok
     assert any(a.startswith("silent_key_replacement:alice/phone") for a in report.alerts)
@@ -59,12 +63,12 @@ def test_recovery_key_change_is_not_flagged():
         KeyLeaf("alice", "phone", "pkA1", epoch=1),
         KeyLeaf("alice", "phone", "pkA2", epoch=2, recovery=True),
     )
-    v = GuardianVerifier(SIGNER)
+    v = GuardianVerifier(SIGNER_PUB)
     assert v.monitor(log).ok
 
 
 def test_consistency_detects_history_rewrite():
-    v = GuardianVerifier(SIGNER)
+    v = GuardianVerifier(SIGNER_PUB)
     log = _log(KeyLeaf("alice", "phone", "pkA1", epoch=1))
     earlier = log.checkpoint(SIGNER, epoch=1)
     # Extend honestly: consistency holds.
@@ -79,7 +83,7 @@ def test_consistency_detects_history_rewrite():
 def test_inclusion_check():
     leaf = KeyLeaf("alice", "phone", "pkA1", epoch=1)
     log = _log(leaf)
-    v = GuardianVerifier(SIGNER)
+    v = GuardianVerifier(SIGNER_PUB)
     assert v.verify_inclusion(log, leaf)
     assert not v.verify_inclusion(log, KeyLeaf("mallory", "phone", "pk", epoch=1))
 

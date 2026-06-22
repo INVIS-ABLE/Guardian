@@ -162,11 +162,23 @@ class BaseConnector:
         )
         return ApprovalPolicy(required_actions=(self.action,) if gated else (), min_reviewers=1)
 
-    def execute(self, authorization: SignedAuthorization) -> ExecutionResult:
+    def execute(
+        self, authorization: SignedAuthorization, *, verify_key: str | None = None
+    ) -> ExecutionResult:
         # Execution requires a present, unexpired, signed authorization for the request.
-        authorize_execution(authorization)
+        # When ``verify_key`` is supplied the signature is cryptographically verified.
+        authorize_execution(authorization, verify_key=verify_key)
         req = authorization.request
-        result = self.run(repo=req.repo, target=req.target, **req.args)
+        # Route the single contract target to the right connector parameter: an explicit
+        # repo wins; dynamic (domain-targeting) tools take a domain; otherwise the target
+        # is a repo. This avoids ownership-checking a repo string as if it were a domain.
+        if req.repo is not None:
+            repo, target = req.repo, None
+        elif self.mode in {"zap_scan", "api_security", "mobile_security"}:
+            repo, target = None, req.target
+        else:
+            repo, target = req.target, None
+        result = self.run(repo=repo, target=target, **req.args)
         output_hash = hashlib.sha256((result.stdout or "").encode("utf-8")).hexdigest()
         return ExecutionResult(
             action=req.action, returncode=result.returncode, output_hash=output_hash,
