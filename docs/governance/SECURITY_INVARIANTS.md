@@ -26,6 +26,7 @@ without an automated check is a gap to close.
 | A capability transition that diverges from its signed manifest/token is independently caught and freezes issuance; the Shadow holds no execution power | `shadow_guardian/` (separate package; independent re-derivation, read-only, freeze latch) | `tests/test_shadow_guardian.py` |
 | No sensitive capability issues unless all six roots of trust (human/workload/machine/software/target/evidence) are independently verified; fail closed | `core/roots_of_trust.py` gate in `core/tools/executor.py` (posture-enforced) | `tests/test_roots_of_trust.py`, `tests/test_executor_roots.py` |
 | All six roots are populated from real verifiers (incl. machine attestation: AK-signed TPM quote over golden PCRs; software: supply-chain admission) — never hand-set | `core/trust_producers.py`, `core/machine_attestation.py`, `ownership/`, `supplychain/` | `tests/test_trust_producers.py`, `tests/test_machine_attestation.py`, `tests/test_software_trust_admission.py`, `tests/test_target_trust_ownership.py` |
+| A tool that claims success but leaves no required independent evidence is flagged (unsupported success); incident timelines correct clock skew and detect missing events | `forensics/` (read-only timeline reconstruction) | `tests/test_forensic_timeline.py` |
 
 ## The "bulletproof" acceptance tests (target state)
 
