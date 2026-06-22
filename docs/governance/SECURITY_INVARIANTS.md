@@ -24,6 +24,7 @@ without an automated check is a gap to close.
 | Connector execution requires a signed, unexpired, request-bound authorization (no replay/forgery) | `core/router.py::execute_capability` + `connectors/contract.py` + `core/signing.py` (Ed25519/HMAC) | `tests/test_router_contract_execution.py`, `tests/test_signing.py` |
 | OPA authority and the embedded mirror agree on every decision | `policies/opa/guardian.rego` vs `core/policy_gate.decide` | `tests/test_opa_parity.py` (OPA-policy CI job) |
 | A capability transition that diverges from its signed manifest/token is independently caught and freezes issuance; the Shadow holds no execution power | `shadow_guardian/` (separate package; independent re-derivation, read-only, freeze latch) | `tests/test_shadow_guardian.py` |
+| No sensitive capability issues unless all six roots of trust (human/workload/machine/software/target/evidence) are independently verified; fail closed | `core/roots_of_trust.py` gate in `core/tools/executor.py` (posture-enforced) | `tests/test_roots_of_trust.py`, `tests/test_executor_roots.py` |
 
 ## The "bulletproof" acceptance tests (target state)
 

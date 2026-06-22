@@ -29,6 +29,7 @@ class RefusalReason(str, Enum):
     ENVIRONMENT_NOT_ALLOWED = "environment_not_allowed"
     APPROVAL_REQUIRED = "approval_required"
     TOKEN_REJECTED = "token_rejected"
+    ROOTS_OF_TRUST_FAILED = "roots_of_trust_failed"
 
 
 class ToolRefusal(BaseModel):
