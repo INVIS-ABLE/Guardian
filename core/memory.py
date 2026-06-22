@@ -108,11 +108,14 @@ def cosine(a: list[float], b: list[float]) -> float:
 class MemoryBackend(Protocol):
     """Minimal contract every memory backend implements."""
 
-    def upsert(self, record: MemoryRecord) -> None: ...
+    def upsert(self, record: MemoryRecord) -> None:
+        """Insert or replace a record."""
 
-    def query(self, collection: str, embedding: list[float], top_k: int) -> list[SearchHit]: ...
+    def query(self, collection: str, embedding: list[float], top_k: int) -> list[SearchHit]:
+        """Return the ``top_k`` nearest records in ``collection`` to ``embedding``."""
 
-    def count(self, collection: str | None = None) -> int: ...
+    def count(self, collection: str | None = None) -> int:
+        """Number of stored records, optionally scoped to one collection."""
 
 
 class InMemoryBackend:

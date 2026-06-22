@@ -78,7 +78,10 @@ def test_memory_scrubs_secrets_before_storage(tmp_path):
 
 
 def test_scrub_removes_common_token_shapes():
-    assert "[REDACTED]" in scrub("token=ghp_abcdefghijklmnopqrstuvwxyz0123456789")
+    # Build a fake GitHub-PAT-shaped token at runtime so no secret-shaped literal sits
+    # in source (keeps the secret scanner clean); the scrubber must still redact it.
+    fake_pat = "ghp_" + "x" * 36
+    assert "[REDACTED]" in scrub(f"token={fake_pat}")
 
 
 # --- Gate ordering / human-in-the-loop ----------------------------------------

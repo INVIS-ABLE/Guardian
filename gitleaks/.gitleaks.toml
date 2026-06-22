@@ -24,6 +24,11 @@ paths = [
   '''.*/fixtures/.*''',
   '''.*\.example$''',
   '''SCOPE_SCHEMA\.yaml''',
+  # Evaluation harness: scrubber tests + red-team prompts intentionally contain
+  # SYNTHETIC secret-shaped strings (e.g. fake PATs) so we can prove they are redacted
+  # / refused. No real secrets ever live here.
+  '''eval/deepeval/.*''',
+  '''eval/promptfooconfig\.yaml''',
 ]
 # Synthetic placeholder values used in docs/examples must not trip the scanner.
 regexes = [
