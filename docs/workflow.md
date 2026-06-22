@@ -29,6 +29,13 @@ loop (also in [SECURITY_POLICY.md](../SECURITY_POLICY.md)):
   pushes to protected branches).
 - Evidence: `core.evidence.write_report` → `reports/generated/` (Markdown + JSON, scrubbed).
 
+## Recommended stack per layer
+
+See [self_healing_stack.md](self_healing_stack.md) for the recommended tool/framework per
+layer (repair brain, workflow engine, code remediation, GitOps, progressive deploy,
+policy-as-code, supply-chain proof, test orchestration, runtime monitoring, safe rollback)
+and how each plugs into Guardian.
+
 ## Gate summary (must all hold before merge)
 
 | Gate | Enforced by |
