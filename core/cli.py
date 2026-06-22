@@ -288,5 +288,87 @@ def id_sod_cmd(spec_file: str, conflicts: tuple[str, ...]) -> None:
     raise SystemExit(1 if breaks else 0)
 
 
+@main.command("lineage-trace")
+@click.argument("spec_file", type=click.Path(exists=True))
+@click.argument("field_id")
+@click.option("--up", is_flag=True, help="Trace upstream (provenance) instead of downstream.")
+def lineage_trace_cmd(spec_file: str, field_id: str, up: bool) -> None:
+    """Data lineage: where FIELD_ID's data flows to (or, with --up, where it came from)."""
+    from .lineage import load_graph
+
+    graph = load_graph(spec_file)
+    f = graph.field(field_id)
+    nodes = graph.upstream(field_id) if up else graph.downstream(field_id)
+    direction = "Upstream of" if up else "Downstream of"
+    click.echo(f"{direction} {f.dataset}.{f.name} ({field_id}):")
+    if not nodes:
+        click.echo("  (no connected fields — isolated)")
+    for n in nodes:
+        trail = " → ".join(f"{s.via}:{s.field}" for s in n.path)
+        click.echo(f"  [{n.distance}] {n.field.classification.value:12s} {n.field.id}   ({trail})")
+    AuditLog().record("lineage-trace", actor="cli", scope=field_id, decision="allowed",
+                      detail={"direction": "up" if up else "down", "reached": len(nodes)})
+
+
+@main.command("lineage-class")
+@click.argument("spec_file", type=click.Path(exists=True))
+@click.argument("field_id")
+def lineage_class_cmd(spec_file: str, field_id: str) -> None:
+    """Data lineage: the propagated (effective) classification of FIELD_ID."""
+    from .lineage import load_graph
+
+    graph = load_graph(spec_file)
+    f = graph.field(field_id)
+    classes = graph.propagated_classifications(field_id)
+    pk = graph.peak_classification(field_id)
+    labels = ", ".join(sorted(c.value for c in classes))
+    click.echo(f"Propagated classification of {f.dataset}.{f.name} ({field_id}):")
+    click.echo(f"  declared: {f.classification.value}")
+    click.echo(f"  effective: {pk.value}  (from {{{labels}}})")
+    AuditLog().record("lineage-class", actor="cli", scope=field_id, decision="allowed",
+                      detail={"peak": pk.value})
+
+
+@main.command("lineage-boundary")
+@click.argument("spec_file", type=click.Path(exists=True))
+def lineage_boundary_cmd(spec_file: str) -> None:
+    """Data lineage: fields holding data their boundary is not approved for (gate)."""
+    from .lineage import load_graph
+
+    graph = load_graph(spec_file)
+    violations = graph.boundary_violations()
+    click.echo("Boundary violations (data outside its approved boundary):")
+    if not violations:
+        click.echo("  (none)")
+    for v in violations:
+        click.echo(f"  {v.field:26s} {v.offending.value:10s} not approved in {v.boundary} "
+                   f"(introduced by {v.introduced_by})")
+    AuditLog().record("lineage-boundary", actor="cli", scope=spec_file,
+                      decision="denied" if violations else "allowed",
+                      detail={"violations": len(violations)})
+    raise SystemExit(1 if violations else 0)
+
+
+@main.command("lineage-retention")
+@click.argument("spec_file", type=click.Path(exists=True))
+def lineage_retention_cmd(spec_file: str) -> None:
+    """Data lineage: fields that would outlive an upstream deletion obligation (gate)."""
+    from .lineage import load_graph
+
+    graph = load_graph(spec_file)
+    violations = graph.retention_violations()
+    click.echo("Retention violations (derived data outliving an upstream obligation):")
+    if not violations:
+        click.echo("  (none)")
+    for v in violations:
+        held = "none" if v.declared_days is None else f"{v.declared_days}d"
+        click.echo(f"  {v.field:26s} keeps {held:8s} > obligation {v.obligation_days}d "
+                   f"(from {v.source})")
+    AuditLog().record("lineage-retention", actor="cli", scope=spec_file,
+                      decision="denied" if violations else "allowed",
+                      detail={"violations": len(violations)})
+    raise SystemExit(1 if violations else 0)
+
+
 if __name__ == "__main__":  # pragma: no cover
     main()
