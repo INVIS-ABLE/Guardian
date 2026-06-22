@@ -42,6 +42,16 @@ test_privacy_train_on_user_content_denied if {
 	}
 }
 
+# AI-agent boundary: the model may not change policy — globally blocked.
+test_agent_change_policy_denied if {
+	not allow with input as {
+		"action": "change_policy", "mode": "code_review", "environment": "staging",
+		"ownership_verified": true, "allowed_modes": ["code_review"],
+		"blocked_actions": [], "approval_required": [], "allowed_test_accounts": [],
+		"approvals": [], "now": 1000,
+	}
+}
+
 # Production with a single approver is denied (two-person rule).
 test_production_single_approver_denied if {
 	not allow with input as {

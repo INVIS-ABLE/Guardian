@@ -17,6 +17,8 @@ without an automated check is a gap to close.
 | Only registered test accounts are ever used | policy gate | `test_non_test_account_*` |
 | Crypto: no plaintext passwords, keys not stored beside data, no tokens in localStorage | `security/crypto/*` + `cryptoPolicyChecker` | `security/crypto/__tests__/*` |
 | Privacy: Guardian never decrypts/reads private content, holds keys, or trains on user data | privacy invariants are globally blocked actions in `core/policy_gate.py` + `policies/opa/guardian.rego` | `tests/test_privacy_invariants.py` |
+| AI agent: the model cannot self-escalate (expand scope, change policy, disable logging, merge/resolve its own work, arbitrary commands) | agent-boundary blocked actions in `core/policy_gate.py` + `policies/opa/guardian.rego` | `tests/test_agent_boundary.py` |
+| Connectors carry no raw command strings; execution needs signed authorization | the connector contract | `tests/test_connector_contract.py` |
 
 ## The "bulletproof" acceptance tests (target state)
 
