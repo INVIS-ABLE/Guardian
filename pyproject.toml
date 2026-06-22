@@ -59,6 +59,7 @@ packages = [
     "core.evidence",
     "core.tools",
     "agents",
+    "agents.specialists",
     "connectors",
     "simulators",
     "shadow_guardian",
