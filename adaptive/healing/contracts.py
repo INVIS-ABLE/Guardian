@@ -48,7 +48,8 @@ class RepairAction(str, Enum):
     ROLLBACK_ARTIFACT = "rollback_artifact"  # layer 5
     ROLLBACK_CANARY = "rollback_canary"  # layer 5
     DISABLE_FEATURE = "disable_feature"  # layer 6
-    REVOKE_CREDENTIAL = "revoke_credential"  # layer 7
+    # layer 7 — credential isolation: revoke the exact affected short-lived credential.
+    REVOKE_SHORT_LIVED_GRANT = "revoke_short_lived_grant"
     QUARANTINE_ARTIFACT = "quarantine_artifact"  # layer 7
     NETWORK_ISOLATION = "network_isolation"  # layer 8
     ISOLATE_WORKLOAD = "isolate_workload"  # layer 8
@@ -71,7 +72,7 @@ REPAIR_LAYER: dict[RepairAction, int] = {
     RepairAction.ROLLBACK_ARTIFACT: 5,
     RepairAction.ROLLBACK_CANARY: 5,
     RepairAction.DISABLE_FEATURE: 6,
-    RepairAction.REVOKE_CREDENTIAL: 7,
+    RepairAction.REVOKE_SHORT_LIVED_GRANT: 7,
     RepairAction.QUARANTINE_ARTIFACT: 7,
     RepairAction.NETWORK_ISOLATION: 8,
     RepairAction.ISOLATE_WORKLOAD: 8,
