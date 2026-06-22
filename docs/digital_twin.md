@@ -49,6 +49,29 @@ them. An `encryption_key` asset is a key *identifier*; a `data_class` asset is a
 (e.g. "message ciphertext"), never records. This mirrors the Verifier's boundary and the Privacy
 Fabric: Guardian protects the cryptographic system while remaining structurally outside it.
 
+## PR-time blast-radius gate
+
+The twin becomes an **active guardrail**: given the assets a change touches, compute what a
+compromise of each would *reach*, flag sensitive sinks (regulated data, encryption keys, data
+stores), and **gate the change before it deploys** — instead of waiting for a scanner to find
+the exposure afterwards ([`core/twin/assessment.py`](../core/twin/assessment.py)).
+
+```bash
+guardian twin-assess twin/invisable-sample.yaml --changed id:ci-token --fail-on high
+# id:ci-token (identity): HIGH — 6 impacted, 2 sensitive
+#     [high    ] reaches confidential data class 'Message ciphertext'  (can_write:… → stores:data:ciphertext)
+#     [medium  ] reaches data store 'Encrypted mailbox store'          (can_write:… → reads:db:mailbox)
+# blast-radius gate: HIGH (fail-on=high) → FAIL      # exit 1, gating CI
+```
+
+Severity is driven by the most sensitive sink reached: regulated data classes (`health`/`pii`/
+`restricted`) are **critical**, `confidential` data and encryption keys are **high**, data
+stores/queues/certificates are **medium**. Every sensitive hit carries its explanatory path, so a
+reviewer sees *how* the change reaches the sink. The command **fails closed on a typo** — an
+unknown changed-asset id raises rather than reporting a clean bill of health. It is read-only: it
+proposes a verdict, it authorises nothing. A CI job maps a PR's changed files to twin asset ids
+and calls `twin-assess`; a `FAIL` blocks merge for review.
+
 ## The production path
 
 In production the twin is **continuously populated from Cartography / CloudQuery and persisted in
