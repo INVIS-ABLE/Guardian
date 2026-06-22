@@ -46,3 +46,25 @@ The roots sit alongside the existing authority components, each owning one conce
 
 A capability that satisfies policy but lacks a verified machine/workload/evidence anchor is
 refused before any token is minted.
+
+## Producing a TrustContext from real evidence
+
+The gate verifies a `TrustContext`; `core/trust_producers.py` *builds* one from the concrete
+evidence Guardian already has, so the roots are populated from facts — not hand-set booleans:
+
+| Root | Producer | Real source |
+| ---- | -------- | ----------- |
+| human | `human_trust_from(principal, approvals, …)` | `identity.oidc.Principal` + `core.guardrails.Approval` (validity + envelope binding) |
+| workload | `workload_trust_from(credential, …)` | `identity.credentials.Credential.valid()` |
+| evidence | `evidence_trust_from(receipt, …)` | a real `core.evidence.store.EvidenceReceipt` from an immutable append |
+| machine | `machine_trust_from(report)` | verified TPM/Keylime attestation result |
+| software | `software_trust_from(report)` | verified SBOM/provenance/signature result |
+| target | `target_trust_from(report)` | verified ownership/DNS result |
+
+Each producer is **fail closed**: a field is asserted only when its evidence supports it
+(`tests/test_trust_producers.py` — an expired credential fails the workload root, an unbound
+approval fails the human envelope-binding, a missing receipt fails the evidence root, etc.).
+The machine/software/target producers are the integration points for the attestation,
+provenance, and ownership systems; until those land, an incomplete report keeps the root
+negative rather than assuming trust.
+
