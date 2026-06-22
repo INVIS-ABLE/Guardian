@@ -1,0 +1,48 @@
+name: OPA policy
+
+# Validates the external authorization authority: the Rego policy compiles, its tests
+# pass, and — crucially — the OPA decision agrees with the embedded mirror in
+# core/policy_gate.py. The two must never disagree (the embedded evaluator is a testing
+# oracle; OPA is the production authority when GUARDIAN_USE_OPA=1).
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  opa:
+    name: Rego tests + OPA/embedded parity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install OPA
+        run: |
+          curl -fsSL -o /usr/local/bin/opa \
+            https://openpolicyagent.org/downloads/v0.70.0/opa_linux_amd64_static
+          chmod +x /usr/local/bin/opa
+          opa version
+
+      - name: opa fmt check
+        run: opa fmt --list --fail policies/opa
+
+      - name: opa test (Rego unit tests)
+        run: opa test policies/opa -v
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Guardian
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: OPA / embedded parity
+        env:
+          GUARDIAN_USE_OPA: "1"
+          GUARDIAN_ENV: ci
+        run: pytest -q tests/test_opa_parity.py

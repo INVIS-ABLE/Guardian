@@ -21,6 +21,8 @@ without an automated check is a gap to close.
 | Connectors carry no raw command strings; execution needs signed authorization | the connector contract (`connectors/contract.py`); scanners migrated onto it | `tests/test_connector_contract.py`, `tests/test_connector_contract_migration.py` |
 | Evidence is append-only, redacted, and verifiable (immudb system of record; hash-chain fallback) | `core/evidence/store.py` | `tests/test_evidence_store.py` |
 | Key transparency: silent identity-key replacement is detectable; Verifier reads public data only | `core/verifier.py` (Guardian Verifier) | `tests/test_verifier.py` |
+| Connector execution requires a signed, unexpired, request-bound authorization (no replay/forgery) | `core/router.py::execute_capability` + `connectors/contract.py` + `core/signing.py` (Ed25519/HMAC) | `tests/test_router_contract_execution.py`, `tests/test_signing.py` |
+| OPA authority and the embedded mirror agree on every decision | `policies/opa/guardian.rego` vs `core/policy_gate.decide` | `tests/test_opa_parity.py` (OPA-policy CI job) |
 
 ## The "bulletproof" acceptance tests (target state)
 

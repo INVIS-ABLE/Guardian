@@ -21,11 +21,12 @@ from typing import Any
 
 from connectors import REGISTRY as CONNECTOR_REGISTRY
 from connectors.base import BaseConnector, ConnectorResult
+from connectors.contract import ActionRequest, SignedAuthorization, sign_authorization
 from simulators import REGISTRY as SIMULATOR_REGISTRY
 from simulators.base import BaseSimulator
 
 from .audit import AuditLog
-from .evidence import SimulatorResult
+from .evidence import EvidenceEvent, EvidenceStore, SimulatorResult
 from .guardrails import GuardrailViolation, Guardrails
 from .scope import Scope
 
@@ -89,11 +90,13 @@ class ToolRouter:
         *,
         guardrails: Guardrails | None = None,
         dry_run: bool = True,
+        evidence_store: EvidenceStore | None = None,
     ) -> None:
         self.scope = scope
         self.guardrails = guardrails or Guardrails(scope=scope)
         self.dry_run = dry_run
         self.audit = AuditLog()
+        self._evidence_store = evidence_store
 
     # --- discovery -------------------------------------------------------------
     @staticmethod
@@ -137,6 +140,81 @@ class ToolRouter:
                 detail={"tool": tool, "reason": str(exc)},
             )
         return result
+
+    # --- contract execution (end-to-end signed path) ---------------------------
+    def authorize_capability(
+        self,
+        capability: str,
+        *,
+        target: str,
+        signer_private_key: str,
+        approver: str,
+        repo: str | None = None,
+        args: dict[str, Any] | None = None,
+        ttl_s: int = 600,
+    ) -> SignedAuthorization:
+        """Mint a signed authorization for a connector capability's first enumerated action.
+
+        In production the signer is the human-approval gate; this binds the capability to a
+        specific action+target so the authorization cannot be replayed elsewhere.
+        """
+        kind, tool = self.resolve(capability)
+        if kind != "connector":
+            raise UnknownCapability(f"contract execution is connector-only (got {kind} for {capability}).")
+        cls = CONNECTOR_REGISTRY[tool]
+        action = (cls.ACTIONS or (cls.action,))[0]
+        request = ActionRequest(action=action, target=target, repo=repo, args=args or {})
+        return sign_authorization(
+            request, signer_private_key=signer_private_key, approver=approver, ttl_s=ttl_s
+        )
+
+    def execute_capability(
+        self, capability: str, authorization: SignedAuthorization, *, verify_key: str | None = None
+    ) -> RouteResult:
+        """Run a connector through the full GuardianConnector contract under a signed
+        authorization, then record the result to the evidence ledger. Refusals are returned."""
+        kind, tool = self.resolve(capability)
+        result = RouteResult(
+            capability=capability, kind=kind, tool=tool, allowed=False, dry_run=self.dry_run
+        )
+        try:
+            if kind != "connector":
+                raise UnknownCapability(f"contract execution is connector-only (got {kind}).")
+            self._preauthorize(kind, tool)
+            cls = CONNECTOR_REGISTRY[tool]
+            connector = cls(self.scope, dry_run=self.dry_run, guardrails=self.guardrails)
+            # calculate_plan validates the request (enumerated action, allowlisted target,
+            # no raw command); execute requires the present, unexpired, signed authorization.
+            plan = connector.calculate_plan(authorization.request)
+            exec_result = connector.execute(authorization, verify_key=verify_key)
+            result.output = {
+                "argv": list(plan.argv), "returncode": exec_result.returncode,
+                "output_hash": exec_result.output_hash, "approver": authorization.approver,
+            }
+            result.allowed = True
+            self._record_evidence(tool, authorization, plan.argv, exec_result, "completed")
+        except (GuardrailViolation, PermissionError, UnknownCapability) as exc:
+            result.refusal_reason = str(exc)
+            self.audit.record(
+                f"router:{capability}:execute_refused", actor="tool_router",
+                scope=self.scope.asset, decision="refused", detail={"tool": tool, "reason": str(exc)},
+            )
+        return result
+
+    def _record_evidence(self, tool, authorization, argv, exec_result, result_status) -> None:
+        store = self._evidence_store or EvidenceStore()
+        store.record(EvidenceEvent(
+            actor="tool_router",
+            command_id=f"{tool}:{authorization.request.action}",
+            result=result_status,
+            target=authorization.request.target,
+            repository=authorization.request.repo,
+            argv=list(argv),
+            returncode=exec_result.returncode,
+            output_hash=exec_result.output_hash,
+            approval_signatures=[authorization.signature],
+            policy_decision="allow",
+        ))
 
     # --- internals -------------------------------------------------------------
     def _preauthorize(self, kind: str, tool: str) -> None:

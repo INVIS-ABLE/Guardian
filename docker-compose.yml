@@ -68,6 +68,28 @@ services:
     expose: ["3100"]
     restart: unless-stopped
 
+  # The external authorization authority. With GUARDIAN_USE_OPA=1, core/policy_gate.py
+  # delegates decisions to OPA loaded with the same policies/opa/ bundle the embedded
+  # evaluator mirrors (parity enforced by tests/test_opa_parity.py + the OPA-policy CI job).
+  opa:
+    image: openpolicyagent/opa:0.70.0-static
+    command: ["run", "--server", "--addr=0.0.0.0:8181", "/policies"]
+    volumes:
+      - ./policies/opa:/policies:ro
+    networks: [guardian]
+    expose: ["8181"]
+    restart: unless-stopped
+
+  # The evidence system of record. With GUARDIAN_USE_IMMUDB=1, core/evidence/store.py
+  # writes verifiable evidence here; the hash-chained JSONL log is the fallback/cache.
+  immudb:
+    image: codenotary/immudb:1.9.5
+    networks: [guardian]
+    expose: ["3322", "9497"]
+    volumes:
+      - immudb_data:/var/lib/immudb
+    restart: unless-stopped
+
 networks:
   guardian:
     driver: bridge
@@ -75,3 +97,4 @@ networks:
 volumes:
   qdrant_data:
   grafana_data:
+  immudb_data:
