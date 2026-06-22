@@ -57,6 +57,7 @@ packages = [
     "core.ai",
     "core.brain",
     "core.evidence",
+    "core.tools",
     "agents",
     "connectors",
     "simulators",
