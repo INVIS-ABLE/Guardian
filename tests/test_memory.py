@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from core.memory import GuardianMemory, InMemoryBackend, cosine, hash_embed
+from core.memory import GuardianMemory, InMemoryBackend, cosine, get_backend, hash_embed
 
 
 @pytest.fixture()
@@ -55,3 +55,25 @@ def test_remember_finding_summarises(memory):
 def test_hash_embed_is_unit_normalised():
     v = hash_embed("guardian defensive security")
     assert abs(cosine(v, v) - 1.0) < 1e-6
+
+
+# --- backend fail-closed by deployment posture (mirrors the policy gate) -------
+def test_get_backend_falls_back_in_development(monkeypatch):
+    monkeypatch.delenv("GUARDIAN_REQUIRE_VECTOR_BACKEND", raising=False)
+    monkeypatch.setenv("GUARDIAN_ENV", "development")
+    assert isinstance(get_backend(), InMemoryBackend)
+
+
+def test_get_backend_fails_closed_in_production(monkeypatch):
+    # In a production posture an unavailable approved backend must NOT silently fall back.
+    monkeypatch.delenv("GUARDIAN_REQUIRE_VECTOR_BACKEND", raising=False)
+    monkeypatch.setenv("GUARDIAN_ENV", "production")
+    with pytest.raises(RuntimeError, match="fail closed"):
+        get_backend()
+
+
+def test_get_backend_explicit_require_overrides_posture(monkeypatch):
+    monkeypatch.delenv("GUARDIAN_ENV", raising=False)
+    monkeypatch.setenv("GUARDIAN_REQUIRE_VECTOR_BACKEND", "1")
+    with pytest.raises(RuntimeError, match="fail closed"):
+        get_backend()
