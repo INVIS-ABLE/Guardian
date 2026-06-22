@@ -28,7 +28,10 @@ which provides the audit hook and the guardrails handle. See `agents/__init__.py
 
 ## Invariants
 
-- No agent can grant its own approval; only the **Human Approval** agent routes to a
-  human, and it returns `auto_approve: False`.
+- No agent can grant its own approval. The **Human Approval** agent routes to a human
+  and only *reports* the recorded decision: it returns `approved` (with
+  `self_granted: False`), derived from a human-recorded `Approval` for
+  `guardian_proceed` — never self-granted. The Brain reads this same `approved` field,
+  and the post-approval `learn`/`deploy` stages stay skipped until it is `True`.
 - **Patch Proposal** never edits production — it opens draft pull requests only.
 - Every agent run is bracketed by `agent:<name>:start` / `:complete` audit entries.

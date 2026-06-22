@@ -26,6 +26,11 @@ Connectors/agents/simulators **never** decide authorization themselves — they 
 `authorize()`. The embedded evaluator and the Rego are kept identical so enforcement holds
 before OPA is deployed and CI/`conftest` can test the same policy.
 
+The embedded mirror is a **testing oracle, not a production authority**. `evaluate()`
+keys off Guardian's deployment posture (`GUARDIAN_ENV`): in `development`/`ci` the mirror
+may decide (and in `ci`, when OPA is present, the two must agree); in `staging`/`production`
+OPA is **mandatory** and its absence means **deny** — there is no silent fallback.
+
 ## The rules (default deny)
 
 1. Globally/scope **blocked actions** are never permitted (8 blocked actions; a scope

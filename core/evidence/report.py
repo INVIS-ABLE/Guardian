@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from .config import REPO_ROOT
+from ..config import REPO_ROOT
 
 SEVERITIES = ("info", "low", "medium", "high", "critical")
 TEMPLATE_PATH = REPO_ROOT / "reports" / "templates" / "report_template.md"
