@@ -64,6 +64,7 @@ packages = [
     "connectors",
     "simulators",
     "shadow_guardian",
+    "forensics",
     "adaptive",
     "adaptive.autonomy",
     "adaptive.healing",
