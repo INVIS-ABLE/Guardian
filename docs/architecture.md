@@ -54,12 +54,43 @@ agent/connector/simulator ─▶ core.guardrails.authorize() ─▶ allow | REFU
                           core.evidence.write_report  +  core.audit.record
 ```
 
+## The Guardian Brain (orchestration layer)
+
+The **Brain** (`core/brain.py`) is the controlled orchestrator that stitches the pieces
+above into the one workflow from the README (Detect → … → Human approval → Learn). It is
+"a brain, not a supermodel": it coordinates proven components rather than training a model.
+See [brain.md](brain.md). New `core` modules:
+
+- `brain.py` — the gated state machine over the 17 agents, with a hard human-approval stop.
+- `router.py` — the **tool router**: one guarded chokepoint mapping capabilities → tools.
+- `memory.py` — the **memory/RAG** layer (pluggable vector backends + offline fallback).
+
+The Brain's policy pre-flight uses the existing central authority `core/policy_gate.py`
+(which mirrors `policies/opa/guardian.rego`); it does not add a second policy engine.
+
+Defence in depth on "defensive-only" = `core/policy_gate.py` + `core/guardrails.py`
+(runtime authority) **+** `policies/opa/guardian.rego` (the OPA twin) **+**
+`policies/guardrails/nemo/` (NeMo rails on the reasoning model). Behaviour is checked by
+the `eval/` harness (DeepEval / Promptfoo / Ragas).
+
+## The Privacy Fabric boundary
+
+The INVISABLE Privacy Fabric ([docs/privacy_fabric/](privacy_fabric/)) places the
+cryptographic boundary **above** the infrastructure Guardian defends. Guardian protects
+infrastructure, code, identities, and availability — and is structurally forbidden from
+reading inside the crypto system. The "Guardian must never" list
+([policies/privacy_invariants.yaml](../policies/privacy_invariants.yaml)) — decrypt private
+content, copy it to memory, hold keys, train on it, create a master key, etc. — is enforced
+as globally **blocked actions** in `core/policy_gate.py` and the Rego twin, and proven by
+`tests/test_privacy_invariants.py`.
+
 ## RAG memory & models
 
 Configured in `guardian.config.yaml`: a reasoning model (Claude/GPT-compatible), an
 optional local model for private/offline analysis, and a vector DB (Qdrant by default)
 holding repos, policies, threat models, app docs, support flows, and safeguarding rules.
-The Learning Memory agent writes outcomes back so Guardian improves over time.
+The Learning Memory agent (via `core/memory.py`) writes outcomes back so Guardian
+improves over time.
 
 ## The defensive simulator library
 

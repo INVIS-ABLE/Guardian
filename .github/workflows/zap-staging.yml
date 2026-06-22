@@ -23,6 +23,8 @@ jobs:
     if: github.event_name != 'workflow_dispatch' || github.event.inputs.confirm == 'staging'
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Guardrail — confirm target is in scope
         run: |

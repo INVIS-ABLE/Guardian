@@ -6,9 +6,16 @@ rules:
     languages: [python, javascript, typescript]
     severity: ERROR
     message: >
-      Possible hardcoded secret. Move to a secrets manager / environment variable.
-    pattern-either:
-      - pattern: $X = "..."
+      Possible hardcoded secret assigned to a secret-named variable. Move it to a secrets
+      manager / environment variable.
+    # Only flag string literals assigned to variables whose NAME implies a secret, so we
+    # don't trip on every string assignment (e.g. constant names, error messages). Deep
+    # secret scanning is handled by Gitleaks/TruffleHog; this is a focused guard.
+    patterns:
+      - pattern: $NAME = "..."
+      - metavariable-regex:
+          metavariable: $NAME
+          regex: (?i).*(secret|passw|pwd|api[_-]?key|access[_-]?key|private[_-]?key|token|credential).*
     metadata:
       category: security
       cwe: "CWE-798: Use of Hard-coded Credentials"
@@ -18,6 +25,11 @@ rules:
         - "**/*.py"
         - "**/*.js"
         - "**/*.ts"
+      exclude:
+        - "**/__tests__/**"
+        - "**/*.test.ts"
+        - "**/*.spec.ts"
+        - "tests/**"
 
   - id: pii-field-logged
     languages: [python, javascript, typescript]

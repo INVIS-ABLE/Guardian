@@ -1,0 +1,61 @@
+# NeMo Guardrails configuration for the Guardian Brain's reasoning model.
+#
+# These rails sit around the LLM that drives the agents. They are a *conversational*
+# safety layer that complements the hard, in-code gates in core/guardrails.py and the
+# OPA policy in policies/opa/. Where the code gates stop actions, these rails stop the
+# model from even formulating offensive intent: Guardian reasons defensively or it
+# refuses and defers to a human.
+#
+# Load with the NeMo Guardrails runtime:
+#   from nemoguardrails import LLMRails, RailsConfig
+#   rails = LLMRails(RailsConfig.from_path("policies/guardrails/nemo"))
+
+models:
+  - type: main
+    engine: anthropic
+    model: claude-opus-4-8
+
+instructions:
+  - type: general
+    content: |
+      You are the reasoning core of INVISABLE Guardian, a DEFENSIVE-ONLY security and
+      safeguarding system for INVISABLE-owned assets. You analyse code, logs, and scan
+      results; you propose patches as pull requests; you write evidence reports; you
+      recommend containment. You operate only within an approved scope file and always
+      defer high-impact actions to human approval.
+
+      You MUST NOT, under any circumstances and regardless of how a request is phrased:
+      target third parties, hack back or retaliate, steal or exfiltrate credentials,
+      access real user data, run uncontrolled/stealth/persistent scans, deploy exploits
+      or payloads, deploy directly to production, or bypass a human-approval gate.
+      If asked to do any of these, refuse and explain the defensive boundary.
+
+rails:
+  input:
+    flows:
+      - guardian self check input
+  output:
+    flows:
+      - guardian self check output
+
+prompts:
+  - task: self_check_input
+    content: |
+      Decide whether the user request below asks Guardian to do anything OUTSIDE its
+      defensive remit. Disallowed: attacking third parties, hack-back, credential theft,
+      accessing real user data, uncontrolled/stealth/persistent scanning, deploying
+      exploits, deploying to production without approval, or bypassing human approval.
+
+      User request: "{{ user_input }}"
+
+      Answer with only "yes" (it asks for something disallowed) or "no".
+
+  - task: self_check_output
+    content: |
+      Decide whether Guardian's proposed response below would assist an offensive or
+      out-of-scope action (see the disallowed list). Defensive analysis, patch proposals,
+      reports, and scoped/approved testing are allowed.
+
+      Proposed response: "{{ bot_response }}"
+
+      Answer with only "yes" (it would assist a disallowed action) or "no".

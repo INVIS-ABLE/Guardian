@@ -30,6 +30,21 @@ The following are **always blocked**, in every mode, in every scope:
 - `hack_back`
 - `destructive_testing`
 
+### Privacy Fabric invariants — Guardian protects the crypto system, never reads inside it
+
+Also always blocked (see [docs/privacy_fabric/](docs/privacy_fabric/) and
+[policies/privacy_invariants.yaml](policies/privacy_invariants.yaml)):
+
+- `decrypt_private_content`
+- `access_message_plaintext`
+- `copy_private_content_to_memory`
+- `send_private_content_to_model`
+- `store_decryption_keys`
+- `silent_moderation_participant`
+- `create_master_access_key`
+- `plaintext_in_observability`
+- `train_on_user_content`
+
 ## 3. Approval gates (human-in-the-loop)
 
 These actions are refused unless an explicit, recorded **human approval** exists for the
@@ -64,15 +79,22 @@ load scope ──▶ verify ownership ──▶ check mode is allowed ──▶ 
                                 yes ──▶ require recorded approval ──▶ else REFUSE
 ```
 
-Pseudocode (see `core/guardrails.py` for the implementation):
+**One central path.** Connectors, agents, and simulators never decide authorization
+themselves — they call a single `authorize()`, which asks the central policy
+(`core/policy_gate.py`, mirrored by `policies/opa/guardian.rego`) for one decision.
+There is **no `allow_production` escape parameter**: production requires two distinct,
+unexpired `production_scan` approvers. Denied actions are audited too. See
+[docs/authorization.md](docs/authorization.md).
 
 ```python
-gate = Guardrails(scope)
-gate.assert_owned(target)          # DNS / repo ownership
-gate.assert_mode_allowed(mode)     # mode in scope.allowed_modes
-gate.assert_not_blocked(action)    # action not in BLOCKED_ACTIONS ∪ scope.blocked_actions
-gate.assert_approved(action)       # if action in scope.approval_required
-gate.assert_test_account(account)  # account in test-account registry
+gate = Guardrails(scope, approvals=[...])
+gate.authorize(                      # the ONLY authorization call sites use
+    mode=mode,                       # mode in scope.allowed_modes
+    action=action,                   # not blocked; valid approval if gated
+    domain=target_domain,            # ownership verified (expires)
+    repo=target_repo,
+    test_account=account,            # registered test account only
+)  # → allow, or audit("denied") + raise GuardrailViolation
 ```
 
 ---

@@ -37,11 +37,16 @@ Every action is scoped, logged, and gated. The full control matrix is in
 
 ```
 /                       root config, policies, CI workflows
-├── core/               config loader, scope engine, guardrails, evidence, audit log
-├── agents/             the 17 Guardian ECC agents (orchestration layer)
+├── core/               config, scope, guardrails, evidence, audit + the Brain
+│   ├── brain.py        controlled orchestrator (Detect→…→Approval→Learn)
+│   ├── router.py       tool router (capability → guarded tool execution)
+│   ├── memory.py       memory/RAG layer (vector backends + offline fallback)
+│   └── policy_gate.py  central authorization authority (mirrors policies/opa/*.rego)
+├── agents/             the 17 Guardian ECC agents (decide; delegate to the router)
 ├── connectors/         thin, dry-run-aware wrappers around security tools
 ├── simulators/         defensive abuse/attack simulators (owned staging only)
-├── policies/           security-standard mappings + malware defence library
+├── policies/           security standards + OPA (rego) + NeMo Guardrails configs
+├── eval/               evaluation harness (DeepEval · Promptfoo · Ragas)
 ├── scope/              asset registry, scope files, test-account registry
 ├── reports/            generated evidence reports + templates
 ├── tests/              unit tests for guardrails, scope, simulators
@@ -67,8 +72,11 @@ pip install -e ".[dev]"
 # 2. Validate scope + guardrails against a scope file (dry run, no scanning)
 python -m core.guardrails check scope/invisable-staging.yaml
 
-# 3. List available simulators
-python -m simulators list
+# 3. Run the Guardian Brain over a scope (dry-run; halts at human approval)
+guardian brain scope/invisable-staging.yaml
+
+# 3b. Evaluate the policy gate for an action (OPA twin / in-Python fallback)
+guardian policy scope/invisable-staging.yaml --action production_scan --mode code_review
 
 # 4. Run a simulator against owned staging (dry run by default)
 python -m simulators run privacy_leak --scope scope/invisable-staging.yaml --dry-run
@@ -91,6 +99,11 @@ The first build target ships:
 
 | Capability                | Where                                              |
 | ------------------------- | -------------------------------------------------- |
+| Guardian Brain orchestrator | `core/brain.py`, [docs/brain.md](docs/brain.md)  |
+| Tool router               | `core/router.py`                                   |
+| Memory / RAG layer        | `core/memory.py`                                   |
+| Policy gates (OPA + NeMo) | `core/policy_gate.py`, `policies/opa/`, `policies/guardrails/nemo/` |
+| Evaluation harness        | `eval/` (DeepEval · Promptfoo · Ragas)             |
 | Asset registry            | `scope/assets.yaml`                                |
 | Scope file + schema       | `scope/invisable-staging.yaml`, `SCOPE_SCHEMA.yaml`|
 | Test account registry     | `scope/test_accounts.yaml`                         |
@@ -120,12 +133,25 @@ OWASP **WSTG**, **ASVS 5.0**, **SAMM**, **MASVS/MASTG**; **NIST SSDF**; **SLSA**
 - [SECURITY_POLICY.md](SECURITY_POLICY.md) — disclosure, self-healing workflow, approval
 - [GUARDRAILS.md](GUARDRAILS.md) — the mandatory control gates
 - [docs/architecture.md](docs/architecture.md) — system architecture
+- [docs/brain.md](docs/brain.md) — the Guardian Brain (orchestrator, router, memory, policy gates, eval)
 - [docs/agents.md](docs/agents.md) — the 17 Guardian agents
 - [docs/workflow.md](docs/workflow.md) — self-healing workflow detail
 - [docs/self_healing_stack.md](docs/self_healing_stack.md) — recommended tools/frameworks per self-healing layer
 - [docs/credential_audit_tools.md](docs/credential_audit_tools.md) — hashcat/John/Hydra, authorised defensive use only
 - [docs/tooling_catalogue.md](docs/tooling_catalogue.md) — every tool Guardian orchestrates, with upstream sources
+- [docs/authorization.md](docs/authorization.md) — central OPA-backed authorization (no `allow_production`)
+- [docs/hardening_roadmap.md](docs/hardening_roadmap.md) — 12-area hardening blueprint → 10/10 acceptance gate
+- [docs/architecture/target_stack.md](docs/architecture/target_stack.md) — target production stack ([components.yaml](docs/architecture/components.yaml))
+- [docs/governance/](docs/governance/) — threat model, invariants, exception process, IR/DR plans
+- [docs/privacy_fabric/](docs/privacy_fabric/) — INVISABLE Privacy Fabric: five-ring firewall, messaging crypto (Signal/MLS), key transparency, sealed sender, retention/DPIA, epics
+- [policies/privacy_invariants.yaml](policies/privacy_invariants.yaml) — Guardian's enforced privacy boundary (protector, never reader)
+- [docs/tool_independence.md](docs/tool_independence.md) — defensive vendor/pin + detection-learning plan
 - [policies/mobile_guardian_modules.yaml](policies/mobile_guardian_modules.yaml) — mobile/PWA defence modules (MASVS/MASTG)
+- **Encryption & hashing layer** — [security/README.md](security/README.md),
+  [docs/crypto_architecture.md](docs/crypto_architecture.md),
+  [docs/crypto_security_policy.md](docs/crypto_security_policy.md),
+  [docs/crypto_threat_model.md](docs/crypto_threat_model.md),
+  [docs/crypto_test_plan.md](docs/crypto_test_plan.md)
 
 ---
 

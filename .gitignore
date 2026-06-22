@@ -21,6 +21,8 @@ reports/generated/
 reports/audit/*.log
 reports/audit/*.jsonl
 !reports/audit/.gitkeep
+# Brain memory store (runtime RAG state; never committed)
+reports/memory/
 *.sarif
 *.tmp
 
