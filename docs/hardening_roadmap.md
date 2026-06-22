@@ -40,7 +40,7 @@ plugs into that single decision point.
 | 19 | Detection-as-code | SigmaHQ/sigma | 🟡 | ATT&CK-mapped rules + engine shipped (`detection/`): per-rule positive/negative tests, recommends reversible containment (still gated); Sigma export to Wazuh/Loki pending |
 | 23 | Chaos & fail-closed | LitmusChaos | 🟡 | control-plane health + fail-closed gate shipped (`resilience/`): OPA/OpenBao/immudb/Temporal down ⇒ sensitive actions refused + audited; chaos-cluster injection pending |
 | 26 | Backup & recovery | restic, Velero | 🟡 | WORM backups + restore drill shipped (`recovery/`): integrity-verified, tamper-refusing restore, audit-chain re-verification with measured RPO/RTO; restic/Velero wiring pending |
-| 12 | Observability & alerting | OTel (py + collector), Tempo, Alertmanager | ⬜ | trace IDs across policy decisions/workflows; routed alerts |
+| 12 | Observability & alerting | OTel (py + collector), Tempo, Alertmanager | 🟡 | correlation/trace IDs + nested spans (`observability/trace.py`, contextvar-propagated) and severity-routed, deduplicated alerting carrying the correlation id (`observability/alerts.py`, allowlist routing, injected sinks — no network by default); OTel exporter + Tempo/Alertmanager wiring pending |
 
 ## 10/10 acceptance gate
 
@@ -56,7 +56,7 @@ plugs into that single decision point.
 | Isolation — sandboxed, rootless, read-only input, egress allowlist | ⬜ | gVisor/Falco pending |
 | Identity — OIDC, role checks, TLS, secure sessions | 🟡 | crypto layer (cookies/tokens) done; oauth2-proxy pending |
 | Testing — property tests prove no bypass | ✅ | `tests/test_authorization_properties.py` |
-| Monitoring — trace IDs; routed alerts | ⬜ | OTel/Alertmanager pending |
+| Monitoring — trace IDs; routed alerts | 🟡 | correlation/trace IDs + spans and severity-routed dedup alerts shipped (`observability/`, `tests/test_observability.py`); OTel exporter + Tempo/Alertmanager wiring pending |
 | Recovery — backups, restore, key rotation, audit verification exercised | 🟡 | WORM backup/restore drill re-verifies the audit hash chain (`recovery/`, `tests/test_recovery.py`); fail-closed on control-plane outage (`resilience/`); key rotation + restic/Velero wiring pending |
 | Validation — independent review + authorised pentest | ⬜ | pre-production |
 
