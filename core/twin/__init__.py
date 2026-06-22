@@ -10,6 +10,13 @@ Metadata-only by construction: the twin is structurally outside private content.
 from __future__ import annotations
 
 from .graph import DigitalTwin, TwinError
+from .assessment import (
+    AssetAssessment,
+    BlastAssessment,
+    SensitiveHit,
+    Severity,
+    assess_change,
+)
 from .ingest import build_from_spec, from_cartography, load_twin, production_source_required
 from .models import (
     AssetKind,
@@ -35,4 +42,9 @@ __all__ = [
     "load_twin",
     "from_cartography",
     "production_source_required",
+    "Severity",
+    "SensitiveHit",
+    "AssetAssessment",
+    "BlastAssessment",
+    "assess_change",
 ]
