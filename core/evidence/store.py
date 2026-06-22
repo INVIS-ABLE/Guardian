@@ -81,12 +81,15 @@ class EvidenceReceipt:
 
 
 class EvidenceBackend(Protocol):
-    def append(self, event: dict[str, Any]) -> EvidenceReceipt: ...
+    def append(self, event: dict[str, Any]) -> EvidenceReceipt:
+        """Append one redacted evidence event; return a verifiable receipt."""
 
-    def verify(self) -> bool: ...
+    def verify(self) -> bool:
+        """Confirm the stored record has not been tampered with."""
 
     @property
-    def name(self) -> str: ...
+    def name(self) -> str:
+        """Backend identifier (e.g. ``immudb`` / ``hash_chain``)."""
 
 
 class ImmudbUnavailable(RuntimeError):

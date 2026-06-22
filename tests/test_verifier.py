@@ -36,7 +36,7 @@ def test_clean_log_passes_with_valid_checkpoint():
 def test_forged_checkpoint_is_rejected():
     log = _log(KeyLeaf("alice", "phone", "pkA1", epoch=1))
     v = GuardianVerifier(SIGNER)
-    forged = GuardianVerifier  # noqa: F841 (clarity)
+    # A checkpoint signed with the wrong key must not verify against our trusted signer.
     bad_cp = _log(KeyLeaf("alice", "phone", "pkA1", epoch=1)).checkpoint(b"attacker-key", epoch=1)
     assert not v.verify_checkpoint(log, bad_cp)
     assert "checkpoint_invalid" in v.monitor(log, current_checkpoint=bad_cp).alerts
