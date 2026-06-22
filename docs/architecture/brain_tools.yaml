@@ -1,0 +1,225 @@
+# Guardian Brain — cognitive tool catalogue (single source of truth for the "Brain V2" stack).
+#
+# This catalogue is DELIBERATELY separate from docs/architecture/components.yaml. That file
+# tracks deployable *infrastructure* by trust zone (images pinned by digest, egress posture).
+# This file tracks the 20 *cognitive* tools the Brain reasons WITH — orchestration graphs,
+# typed contracts, the model gateway, knowledge/graph reasoning, code intelligence, and the
+# adversarial-assurance harness. Several are libraries, not platforms, so they do not belong
+# in the trust-zone infrastructure manifest.
+#
+# Design line (held throughout docs/brain_v2.md):
+#   Guardian may become highly autonomous in INVESTIGATION, correlation, testing, patch
+#   preparation and recovery PLANNING. Production execution, key access, identity changes and
+#   irreversible containment stay behind deterministic policy (OPA) + bound human approval.
+#
+#   => Cognition proposes. Authority disposes. No cognitive tool can grant authority.
+#
+# Invariants enforced by tests/test_brain_tools_manifest.py:
+#   * exactly 20 tools, one authoritative owner per function (no duplicate component)
+#   * grants_authority is false for EVERY tool (a model/graph/solver never self-authorises)
+#   * Temporal here references the same upstream as components.yaml::durable_orchestration
+#
+# category:  reasoning | tooluse | memory | code | assurance
+# wave:      1..4  (the priority implementation waves in docs/brain_v2.md)
+# autonomy:  the highest action class this tool is allowed to *serve*:
+#              investigate  — fully autonomous within verified owned scope (read/reason/test/plan)
+#              conditional  — may drive a pre-authorised, reversible, expiring, audited action
+#              none         — never participates in an action decision (analysis/assurance only)
+# status:    present | planned
+version: 0.1.0
+principle: cognition_proposes_authority_disposes
+defaults:
+  pin: upstream_release        # pinned by release tag + verified before adoption
+  network: deny_by_default
+  grants_authority: false      # the cardinal invariant — overridable per tool only to keep false
+
+tools:
+  # --- Executive reasoning & orchestration (the nervous system) ------------------------- #
+  - id: reasoning_graph
+    tool: LangGraph
+    component: langchain-ai/langgraph
+    function: bounded inner reasoning graph — branches, parallel specialists, interrupts, checkpoints, replay
+    category: reasoning
+    wave: 1
+    autonomy: investigate
+    grants_authority: false
+    status: planned   # optional 'brain' extra in pyproject; not yet wired into core/brain.py
+  - id: durable_workflow
+    tool: Temporal
+    component: temporalio/temporal
+    function: durable outer case/approval workflow — survives restarts, safe pending approvals, replayable history
+    category: reasoning
+    wave: 1
+    autonomy: conditional
+    grants_authority: false
+    status: planned   # cross-referenced to components.yaml::durable_orchestration
+  - id: typed_contracts
+    tool: PydanticAI
+    component: pydantic/pydantic-ai
+    function: typed agent inputs/outputs/dependencies — every node returns a validated object, not prose
+    category: reasoning
+    wave: 1
+    autonomy: investigate
+    grants_authority: false
+    status: planned
+  - id: model_gateway
+    tool: LiteLLM
+    component: BerriAI/litellm
+    function: one controlled model gateway (routing, budgets, provenance) — agents never call providers directly
+    category: reasoning
+    wave: 1
+    autonomy: investigate
+    grants_authority: false
+    status: planned
+
+  # --- Tool use, structured generation & self-improvement ------------------------------ #
+  - id: capability_protocol
+    tool: MCP Python SDK
+    component: modelcontextprotocol/python-sdk
+    function: standard tool/resource protocol behind a Guardian capability proxy — no arbitrary command access
+    category: tooluse
+    wave: 1
+    autonomy: investigate
+    grants_authority: false
+    status: planned
+  - id: constrained_generation
+    tool: Outlines
+    component: dottxt-ai/outlines
+    function: schema-constrained generation so model output is structurally valid (still requires evidence verification)
+    category: tooluse
+    wave: 1
+    autonomy: investigate
+    grants_authority: false
+    status: planned
+  - id: prompt_optimisation
+    tool: DSPy
+    component: stanfordnlp/dspy
+    function: OFFLINE optimisation of prompts/programs against eval datasets — promoted only via signed manifest
+    category: tooluse
+    wave: 3
+    autonomy: none
+    grants_authority: false
+    status: planned
+  - id: reasoning_observability
+    tool: Langfuse
+    component: langfuse/langfuse
+    function: self-hosted tracing, prompt/version management, evals, latency + token-cost visibility
+    category: tooluse
+    wave: 2
+    autonomy: none
+    grants_authority: false
+    status: planned
+
+  # --- Temporal memory & security knowledge -------------------------------------------- #
+  - id: temporal_knowledge_graph
+    tool: Graphiti
+    component: getzep/graphiti
+    function: time-aware knowledge graph of assets/identities/findings/incidents with provenance
+    category: memory
+    wave: 2
+    autonomy: investigate
+    grants_authority: false
+    status: planned
+  - id: graph_retrieval
+    tool: Neo4j GraphRAG
+    component: neo4j/neo4j-graphrag-python
+    function: graph-based retrieval over repos/services/identities/APIs/vulns — connected evidence, not text match
+    category: memory
+    wave: 2
+    autonomy: investigate
+    grants_authority: false
+    status: planned
+  - id: graph_algorithms
+    tool: NetworkX
+    component: networkx/networkx
+    function: deterministic attack-path, shortest-path, blast-radius and critical-node analysis
+    category: memory
+    wave: 2
+    autonomy: investigate
+    grants_authority: false
+    status: planned
+  - id: constraint_solver
+    tool: Z3
+    component: Z3Prover/z3
+    function: prove a proposed plan is internally feasible (permissions, capacity, exclusivity) before execution
+    category: memory
+    wave: 2
+    autonomy: conditional
+    grants_authority: false
+    status: planned
+  - id: evidence_sql
+    tool: DuckDB
+    component: duckdb/duckdb
+    function: fast deterministic SQL over logs/SARIF/SBOM/scanner output — factual computation, not model counting
+    category: memory
+    wave: 2
+    autonomy: investigate
+    grants_authority: false
+    status: planned
+
+  # --- Deep code & application understanding ------------------------------------------- #
+  - id: structural_parsing
+    tool: Tree-sitter
+    component: tree-sitter/tree-sitter
+    function: robust multi-language parse to syntax trees — functions/imports/routes/symbols without text matching
+    category: code
+    wave: 3
+    autonomy: investigate
+    grants_authority: false
+    status: planned
+  - id: dataflow_analysis
+    tool: Joern
+    component: joernio/joern
+    function: code-property graphs (syntax + control flow + data flow) for taint/authorisation-path analysis
+    category: code
+    wave: 3
+    autonomy: investigate
+    grants_authority: false
+    status: planned
+  - id: sandboxed_engineer
+    tool: OpenHands
+    component: All-Hands-AI/OpenHands
+    function: disposable-sandbox SWE worker — reproduce, patch, run tests; prepares branches/PRs, never deploys
+    category: code
+    wave: 3
+    autonomy: investigate
+    grants_authority: false
+    status: planned
+
+  # --- Assurance, adversarial testing & formal proof ----------------------------------- #
+  - id: property_testing
+    tool: Hypothesis
+    component: HypothesisWorks/hypothesis
+    function: property-based generation of approval/identity/timestamp/envelope combinations to find bypasses
+    category: assurance
+    wave: 4
+    autonomy: none
+    grants_authority: false
+    status: present   # already a dev dependency; tests/test_authorization_properties.py
+  - id: formal_model_checking
+    tool: TLA+ / TLC
+    component: tlaplus/tlaplus
+    function: formal model checking of workflow invariants — concurrency, duplicate signals, replay, approval states
+    category: assurance
+    wave: 4
+    autonomy: none
+    grants_authority: false
+    status: planned
+  - id: adaptive_redteam
+    tool: PyRIT
+    component: Azure/PyRIT
+    function: adaptive, multi-turn adversarial campaigns against Guardian's models and agents
+    category: assurance
+    wave: 4
+    autonomy: none
+    grants_authority: false
+    status: planned
+  - id: llm_vuln_scanning
+    tool: garak
+    component: NVIDIA/garak
+    function: repeatable LLM vulnerability scanning — prompt injection, data leakage, unsafe-behaviour probes
+    category: assurance
+    wave: 4
+    autonomy: none
+    grants_authority: false
+    status: planned

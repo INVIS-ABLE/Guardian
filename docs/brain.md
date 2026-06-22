@@ -1,5 +1,10 @@
 # Guardian Brain
 
+> **Going deeper?** This page documents the V1 Brain that ships today. The cognition roadmap —
+> the 20 cognitive tools (LangGraph, Temporal, PydanticAI, LiteLLM, Z3, Joern, …), the autonomy
+> tiers, and the release gate — lives in [`brain_v2.md`](brain_v2.md), with the machine-checked
+> catalogue in [`architecture/brain_tools.yaml`](architecture/brain_tools.yaml).
+
 > **A brain, not a supermodel.** Guardian does not train a model from scratch. It
 > *stitches proven pieces together* into one controlled, auditable system: the 17
 > agents, the tool router, the guardrails, the policy gates, memory, and the
