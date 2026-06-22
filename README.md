@@ -142,6 +142,9 @@ OWASP **WSTG**, **ASVS 5.0**, **SAMM**, **MASVS/MASTG**; **NIST SSDF**; **SLSA**
 - [docs/authorization.md](docs/authorization.md) — central OPA-backed authorization (no `allow_production`)
 - [docs/hardening_roadmap.md](docs/hardening_roadmap.md) — 12-area hardening blueprint → 10/10 acceptance gate
 - [docs/architecture/target_stack.md](docs/architecture/target_stack.md) — target production stack ([components.yaml](docs/architecture/components.yaml))
+- [docs/architecture/final_powerup_map.md](docs/architecture/final_powerup_map.md) — Final Power-Up master map; [build_directive.md](docs/architecture/build_directive.md), [invariants.md](docs/architecture/invariants.md), [wave_status.md](docs/architecture/wave_status.md)
+- [reports/audit/current_state.md](reports/audit/current_state.md) — machine-readable repository inventory (`python -m core.inventory --write`), enforced by `tests/test_repo_inventory.py`
+- [docs/adr/](docs/adr/) — architecture decision records ([template](docs/adr/0000-adr-template.md))
 - [docs/defence_catalogue.md](docs/defence_catalogue.md) — layered bolt-on catalogue (prevent→detect→contain→prove→recover), one authority per function, the connector contract, AI-agent boundary
 - [policies/agent_boundary.yaml](policies/agent_boundary.yaml) — the enforced AI-agent action boundary (model recommends; policy decides)
 - [docs/governance/](docs/governance/) — threat model, invariants, exception process, IR/DR plans
