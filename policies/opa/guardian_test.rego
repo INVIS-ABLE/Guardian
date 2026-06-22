@@ -2,6 +2,8 @@
 # Also usable via conftest in CI to validate the same Rego the Python gate mirrors.
 package guardian.authz
 
+import rego.v1
+
 # A plain in-scope staging action is allowed.
 test_staging_action_allowed if {
 	allow with input as {

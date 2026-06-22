@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Install OPA
         run: |
@@ -26,8 +28,8 @@ jobs:
           chmod +x /usr/local/bin/opa
           opa version
 
-      - name: opa fmt check
-        run: opa fmt --list --fail policies/opa
+      - name: opa check (parse + compile the policy bundle)
+        run: opa check policies/opa
 
       - name: opa test (Rego unit tests)
         run: opa test policies/opa -v
