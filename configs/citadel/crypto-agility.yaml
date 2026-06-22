@@ -1,0 +1,18 @@
+# Citadel — Cryptographic Agility Fabric (System 23). Owner: citadel/crypto_agility/inventory.py.
+# Verifier: citadel/crypto_agility/downgrade.py.
+citadel:
+  enabled: true
+  fail_closed: true
+  crypto_agility:
+    inventory_required: true
+    algorithm_allowlist_required: true
+    downgrade_detection: true
+    post_quantum_readiness: true
+    hybrid_migration: true
+    automatic_retirement: false               # retirement is a quorum decision, never automatic
+    dual_read_required_before_cutover: true   # invariant 25
+    pq_must_not_reduce_classical_security: true  # invariant 26
+    migration_states: [discovered, classified, dual-write, dual-read, hybrid, new-primary, legacy-read-only, retired, destroyed, verified]
+    registry_fields: [algorithm, purpose, library, version, key_size, protocol, data_locations, owners, rotation_period, migration_state, approved_alternatives, deprecation_date, verification_tests]
+    unknown_crypto_use: fail_ci
+    deprecated_algorithm: blocking_finding

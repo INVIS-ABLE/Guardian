@@ -1,0 +1,100 @@
+# Guardian Crown Citadel — trust zones (extends the components.yaml trust_zone set).
+#
+# The Citadel adds 15 high-assurance zones (17-31) beneath the existing edge/management/identity/
+# execution/evidence/detection/observability zones. Each zone names the Citadel system that owns it,
+# its isolation posture and its fail mode. (tests/test_citadel_trust_zones — folded into the
+# capabilities manifest test — assert every zone maps to a real system id.)
+version: 0.1.0
+inherits_zones_from: docs/architecture/components.yaml
+
+zones:
+  - id: 17
+    name: Hardware Root Zone
+    owner_system: root_of_trust
+    isolation: hardware_tpm
+    contains: [tpm, measured_boot, ima_evm, platform_attestation]
+    fail_mode: deny_capability_to_unattested_platform
+  - id: 18
+    name: Confidential Compute Zone
+    owner_system: confidential_execution
+    isolation: tee_or_high_isolation_sandbox
+    contains: [confidential_containers, attestation, secret_release]
+    fail_mode: deny_secret_release_on_failed_attestation
+  - id: 19
+    name: Build Foundry Zone
+    owner_system: build_foundry
+    isolation: hermetic_offline_final_stage
+    contains: [hermetic_builds, reproducibility, independent_rebuilders]
+    fail_mode: block_promotion_on_digest_mismatch
+  - id: 20
+    name: Transparency Zone
+    owner_system: build_foundry
+    isolation: append_only_log
+    contains: [rekor, independent_log, inclusion_proofs]
+    fail_mode: deny_promotion_without_inclusion_proof
+  - id: 21
+    name: Deception Zone
+    owner_system: deception_grid
+    isolation: no_real_privilege_no_real_data
+    contains: [honeytokens, honeypots, decoy_services]
+    fail_mode: trigger_creates_signed_evidence_and_incident
+  - id: 22
+    name: Data Protection Zone
+    owner_system: data_exfiltration_detection
+    isolation: classification_boundary
+    contains: [classification, fingerprinting, exfiltration_detection]
+    fail_mode: default_deny_egress_on_classified_paths
+  - id: 23
+    name: Cyber Vault Zone
+    owner_system: cyber_vault
+    isolation: separate_identity_and_network_plane
+    contains: [immutable_backups, recovery_roots, isolated_restore]
+    fail_mode: reject_recovery_point_failing_integrity
+  - id: 24
+    name: Continuity Zone
+    owner_system: continuity_mode
+    isolation: local_only_operation
+    contains: [local_policy, local_model, local_evidence_queue]
+    fail_mode: fail_closed_on_sensitive_actions
+  - id: 25
+    name: Formal Proof Zone
+    owner_system: formal_state_machine
+    isolation: laboratory
+    contains: [state_machine_models, policy_models, protocol_models]
+    fail_mode: block_change_until_reproven
+  - id: 26
+    name: Shadow Verification Zone
+    owner_system: shadow_federation
+    isolation: separate_credentials_runtime_and_keys
+    contains: [independent_reconstruction, capability_freeze]
+    fail_mode: freeze_capability_issuance_on_divergence
+  - id: 27
+    name: Trust Quorum Zone
+    owner_system: trust_quorum
+    isolation: threshold_separate_custodians
+    contains: [threshold_approval, ceremonies]
+    fail_mode: root_operation_blocked_below_threshold
+  - id: 28
+    name: Secure Time Zone
+    owner_system: secure_time
+    isolation: authenticated_time_sources
+    contains: [nts, monotonic_clocks, signed_checkpoints]
+    fail_mode: suspend_signing_release_execution_on_disagreement
+  - id: 29
+    name: Device Integrity Zone
+    owner_system: root_of_trust
+    isolation: endpoint_posture
+    contains: [endpoint_posture, firmware_state, hardware_identity]
+    fail_mode: case_on_unknown_privileged_device
+  - id: 30
+    name: Exposure Intelligence Zone
+    owner_system: exposure_intelligence
+    isolation: read_only_owned_assets
+    contains: [asset_ownership, dns, certificates, public_exposure]
+    fail_mode: finding_on_unowned_exposure
+  - id: 31
+    name: Control Proof Zone
+    owner_system: control_proof_engine
+    isolation: continuous_validation
+    contains: [security_claims, evidence_freshness, trends]
+    fail_mode: gate_promotion_on_stale_proof

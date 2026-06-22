@@ -1,0 +1,19 @@
+# Citadel — Immutable Cyber Vault (System 33). Owner: recovery/backup.py.
+# Verifier: recovery/drill.py. Separate identity + network plane; no normal-runtime write access.
+citadel:
+  enabled: true
+  fail_closed: true
+  cyber_vault:
+    immutable: true
+    separate_identity: true
+    separate_network: true
+    restore_testing: true
+    integrity_scanning: true
+    malware_scanning: true
+    recovery_key_separation: true
+    no_direct_normal_runtime_write_access: true
+    delayed_deletion: true
+    tamper_alerts: true
+    recovery_evidence_not_written_solely_by_recovered_system: true   # invariant 19
+    recovery_incomplete_until: [evidence_integrity_pass, identity_integrity_pass]  # invariant 30
+    snapshot_classes: [postgresql, temporal, qdrant, opensearch, neo4j, minio_evidence, immudb, keycloak, openfga, openbao, opa_policy_bundles, tool_manifests, rule_packs, prompt_manifests, model_manifests, pwa_release_artifacts, sboms, provenance, recovery_documentation]

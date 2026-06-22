@@ -1,0 +1,13 @@
+# Citadel — remote attestation policy (Systems 21 + 22). Attestation NEVER grants production
+# authority; it only gates capability issuance. Owner: core/machine_attestation.py.
+citadel:
+  enabled: true
+  fail_closed: true
+  attestation:
+    grants_production_authority: false        # invariant: attestation gates, never authorises
+    required_before_capability: true          # no capability before identity attestation
+    max_age_minutes: 15
+    nonce_required: true                       # anti-replay
+    required_evidence: [platform_identity, firmware_identity, boot_measurements, kernel_measurements, runtime_integrity_state, attestation_result, attestation_expiry]
+    on_failure: deny_capability_issuance
+    model_output_cannot_override_failed_attestation: true

@@ -1,0 +1,16 @@
+# Citadel — Root-of-Trust Fabric (System 21). Owner: core/machine_attestation.py.
+# Verifier: citadel/root_of_trust/verifier.py. See docs/architecture/citadel_capabilities.yaml.
+citadel:
+  enabled: true
+  fail_closed: true
+  root_of_trust:
+    tpm_required_for_production_workers: true
+    measured_boot_required: true
+    secure_boot_required: true
+    ima_required: true
+    remote_attestation_required: true
+    attestation_max_age_minutes: 15
+    spire_node_attestation: tpm_backed
+    golden_pcr_baseline_signed_offline: true
+    on_drift: { create_event: true, create_case: true, quarantine_worker: true }
+    unattested_platform: deny_capability_issuance

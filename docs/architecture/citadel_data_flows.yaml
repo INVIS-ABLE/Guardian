@@ -1,0 +1,89 @@
+# Guardian Crown Citadel — data flows and the extended execution path.
+#
+# The EXISTING execution path (docs/sovereign_ops_plane.md) is preserved:
+#   Brain -> Policy Authority -> Capability Broker -> Attested Worker -> Tool -> Evidence -> Verifier
+#
+# The Citadel EXTENDS (never bypasses) it with proof gates. Each new gate has an owner system and a
+# fail-closed behaviour. (tests/test_citadel_authority_invariants.py asserts ordering invariants:
+# attestation precedes capability; policy precedes attestation override; evidence precedes result.)
+version: 0.1.0
+preserves_path: brain->policy->broker->attested_worker->tool->evidence->verifier
+
+extended_execution_path:
+  - step: 1
+    stage: plan_feasibility_proof
+    owner_system: formal_state_machine
+    gate: plan must correspond to a proven state transition
+    fail_closed: true
+  - step: 2
+    stage: policy_authority
+    owner_system: verified_policy
+    gate: OPA allow decision (the ONE authority)
+    fail_closed: true
+  - step: 3
+    stage: identity_verification
+    owner_system: trust_quorum
+    gate: actor + workload identity verified before any capability
+    fail_closed: true
+  - step: 4
+    stage: platform_attestation
+    owner_system: root_of_trust
+    gate: worker platform attested and not drifted (max_age enforced)
+    fail_closed: true
+    invariant: failed_attestation_denies_capability_issuance
+  - step: 5
+    stage: build_and_image_verification
+    owner_system: build_foundry
+    gate: image digest signed + provenance + SBOM + reproduced + transparency inclusion proof
+    fail_closed: true
+    invariant: signature_alone_insufficient_without_provenance_or_identity
+  - step: 6
+    stage: capability_broker
+    owner_system: trust_quorum            # broker is core/tools; quorum/identity gate issuance
+    gate: issue ONE-action capability envelope bound to identity+platform+image+policy+approvals
+    fail_closed: true
+  - step: 7
+    stage: attested_confidential_or_sandboxed_worker
+    owner_system: confidential_execution
+    gate: secret release bound to the exact workload measurement
+    fail_closed: true
+  - step: 8
+    stage: tool_execution
+    owner_system: defensive_degradation
+    gate: exact target/duration/rollback; reversible; blast-radius assessed
+    fail_closed: true
+  - step: 9
+    stage: evidence_commitment
+    owner_system: cyber_vault
+    gate: evidence committed outside the worker's sole control; append-only
+    fail_closed: true
+    invariant: evidence_not_deletable_by_creating_service
+  - step: 10
+    stage: transparency_inclusion
+    owner_system: build_foundry
+    gate: action/artefact recorded with an inclusion proof
+    fail_closed: true
+  - step: 11
+    stage: independent_shadow_verification
+    owner_system: shadow_federation
+    gate: Shadow recomputes the proofs; may freeze on divergence
+    fail_closed: true
+    invariant: shadow_cannot_assume_operational_control
+  - step: 12
+    stage: quorum_result
+    owner_system: trust_quorum
+    gate: root-level results require threshold approval
+    fail_closed: true
+
+# Privacy data-flow invariant (Privacy Fabric): private-message plaintext NEVER enters any Citadel
+# system. Enforced structurally by the forbidden-field sets already used in core/verifier.py and
+# core/event_fabric. (tests/test_citadel_privacy_invariants.py)
+private_plaintext_barrier:
+  forbidden_in: [telemetry, evidence, models, memory, formal_verification_input, deception_systems]
+  forbidden_fields: [private_key, plaintext, message, conversation_key, secret, media]
+  classification_denylist: [MESSAGE_PLAINTEXT, DECRYPTION_KEY]
+
+# Untrusted-input invariant: telemetry/comment/log content is DATA, never executable instruction.
+untrusted_input_barrier:
+  sources: [exposure_observations, deception_triggers, ci_logs, external_comments, model_output]
+  rule: never_interpreted_as_instruction

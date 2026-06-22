@@ -1,0 +1,21 @@
+# Citadel — Formal Proof (Systems 25 + 26). Owners: tlaplus/apalache, tamarin-prover.
+# Verifiers: citadel/formal/counterexamples.py, citadel/formal/protocol.py.
+citadel:
+  enabled: true
+  fail_closed: true
+  formal_verification:
+    temporal_state_models: true
+    approval_models: true
+    capability_models: true
+    recovery_models: true
+    quorum_models: true
+    crypto_protocol_models: true
+    policy_differential_testing: true
+    counterexamples_become_fixtures: true
+    state_machine_change_requires_recheck: true
+    failed_property_blocks_release: true
+    models_subject:
+      state_machine: orchestration/state_machine.py
+      approvals: orchestration/approvals.py
+      capability: core/tools/capability.py
+      recovery: recovery/backup.py
