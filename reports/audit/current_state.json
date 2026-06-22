@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-22T22:39:18.870315+00:00",
+  "generated_at": "2026-06-22T23:35:26.929181+00:00",
   "wave": 0,
   "summary": {
     "agents": 17,
@@ -8,7 +8,7 @@
     "simulators": 3,
     "router_capabilities": 12,
     "tool_manifest_capabilities": 8,
-    "tests": 36,
+    "tests": 57,
     "source_directories": [
       "agents",
       "attestation",
@@ -418,11 +418,47 @@
       ]
     },
     {
+      "file": "core/endpoint/ingest.py",
+      "markers": [
+        {
+          "line": 90,
+          "marker": "NotImplementedError"
+        }
+      ]
+    },
+    {
+      "file": "core/identity_graph/ingest.py",
+      "markers": [
+        {
+          "line": 62,
+          "marker": "NotImplementedError"
+        }
+      ]
+    },
+    {
+      "file": "core/lineage/ingest.py",
+      "markers": [
+        {
+          "line": 63,
+          "marker": "NotImplementedError"
+        }
+      ]
+    },
+    {
       "file": "core/tools/registry.py",
       "markers": [
         {
-          "line": 78,
+          "line": 79,
           "marker": "placeholder"
+        }
+      ]
+    },
+    {
+      "file": "core/twin/ingest.py",
+      "markers": [
+        {
+          "line": 58,
+          "marker": "NotImplementedError"
         }
       ]
     },
@@ -470,6 +506,8 @@
     "tests/test_attestation.py",
     "tests/test_audit.py",
     "tests/test_authorization_properties.py",
+    "tests/test_autonomy_budget.py",
+    "tests/test_autonomy_states.py",
     "tests/test_brain.py",
     "tests/test_brain_tools_manifest.py",
     "tests/test_components_manifest.py",
@@ -478,27 +516,46 @@
     "tests/test_containment.py",
     "tests/test_credential_audit.py",
     "tests/test_detection.py",
+    "tests/test_endpoint.py",
     "tests/test_evidence_store.py",
+    "tests/test_executor_roots.py",
     "tests/test_failclosed.py",
     "tests/test_guardrails.py",
+    "tests/test_healing_contracts.py",
     "tests/test_identity.py",
+    "tests/test_identity_graph.py",
     "tests/test_isolation.py",
+    "tests/test_lineage.py",
+    "tests/test_machine_attestation.py",
     "tests/test_memory.py",
+    "tests/test_observability.py",
     "tests/test_opa_parity.py",
     "tests/test_orchestration.py",
+    "tests/test_ownership.py",
     "tests/test_policy_gate.py",
     "tests/test_privacy_invariants.py",
     "tests/test_reasoning_graph.py",
+    "tests/test_recovery.py",
     "tests/test_repo_inventory.py",
+    "tests/test_resilience.py",
+    "tests/test_roots_of_trust.py",
     "tests/test_router.py",
     "tests/test_router_contract_execution.py",
     "tests/test_scope.py",
     "tests/test_shadow_guardian.py",
     "tests/test_signing.py",
     "tests/test_simulators.py",
+    "tests/test_software_trust_admission.py",
     "tests/test_sovereign_capabilities_manifest.py",
+    "tests/test_specialists.py",
     "tests/test_supplychain.py",
+    "tests/test_target_trust_ownership.py",
+    "tests/test_tenancy.py",
     "tests/test_tool_manifest.py",
+    "tests/test_trust_producers.py",
+    "tests/test_twin.py",
+    "tests/test_twin_assessment.py",
+    "tests/test_twin_changemap.py",
     "tests/test_typed_state.py",
     "tests/test_verifier.py"
   ]

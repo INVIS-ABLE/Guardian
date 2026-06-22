@@ -31,6 +31,14 @@ properties:
     type: string
     default: INVISABLE
     description: Owning organisation. Ownership is verified at runtime (DNS / repo).
+  tenant:
+    type: string
+    default: invisable
+    description: >
+      Owning tenant id (core/tenancy.py). Optional and defaults to the founding
+      INVISABLE tenant so pre-tenancy scope files remain valid. In multi-tenant
+      deployments this binds the scope to a tenant whose authorisation grants must
+      cover every asset/capability/environment the run touches (default-deny).
   allowed_domains:
     type: array
     minItems: 1
