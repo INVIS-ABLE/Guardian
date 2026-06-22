@@ -36,6 +36,7 @@ plugs into that single decision point.
 | 9 | Build provenance | actions/attest, cosign, witness | 🟡 | admission verify + provenance signing shipped (`supplychain/`): digest-pinned+signed+provenance+SBOM, fail-closed; cosign/witness CI wiring pending |
 | 10 | Mandatory CI gates | dependency-review, scorecard, zizmor, pip-audit, bandit | 🟡 | zizmor + pip-audit + bandit blocking now; dependency-review + scorecard pending |
 | 11 | High-assurance testing | hypothesis, schemathesis, uv, renovate | 🟡 | hypothesis property tests done; uv lockfile + schemathesis next |
+| 21 | Reversible containment | deterministic adapter | 🟡 | reversible-only allowlist + deterministic param validation + audit shipped (`containment/`); concrete IdP/Cilium/Harbor adapters pending |
 | 12 | Observability & alerting | OTel (py + collector), Tempo, Alertmanager | ⬜ | trace IDs across policy decisions/workflows; routed alerts |
 
 ## 10/10 acceptance gate
