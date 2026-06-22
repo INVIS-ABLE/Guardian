@@ -26,15 +26,18 @@ plugs into that single decision point.
 | - | ---- | -------- | ------ | ----- |
 | 1 | Policy & authorisation | OPA, conftest | ✅ keystone | `core/policy_gate.py`, `policies/opa/*.rego`, `docs/authorization.md` |
 | 2 | Ownership verification | PyGithub, dnspython | ⬜ | inject a real verifier into `Guardrails.ownership_verifier`; expiring evidence |
-| 3 | Durable workflows & approvals | Temporal + sdk-python | ⬜ | two-reviewer signal flow, re-ask OPA before execute |
-| 4 | Secrets & keys | OpenBao, SOPS | ⬜ | short-lived per-workflow creds; encrypt in-Git config |
-| 5 | Immutable audit & evidence | immudb, in-toto/witness, cosign | 🟡 | denials already audited (hash chain); immudb + signed attestations next |
-| 6 | Findings management | DefectDojo | ⬜ | unified findings ledger; Guardian orchestrates, doesn't re-home findings |
-| 7 | Dashboard identity | oauth2-proxy (OIDC) | ⬜ | proxy in front of FastAPI; internal services off public ports |
-| 8 | Sandbox & runtime detection | gVisor (runsc), Falco | ⬜ | scanners rootless, read-only input, egress allowlist |
-| 9 | Build provenance | actions/attest, cosign, witness | ⬜ | SBOM + provenance + signature; verify by digest before deploy |
+| 3 | Durable workflows & approvals | Temporal + sdk-python | 🟡 | state machine + engine shipped (`orchestration/`): monotonic states, two-reviewer approvals, replay protection, kill switches, budgets, **re-ask policy before execute**; Temporal cluster wiring pending |
+| 4 | Secrets & keys | OpenBao, SOPS | 🟡 | short-lived credential broker shipped (`identity/credentials.py`: TTL ceiling, expiry, revoke); OpenBao + SOPS wiring pending |
+| 5 | Immutable audit & evidence | immudb, in-toto/witness, cosign | 🟡 | system-of-record + Ed25519-signed attestations shipped (`attestation/`); local deletion can't erase evidence; immudb + cosign/witness wiring pending |
+| 6 | Findings management | DefectDojo | 🟡 | risk-based prioritisation shipped (`supplychain/sbom.py`: KEV/EPSS/exposure/reachability + OpenVEX); DefectDojo ledger wiring pending |
+| 7 | Dashboard identity | oauth2-proxy (OIDC) | 🟡 | principal + role enforcement shipped (`identity/oidc.py`); internal ports closed; oauth2-proxy/Keycloak wiring pending |
+| 7b | Egress control | Cilium + egress gateway | 🟡 | default-deny egress policy shipped (`isolation/egress.py`: blocks metadata/private/loopback, allowlist); Cilium gateway wiring pending |
+| 8 | Sandbox & runtime detection | gVisor (runsc), Falco | 🟡 | sandbox profile + run-spec validation shipped (`isolation/sandbox.py`); gVisor/Falco runtime wiring pending |
+| 9 | Build provenance | actions/attest, cosign, witness | 🟡 | admission verify + provenance signing shipped (`supplychain/`): digest-pinned+signed+provenance+SBOM, fail-closed; cosign/witness CI wiring pending |
 | 10 | Mandatory CI gates | dependency-review, scorecard, zizmor, pip-audit, bandit | 🟡 | zizmor + pip-audit + bandit blocking now; dependency-review + scorecard pending |
 | 11 | High-assurance testing | hypothesis, schemathesis, uv, renovate | 🟡 | hypothesis property tests done; uv lockfile + schemathesis next |
+| 21 | Reversible containment | deterministic adapter | 🟡 | reversible-only allowlist + deterministic param validation + audit shipped (`containment/`); concrete IdP/Cilium/Harbor adapters pending |
+| 19 | Detection-as-code | SigmaHQ/sigma | 🟡 | ATT&CK-mapped rules + engine shipped (`detection/`): per-rule positive/negative tests, recommends reversible containment (still gated); Sigma export to Wazuh/Loki pending |
 | 12 | Observability & alerting | OTel (py + collector), Tempo, Alertmanager | ⬜ | trace IDs across policy decisions/workflows; routed alerts |
 
 ## 10/10 acceptance gate

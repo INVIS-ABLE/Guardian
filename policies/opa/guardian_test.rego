@@ -2,6 +2,8 @@
 # Also usable via conftest in CI to validate the same Rego the Python gate mirrors.
 package guardian.authz
 
+import rego.v1
+
 # A plain in-scope staging action is allowed.
 test_staging_action_allowed if {
 	allow with input as {
@@ -36,6 +38,16 @@ test_privacy_decrypt_denied if {
 test_privacy_train_on_user_content_denied if {
 	not allow with input as {
 		"action": "train_on_user_content", "mode": "code_review", "environment": "staging",
+		"ownership_verified": true, "allowed_modes": ["code_review"],
+		"blocked_actions": [], "approval_required": [], "allowed_test_accounts": [],
+		"approvals": [], "now": 1000,
+	}
+}
+
+# AI-agent boundary: the model may not change policy — globally blocked.
+test_agent_change_policy_denied if {
+	not allow with input as {
+		"action": "change_policy", "mode": "code_review", "environment": "staging",
 		"ownership_verified": true, "allowed_modes": ["code_review"],
 		"blocked_actions": [], "approval_required": [], "allowed_test_accounts": [],
 		"approvals": [], "now": 1000,

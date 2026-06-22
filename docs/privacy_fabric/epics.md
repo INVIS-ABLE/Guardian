@@ -7,8 +7,8 @@ PRs, gather evidence, and verify — never read private content.
 | # | Epic | Outcome / definition of done |
 | - | ---- | ---------------------------- |
 | 1 | **Privacy Threat Model** | Documented adversaries (stalkers, abusive household members, hostile admins, criminal attackers, compromised devices, insiders, social engineers, metadata correlation) with mapped defences. Seeded in [retention_and_legal.md](retention_and_legal.md#privacy-threat-model). |
-| 2 | **Cryptographic Architecture Decision** | Signed ADR: Signal Protocol vs MLS usage, libsignal licensing/versioning, migration, emergency revocation. Owner: cryptographer. See [messaging_crypto.md](messaging_crypto.md). |
-| 3 | **Key Transparency Service** | Verifiable append-only identity-key directory + independent monitors + **Guardian Verifier**. |
+| 2 | **Cryptographic Architecture Decision** | 🟡 ADR drafted ([adr/0001-messaging-protocol.md](adr/0001-messaging-protocol.md), *Proposed*) — Signal 1:1 / MLS groups / SFrame calls; awaiting cryptographer sign-off on libsignal licensing, MLS suite, migration & revocation. See [messaging_crypto.md](messaging_crypto.md). |
+| 3 | **Key Transparency Service** | 🟢 Guardian **Verifier** implemented ([`core/verifier.py`](../../core/verifier.py), `tests/test_verifier.py`) + design ADR ([adr/0002-key-transparency.md](adr/0002-key-transparency.md)); production verifiable-log directory + Ed25519 checkpoints pending. |
 | 4 | **Metadata-Minimising Relay** | Sealed sender, two-hop routing, short-lived delivery credentials; ingress/delivery split with separate datastores. |
 | 5 | **Device Trust Service** | Per-device identities, linking, verification, revocation, recovery. |
 | 6 | **Five-Ring Network Defence** | Edge DDoS/WAF, locked origin, Envoy+Coraza app firewall, Cilium zero-trust, runtime enforcement. See [five_ring_firewall.md](five_ring_firewall.md). |

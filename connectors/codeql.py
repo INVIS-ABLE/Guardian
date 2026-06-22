@@ -16,6 +16,7 @@ class CodeQLConnector(BaseConnector):
     binary = "codeql"
     mode = "code_review"
     action = "code_review"
+    ACTIONS = ("analyze",)
 
     def build_command(self, *, repo: str | None = None, target: str | None = None, **kwargs: Any) -> list[str]:
         # Single-step analysis entry point; CI uses the github/codeql-action instead.

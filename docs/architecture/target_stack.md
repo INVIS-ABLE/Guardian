@@ -5,6 +5,15 @@ machine-readable list is [`components.yaml`](components.yaml) (validated by
 `tests/test_components_manifest.py`). **One authoritative owner per function** — we do not
 add overlapping platforms to inflate the count.
 
+> This file tracks deployable **infrastructure** by trust zone. The 20 **cognitive** tools the
+> Brain reasons *with* (orchestration graphs, the model gateway, knowledge/graph reasoning, code
+> intelligence, the adversarial-assurance harness) are tracked separately in
+> [`brain_tools.yaml`](brain_tools.yaml) and designed in [`../brain_v2.md`](../brain_v2.md) —
+> same "one owner per function" principle, but cognition never grants authority. The 20 higher-order
+> **capability systems** of the [Sovereign Operations Plane](../sovereign_ops_plane.md) (digital
+> twin, knowledge graphs, experimentation labs, brokered response) live in
+> [`sovereign_capabilities.yaml`](sovereign_capabilities.yaml).
+
 ## Principles
 
 - **One reference monitor.** Every action passes the central OPA-backed `authorize()`

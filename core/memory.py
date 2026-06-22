@@ -23,6 +23,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import os
 import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -268,17 +269,54 @@ class GuardianMemory:
             )
 
 
-def get_backend(config: GuardianConfig | None = None) -> MemoryBackend:
-    """Return the configured vector backend, degrading to the in-memory store.
+# Deployment postures in which the local JSONL fallback is NOT an acceptable backend —
+# mirrors core.policy_gate._OPA_REQUIRED_ENVS so memory and authorization fail closed alike.
+_BACKEND_REQUIRED_ENVS: frozenset[str] = frozenset({"staging", "production"})
 
-    Mirrors the connector pattern: if the configured vector DB's client/service is
-    not available, fall back rather than failing the run. Real Qdrant/pgvector/Chroma
-    wiring is added here as those services are provisioned.
+
+def _vector_backend_required() -> bool:
+    """Whether an unavailable approved vector backend must FAIL CLOSED rather than fall back.
+
+    Keys off Guardian's deployment posture (``GUARDIAN_ENV``), exactly as the policy gate
+    does — where Guardian itself runs, not a target's environment. ``development``/``ci``
+    (the default) permit the always-available local store so offline tests/dev work;
+    ``staging``/``production`` require the real backend. ``GUARDIAN_REQUIRE_VECTOR_BACKEND=1``
+    forces the requirement regardless of posture.
+    """
+    if os.environ.get("GUARDIAN_REQUIRE_VECTOR_BACKEND") == "1":
+        return True
+    return os.environ.get("GUARDIAN_ENV", "development").strip().lower() in _BACKEND_REQUIRED_ENVS
+
+
+def _build_vector_backend(rag: dict[str, Any]) -> MemoryBackend | None:
+    """Construct the configured production vector backend, or None if it can't be built.
+
+    Real Qdrant/pgvector/Chroma wiring is added here as those services are provisioned
+    (their client library + a reachable service). Until then this returns None, and the
+    caller decides whether that is fatal (staging/production) or acceptable (development/ci).
+    """
+    return None
+
+
+def get_backend(config: GuardianConfig | None = None) -> MemoryBackend:
+    """Return the configured vector backend.
+
+    In development/ci this degrades to the always-available in-memory (JSONL) store. In
+    Guardian's staging/production postures it **fails closed**: if the approved vector
+    backend cannot be built we raise rather than silently dropping to local JSONL — which
+    would quietly lose the production knowledge store and its access controls.
     """
     cfg = config or load_config()
     rag = cfg.raw.get("guardian", {}).get("agents", {}).get("rag", {})
     if not rag.get("enabled", True):
         return InMemoryBackend()
-    # Production backends (qdrant/weaviate/chroma/pgvector) are wired in here when
-    # their client libraries + services are present. Until then, fail safe to local.
+    backend = _build_vector_backend(rag)
+    if backend is not None:
+        return backend
+    if _vector_backend_required():
+        raise RuntimeError(
+            f"Approved vector backend '{rag.get('vector_db', 'unknown')}' is unavailable and "
+            "this Guardian deployment posture requires it; refusing to silently fall back to "
+            "the local JSONL store (fail closed). Set GUARDIAN_ENV=development to permit it."
+        )
     return InMemoryBackend()

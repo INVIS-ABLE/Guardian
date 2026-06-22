@@ -1,0 +1,18 @@
+id: scraper-burst
+title: High-rate scraping / enumeration burst
+severity: medium
+attack: [T1595]                # Active Scanning (defensive mapping)
+logsource: api_gateway
+confidence: 0.75
+detection:
+  all:
+    - { field: event_type, equals: http_request }
+    - { field: request_rate, gte: 100 }
+response:
+  action: block_indicator_temporarily   # reversible, time-boxed
+  target_field: source_ip
+tests:
+  positive:
+    - { event_type: http_request, request_rate: 250, source_ip: 9.9.9.9 }
+  negative:
+    - { event_type: http_request, request_rate: 5, source_ip: 9.9.9.9 }

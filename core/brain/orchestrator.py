@@ -23,12 +23,12 @@ from typing import Any, Callable
 from agents import REGISTRY as AGENT_REGISTRY
 from agents.base import AgentContext
 
-from .audit import AuditLog
-from .guardrails import Approval, Guardrails
-from .memory import GuardianMemory
-from .policy_gate import PolicyInput, evaluate
-from .router import ToolRouter
-from .scope import Scope, load_scope
+from ..audit import AuditLog
+from ..guardrails import Approval, Guardrails
+from ..memory import GuardianMemory
+from ..policy_gate import PolicyInput, evaluate
+from ..router import ToolRouter
+from ..scope import Scope, load_scope
 
 
 def build_policy_input(
@@ -38,7 +38,7 @@ def build_policy_input(
     mode: str,
     approvals=None,
     actor: str = "guardian_brain",
-    ownership_verified: bool = True,
+    ownership_verified: bool = False,
 ) -> PolicyInput:
     """Assemble a central-policy ``PolicyInput`` from a scope + requested action.
 
@@ -82,8 +82,9 @@ WORKFLOW: tuple[tuple[str, str], ...] = (
 )
 
 # Stages that must not run until a human approval has been recorded. Everything from
-# the approval gate onward (deploy/PR-merge) is post-approval only.
-POST_APPROVAL_STAGES: frozenset[str] = frozenset({"deploy"})
+# the approval gate onward (deploy/PR-merge and curated learning) is post-approval
+# only — the learning node must not fold un-approved, unverified outputs into memory.
+POST_APPROVAL_STAGES: frozenset[str] = frozenset({"deploy", "learn"})
 
 
 @dataclass
@@ -205,10 +206,14 @@ class GuardianBrain:
             run.stages.append(result)
 
             if stage == "approval":
+                # The approval node reports `approved` (derived from a recorded human
+                # decision — never self-granted). Read the same field the agent emits.
                 run.approved = bool(result.output.get("approved", False))
                 if not run.approved:
-                    # Stop here — by design. The run is complete up to the gate and
-                    # waits for a human. Downstream deploy work is never auto-run.
+                    # Halt for a human — by design, fail closed. The run is complete up
+                    # to the gate; everything after it (learn, deploy) is in
+                    # POST_APPROVAL_STAGES and is recorded as skipped, never executed,
+                    # until a recorded human approval flips `approved` to True.
                     run.halted_at = stage
                     self.audit.record(
                         "brain:run:halt_for_approval", actor="guardian_brain",

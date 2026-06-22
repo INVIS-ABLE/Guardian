@@ -1,0 +1,18 @@
+id: ransomware-mass-file-change
+title: Mass file change / encryption behaviour
+severity: critical
+attack: [T1486]                # Data Encrypted for Impact (defensive mapping)
+logsource: host
+confidence: 0.9
+detection:
+  all:
+    - { field: event_type, equals: file_change }
+    - { field: changed_files, gte: 500 }
+response:
+  action: isolate_pod          # reversible; requires human approval
+  target_field: host
+tests:
+  positive:
+    - { event_type: file_change, changed_files: 2000, host: fileserver-1 }
+  negative:
+    - { event_type: file_change, changed_files: 3, host: fileserver-1 }

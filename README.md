@@ -142,6 +142,8 @@ OWASP **WSTG**, **ASVS 5.0**, **SAMM**, **MASVS/MASTG**; **NIST SSDF**; **SLSA**
 - [docs/authorization.md](docs/authorization.md) — central OPA-backed authorization (no `allow_production`)
 - [docs/hardening_roadmap.md](docs/hardening_roadmap.md) — 12-area hardening blueprint → 10/10 acceptance gate
 - [docs/architecture/target_stack.md](docs/architecture/target_stack.md) — target production stack ([components.yaml](docs/architecture/components.yaml))
+- [docs/defence_catalogue.md](docs/defence_catalogue.md) — layered bolt-on catalogue (prevent→detect→contain→prove→recover), one authority per function, the connector contract, AI-agent boundary
+- [policies/agent_boundary.yaml](policies/agent_boundary.yaml) — the enforced AI-agent action boundary (model recommends; policy decides)
 - [docs/governance/](docs/governance/) — threat model, invariants, exception process, IR/DR plans
 - [docs/privacy_fabric/](docs/privacy_fabric/) — INVISABLE Privacy Fabric: five-ring firewall, messaging crypto (Signal/MLS), key transparency, sealed sender, retention/DPIA, epics
 - [policies/privacy_invariants.yaml](policies/privacy_invariants.yaml) — Guardian's enforced privacy boundary (protector, never reader)

@@ -13,6 +13,7 @@ class GitleaksConnector(BaseConnector):
     binary = "gitleaks"
     mode = "secrets_scan"
     action = "secrets_scan"
+    ACTIONS = ("detect",)
 
     def build_command(self, *, repo: str | None = None, target: str | None = None, **kwargs: Any) -> list[str]:
         path = kwargs.get("path", ".")

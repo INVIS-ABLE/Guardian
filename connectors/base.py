@@ -9,6 +9,7 @@ Connectors never act outside an approved scope. Every connector:
 
 from __future__ import annotations
 
+import hashlib
 import shutil
 import subprocess
 from dataclasses import dataclass, field
@@ -16,7 +17,23 @@ from typing import Any
 
 from core.audit import AuditLog
 from core.guardrails import Guardrails
+from core.policy_gate import GLOBAL_APPROVAL_REQUIRED
 from core.scope import Scope
+
+from .contract import (
+    ActionRequest,
+    ApprovalPolicy,
+    CleanupResult,
+    ConnectorInventory,
+    EvidenceBundle,
+    ExecutionPlan,
+    ExecutionResult,
+    Permission,
+    SignedAuthorization,
+    ValidationResult,
+    authorize_execution,
+    validate_request,
+)
 
 
 @dataclass
@@ -42,12 +59,22 @@ class ConnectorResult:
 
 
 class BaseConnector:
-    """Subclass and set ``tool``/``mode``/``action``; implement :meth:`build_command`."""
+    """Subclass and set ``tool``/``mode``/``action``; implement :meth:`build_command`.
+
+    Implements the :class:`~connectors.contract.GuardianConnector` lifecycle so every
+    scanner is driven through the one typed contract — enumerated actions, allowlisted
+    targets, and signed-authorization execution — not ad-hoc shell-outs.
+    """
 
     tool: str = "tool"
     binary: str = "tool"
     mode: str = "code_review"
     action: str = "code_review"
+    version: str = "0.1.0"
+    trust_zone: str = "execution"
+    #: enumerated actions this connector will perform (the contract's allowlist). Defaults
+    #: to the single guardrail action label; scanners may override with richer verbs.
+    ACTIONS: tuple[str, ...] = ()
 
     def __init__(self, scope: Scope, *, dry_run: bool = True, guardrails: Guardrails | None = None):
         self.scope = scope
@@ -90,3 +117,76 @@ class BaseConnector:
         result.stdout = proc.stdout
         result.stderr = proc.stderr
         return self.parse(result)
+
+    # --- GuardianConnector contract -------------------------------------------------------
+    # The 8-method lifecycle from connectors/contract.py. ``run`` remains the low-level
+    # execution path; these methods wrap it in the typed, allowlisted, signed contract.
+    @property
+    def actions(self) -> tuple[str, ...]:
+        return self.ACTIONS or (self.action,)
+
+    def _target_allowlist(self) -> tuple[str, ...]:
+        return tuple(self.scope.allowed_domains) + tuple(self.scope.allowed_repos)
+
+    def inventory(self) -> ConnectorInventory:
+        return ConnectorInventory(
+            connector=self.tool, version=self.version, actions=self.actions,
+            fixed_binary=self.binary, trust_zone=self.trust_zone,
+        )
+
+    def validate_configuration(self) -> ValidationResult:
+        notes: list[str] = []
+        if not self.actions:
+            notes.append("no enumerated actions declared")
+        if shutil.which(self.binary) is None:
+            notes.append(f"{self.binary} not installed (CI/docker-compose provides it)")
+        return ValidationResult(ok=not any("no enumerated" in n for n in notes), notes=notes)
+
+    def calculate_plan(self, request: ActionRequest) -> ExecutionPlan:
+        # Gate the request on enumerated actions + allowlisted target (rejects raw commands).
+        validate_request(
+            request, allowed_actions=self.actions, target_allowlist=self._target_allowlist()
+        )
+        command = self.build_command(repo=request.repo, target=request.target, **request.args)
+        return ExecutionPlan(
+            action=request.action, argv=tuple(command), target=request.target,
+            egress_allowlist=self._target_allowlist(),
+        )
+
+    def required_permissions(self) -> list[Permission]:
+        return [Permission(f"{self.mode}:{self.scope.environment}")]
+
+    def required_approvals(self) -> ApprovalPolicy:
+        gated = self.action in GLOBAL_APPROVAL_REQUIRED or self.action in set(
+            self.scope.approval_required
+        )
+        return ApprovalPolicy(required_actions=(self.action,) if gated else (), min_reviewers=1)
+
+    def execute(
+        self, authorization: SignedAuthorization, *, verify_key: str | None = None
+    ) -> ExecutionResult:
+        # Execution requires a present, unexpired, signed authorization for the request.
+        # When ``verify_key`` is supplied the signature is cryptographically verified.
+        authorize_execution(authorization, verify_key=verify_key)
+        req = authorization.request
+        # Route the single contract target to the right connector parameter: an explicit
+        # repo wins; dynamic (domain-targeting) tools take a domain; otherwise the target
+        # is a repo. This avoids ownership-checking a repo string as if it were a domain.
+        if req.repo is not None:
+            repo, target = req.repo, None
+        elif self.mode in {"zap_scan", "api_security", "mobile_security"}:
+            repo, target = None, req.target
+        else:
+            repo, target = req.target, None
+        result = self.run(repo=repo, target=target, **req.args)
+        output_hash = hashlib.sha256((result.stdout or "").encode("utf-8")).hexdigest()
+        return ExecutionResult(
+            action=req.action, returncode=result.returncode, output_hash=output_hash,
+        )
+
+    def collect_evidence(self) -> EvidenceBundle:
+        return EvidenceBundle(events=[{"connector": self.tool, "mode": self.mode}], signed=False)
+
+    def cleanup(self) -> CleanupResult:
+        # Stateless scanner wrappers hold no persistent execution environment to destroy.
+        return CleanupResult(destroyed=True, notes="stateless connector; nothing to clean up")

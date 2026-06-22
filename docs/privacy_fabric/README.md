@@ -113,6 +113,8 @@ Ring 4 Cilium zero-trust service mesh, Ring 5 runtime containment) — see
 | Messaging cryptography (Signal vs MLS, key transparency, sealed sender, backups) | [messaging_crypto.md](messaging_crypto.md) |
 | Retention classes + UK-GDPR / DPIA / safeguarding | [retention_and_legal.md](retention_and_legal.md) |
 | The 14 delivery epics (ordered) | [epics.md](epics.md) |
+| ADR 0001 — messaging protocol (Signal vs MLS) · Epic 2 | [adr/0001-messaging-protocol.md](adr/0001-messaging-protocol.md) |
+| ADR 0002 — key transparency & the Guardian Verifier · Epic 3 | [adr/0002-key-transparency.md](adr/0002-key-transparency.md) |
 | Existing crypto module layer (data-at-rest, sessions, audit) | [../crypto_architecture.md](../crypto_architecture.md) |
 | Guardian's own control gates | [../../GUARDRAILS.md](../../GUARDRAILS.md) |
 

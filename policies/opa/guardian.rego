@@ -5,7 +5,9 @@
 # reviewers who approved production_scan.
 package guardian.authz
 
-import future.keywords.in
+# rego.v1 enables the if/contains/in/every keywords this policy uses and enforces v1
+# syntax — without it, OPA rejects the `... if {}` and `... contains ... if {}` rules.
+import rego.v1
 
 blocked_actions := {
 	"third_party_scan", "real_user_data_access", "credential_theft", "stealth",
@@ -14,6 +16,9 @@ blocked_actions := {
 	"decrypt_private_content", "access_message_plaintext", "copy_private_content_to_memory",
 	"send_private_content_to_model", "store_decryption_keys", "silent_moderation_participant",
 	"create_master_access_key", "plaintext_in_observability", "train_on_user_content",
+	# AI-agent boundary — the model recommends; the policy decides. No self-escalation.
+	"expand_scope", "change_policy", "disable_logging", "merge_own_security_patch",
+	"resolve_own_finding", "unrestricted_secret_access", "arbitrary_command_execution",
 }
 
 global_approval_required := {
@@ -32,21 +37,25 @@ unexpired(a) if {
 }
 
 # An approval's bindings (target/commit/workflow_run) must match the request when set.
+# A binding field that is ABSENT or null means "unbound" (wildcard) — mirroring
+# core.policy_gate.ApprovalLite.applies_to, which treats None as unbound. object.get with a
+# null default makes a missing key behave identically to a present-null key, so real input
+# (to_opa_input emits every field) and terse approvals agree.
 bound_ok(a) if {
 	commit_ok(a)
 	workflow_ok(a)
 	target_ok(a)
 }
 
-commit_ok(a) if a.commit == null
-commit_ok(a) if a.commit == input.commit
+commit_ok(a) if object.get(a, "commit", null) == null
+commit_ok(a) if object.get(a, "commit", null) == input.commit
 
-workflow_ok(a) if a.workflow_run == null
-workflow_ok(a) if a.workflow_run == input.workflow_run
+workflow_ok(a) if object.get(a, "workflow_run", null) == null
+workflow_ok(a) if object.get(a, "workflow_run", null) == input.workflow_run
 
-target_ok(a) if a.target == null
-target_ok(a) if a.target == input.domain
-target_ok(a) if a.target == input.repo
+target_ok(a) if object.get(a, "target", null) == null
+target_ok(a) if object.get(a, "target", null) == input.domain
+target_ok(a) if object.get(a, "target", null) == input.repo
 
 valid_approval(a) if {
 	unexpired(a)

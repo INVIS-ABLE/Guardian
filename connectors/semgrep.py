@@ -15,6 +15,7 @@ class SemgrepConnector(BaseConnector):
     binary = "semgrep"
     mode = "code_review"
     action = "code_review"
+    ACTIONS = ("scan",)
 
     def build_command(self, *, repo: str | None = None, target: str | None = None, **kwargs: Any) -> list[str]:
         path = kwargs.get("path", ".")

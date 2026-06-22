@@ -259,3 +259,55 @@ components:
     roadmap_area: 12
     phase: 6
     status: planned
+
+# Authoritative choices — one owner per function. Alternatives may CROSS-CHECK results, but
+# must never run as a second authority for the same function (that weakens accountability).
+# Enforced by tests/test_components_manifest.py: no alternative is also an authoritative
+# component id above.
+authoritative_choices:
+  - function: edge_gateway
+    selected: envoyproxy/gateway
+    not_as_second_authority: [haproxy/haproxy, caddyserver/caddy, nginx/nginx]
+  - function: waf
+    selected: corazawaf/coraza + coreruleset/coreruleset
+    not_as_second_authority: [ModSecurity/ModSecurity]
+  - function: network_policy
+    selected: cilium/cilium
+    not_as_second_authority: [projectcalico/calico, antrea-io/antrea]
+  - function: k8s_admission
+    selected: open-policy-agent/gatekeeper
+    not_as_second_authority: [kyverno/kyverno]
+  - function: identity
+    selected: keycloak/keycloak
+    not_as_second_authority: [goauthentik/authentik, kanidm/kanidm, ory/kratos]
+  - function: policy
+    selected: open-policy-agent/opa
+    not_as_second_authority: [application-local-authorization-bypass]
+  - function: secrets
+    selected: openbao/openbao
+    not_as_second_authority: [infisical/infisical]
+  - function: workflow
+    selected: temporalio/temporal
+    not_as_second_authority: [argoproj/argo-workflows]
+  - function: isolation
+    selected: google/gvisor
+    not_as_second_authority: [kata-containers/kata-containers, firecracker-microvm/firecracker]
+    note: gVisor initially; move high-risk jobs to Kata/Firecracker later (not a second authority).
+  - function: siem
+    selected: wazuh/wazuh
+    not_as_second_authority: [parallel-custom-siem]
+  - function: findings_ledger
+    selected: DefectDojo/django-DefectDojo
+    not_as_second_authority: [scanner-specific-remediation-databases]
+  - function: component_risk
+    selected: DependencyTrack/dependency-track
+    not_as_second_authority: [duplicate-sbom-lifecycle-system]
+  - function: evidence
+    selected: codenotary/immudb + signed object storage
+    not_as_second_authority: [local-jsonl-as-authoritative-record]
+  - function: ir_cases
+    selected: dfir-iris/iris-web
+    not_as_second_authority: [parallel-case-management-systems]
+  - function: observability
+    selected: open-telemetry/opentelemetry-collector + prometheus/loki/tempo/grafana
+    not_as_second_authority: [multiple-competing-telemetry-pipelines]

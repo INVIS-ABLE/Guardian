@@ -17,6 +17,13 @@ without an automated check is a gap to close.
 | Only registered test accounts are ever used | policy gate | `test_non_test_account_*` |
 | Crypto: no plaintext passwords, keys not stored beside data, no tokens in localStorage | `security/crypto/*` + `cryptoPolicyChecker` | `security/crypto/__tests__/*` |
 | Privacy: Guardian never decrypts/reads private content, holds keys, or trains on user data | privacy invariants are globally blocked actions in `core/policy_gate.py` + `policies/opa/guardian.rego` | `tests/test_privacy_invariants.py` |
+| AI agent: the model cannot self-escalate (expand scope, change policy, disable logging, merge/resolve its own work, arbitrary commands) | agent-boundary blocked actions in `core/policy_gate.py` + `policies/opa/guardian.rego` | `tests/test_agent_boundary.py` |
+| Connectors carry no raw command strings; execution needs signed authorization | the connector contract (`connectors/contract.py`); scanners migrated onto it | `tests/test_connector_contract.py`, `tests/test_connector_contract_migration.py` |
+| Evidence is append-only, redacted, and verifiable (immudb system of record; hash-chain fallback) | `core/evidence/store.py` | `tests/test_evidence_store.py` |
+| Key transparency: silent identity-key replacement is detectable; Verifier reads public data only | `core/verifier.py` (Guardian Verifier) | `tests/test_verifier.py` |
+| Connector execution requires a signed, unexpired, request-bound authorization (no replay/forgery) | `core/router.py::execute_capability` + `connectors/contract.py` + `core/signing.py` (Ed25519/HMAC) | `tests/test_router_contract_execution.py`, `tests/test_signing.py` |
+| OPA authority and the embedded mirror agree on every decision | `policies/opa/guardian.rego` vs `core/policy_gate.decide` | `tests/test_opa_parity.py` (OPA-policy CI job) |
+| A capability transition that diverges from its signed manifest/token is independently caught and freezes issuance; the Shadow holds no execution power | `shadow_guardian/` (separate package; independent re-derivation, read-only, freeze latch) | `tests/test_shadow_guardian.py` |
 
 ## The "bulletproof" acceptance tests (target state)
 
