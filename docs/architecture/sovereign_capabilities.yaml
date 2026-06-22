@@ -1,0 +1,259 @@
+# Guardian Sovereign Operations Plane — capability catalogue (single source of truth).
+#
+# The NEXT phase after the Brain V2 cognition layer (docs/brain_v2.md): total situational
+# awareness, deeper reasoning, a controlled experimentation laboratory, and BROKERED
+# operational power. This catalogue is separate from:
+#   * docs/architecture/components.yaml  — deployable trust-zone infrastructure
+#   * docs/architecture/brain_tools.yaml — the 20 cognitive tools the Brain reasons WITH
+# because these are higher-order *capability systems* assembled on top of both.
+#
+# The one rule about "full power" (docs/sovereign_ops_plane.md):
+#   Do NOT give the AI permanent administrator credentials behind strong firewalls — that is
+#   one catastrophic failure point. Give Guardian full ANALYTICAL visibility, full execution
+#   freedom inside DISPOSABLE ranges, full freedom to PREPARE code/tests/detections/recovery,
+#   and only SHORT-LIVED, one-action production capabilities issued after policy checks.
+#
+#   => Cognition proposes. Authority disposes. The Broker issues one-action credentials. The
+#      Verifier proves it was legitimate. No capability system can grant itself authority.
+#
+# The four separated powers (each a distinct module, so one compromise != total compromise):
+powers:
+  brain:    core/brain        # can reason and propose (orchestrator, graph, nodes, state)
+  policy:   core/policy_gate  # can approve or deny (OPA-backed reference monitor)
+  broker:   core/tools        # can issue one-action capability tokens (capability + executor)
+  verifier: core/verifier     # can prove whether everything was legitimate (independent monitor)
+#
+# Invariants enforced by tests/test_sovereign_capabilities_manifest.py:
+#   * exactly 20 capability systems, one authoritative owner per function (unique component)
+#   * grants_authority is false for EVERY system
+#   * any system reaching max_autonomy_level 5 (approval-bound production) REQUIRES human approval
+#   * the four powers above are real, distinct modules
+#   * never_autonomous is non-empty and lists the permanently-prohibited actions
+#
+# kind:               upstream | guardian_native
+# wave:               1 omniscience · 2 intelligence · 3 proof/experimentation · 4 operations
+# max_autonomy_level: highest of the five autonomy levels this system participates in —
+#   1 awareness · 2 investigation · 3 engineering · 4 reversible defence · 5 approval-bound prod
+version: 0.1.0
+principle: brokered_power_not_root
+
+# Permanently prohibited — Guardian can NEVER do these autonomously, in any posture.
+never_autonomous:
+  - grant_itself_permissions
+  - change_its_own_policies
+  - add_new_tools
+  - disable_evidence
+  - access_private_content_keys
+  - bypass_approval
+  - widen_scope
+  - target_third_parties
+  - convert_temporary_authority_into_permanent
+
+systems:
+  # --- Wave 1 — Omniscience (total awareness) ----------------------------------------- #
+  - id: digital_twin
+    system: Live cyber digital twin
+    component: lyft/cartography
+    kind: upstream
+    function: continuously-updated relationship graph of repos/services/identities/cloud/k8s/keys/data (CloudQuery as alt ingestion)
+    wave: 1
+    max_autonomy_level: 1
+    human_approval_required: false
+    grants_authority: false
+    status: planned
+  - id: identity_attack_graph
+    system: Identity & permission attack graph
+    component: SpecterOps/BloodHound
+    kind: upstream
+    function: effective/transitive permissions, privilege-escalation paths, dormant privilege, separation-of-duties breaks
+    wave: 1
+    max_autonomy_level: 1
+    human_approval_required: false
+    grants_authority: false
+    status: planned
+  - id: data_lineage_graph
+    system: Data lineage & privacy graph
+    component: datahub-project/datahub
+    kind: upstream
+    function: field-level lineage, classification propagation, processor boundaries, retention/deletion obligations (OpenLineage feeds)
+    wave: 1
+    max_autonomy_level: 1
+    human_approval_required: false
+    grants_authority: false
+    status: planned
+  - id: endpoint_fabric
+    system: Endpoint intelligence fabric
+    component: osquery/osquery
+    kind: upstream
+    function: structured OS-state visibility via signed, reviewed query packs only — never model-generated commands (Fleet orchestrates)
+    wave: 1
+    max_autonomy_level: 1
+    human_approval_required: false
+    grants_authority: false
+    status: planned
+  - id: event_fabric
+    system: Real-time security event fabric
+    component: ClickHouse/ClickHouse
+    kind: upstream
+    function: durable stream + analytical store for OPA/Temporal/GitHub/identity/Cilium/Falco/build/model events (Redpanda streams)
+    wave: 1
+    max_autonomy_level: 1
+    human_approval_required: false
+    grants_authority: false
+    status: planned
+  - id: forensic_timeline
+    system: Forensic timeline reconstruction
+    component: google/timesketch
+    kind: upstream
+    function: automatic incident chronologies so the Brain reasons from sequence, not isolated alerts
+    wave: 1
+    max_autonomy_level: 1
+    human_approval_required: false
+    grants_authority: false
+    status: planned
+
+  # --- Wave 2 — Intelligence (deeper reasoning) --------------------------------------- #
+  - id: hypothesis_engine
+    system: Evidence & competing-hypothesis engine
+    component: core/evidence
+    kind: guardian_native
+    function: every case holds competing hypotheses with supporting/contradicting/missing evidence + falsification tests; seeks disproof
+    wave: 2
+    max_autonomy_level: 2
+    human_approval_required: false
+    grants_authority: false
+    status: planned
+  - id: causal_engine
+    system: Causal root-cause engine
+    component: core/brain
+    kind: guardian_native
+    function: counterfactual reasoning to separate first event / root cause / enabling conditions / amplifiers / symptoms
+    wave: 2
+    max_autonomy_level: 2
+    human_approval_required: false
+    grants_authority: false
+    status: planned
+  - id: reasoning_council
+    system: Multi-model reasoning council
+    component: core/ai
+    kind: guardian_native
+    function: planner/sceptic/alt-hypothesis/attack-path/privacy/adjudicator roles across model families; adjudication, not majority vote
+    wave: 2
+    max_autonomy_level: 2
+    human_approval_required: false
+    grants_authority: false
+    status: planned
+  - id: calibration_engine
+    system: Confidence calibration & abstention
+    component: eval/calibration
+    kind: guardian_native
+    function: learns whether 90% confidence is right ~90% of the time; lowers it or abstains ("insufficient evidence") when unsupported
+    wave: 2
+    max_autonomy_level: 2
+    human_approval_required: false
+    grants_authority: false
+    status: planned
+  - id: threat_hunting
+    system: Autonomous threat-hunting engine
+    component: INVIS-ABLE/guardian-detections
+    kind: guardian_native
+    function: continuously generates read-only, budgeted, tenant-isolated, privacy-filtered hunts; validated hunts become permanent detections
+    wave: 2
+    max_autonomy_level: 2
+    human_approval_required: false
+    grants_authority: false
+    status: planned
+  - id: attack_path_forecasting
+    system: Predictive attack-path forecasting
+    component: networkx/networkx
+    kind: upstream
+    function: simulates reachability/blast-radius over the twin; evaluates PRs & infra changes BEFORE deploy, not after a scanner finds the exposure
+    wave: 2
+    max_autonomy_level: 2
+    human_approval_required: false
+    grants_authority: false
+    status: planned
+
+  # --- Wave 3 — Proof & controlled experimentation ------------------------------------ #
+  - id: adversary_emulation
+    system: Continuous adversary-emulation laboratory
+    component: mitre/caldera
+    kind: upstream
+    function: automated ATT&CK emulation in the test lab ONLY (Atomic Red Team, Stratus Red Team); every bypass becomes a regression test
+    wave: 3
+    max_autonomy_level: 3
+    human_approval_required: false
+    grants_authority: false
+    status: planned
+  - id: fuzzing_farm
+    system: Continuous fuzzing farm
+    component: google/clusterfuzzlite
+    kind: upstream
+    function: CI fuzzing of crypto envelopes/attachments/tokens/parsers (AFL++, Atheris, Jazzer; Schemathesis for API contracts)
+    wave: 3
+    max_autonomy_level: 3
+    human_approval_required: false
+    grants_authority: false
+    status: planned
+  - id: crypto_proof_lab
+    system: Cryptographic protocol proof laboratory
+    component: tamarin-prover/tamarin-prover
+    kind: upstream
+    function: symbolic verification of device/key/group/forward-secrecy/recovery flows (Verifpal, ProVerif) — review the crypto SYSTEM, never plaintext
+    wave: 3
+    max_autonomy_level: 3
+    human_approval_required: false
+    grants_authority: false
+    status: planned
+  - id: binary_malware_lab
+    system: Binary & malware analysis laboratory
+    component: NationalSecurityAgency/ghidra
+    kind: upstream
+    function: Tier-3 isolated reverse engineering (angr, CAPE Sandbox, YARA); no prod route, disposable VMs, full pcap, human approval to import unknown artifacts
+    wave: 3
+    max_autonomy_level: 3
+    human_approval_required: true
+    grants_authority: false
+    status: planned
+  - id: chaos_recovery_sim
+    system: Digital-twin chaos & recovery simulator
+    component: INVIS-ABLE/guardian-test-lab
+    kind: guardian_native
+    function: failure simulations (region/IdP/OPA/OpenBao/CA/key-rotation/queue/DB/audit/partition) against the CLONED twin; predicted vs actual impact
+    wave: 3
+    max_autonomy_level: 3
+    human_approval_required: false
+    grants_authority: false
+    status: planned
+
+  # --- Wave 4 — Brokered operational power -------------------------------------------- #
+  - id: remediation_factory
+    system: Autonomous remediation factory
+    component: agents/remediation
+    kind: guardian_native
+    function: reproduces issue in isolated copies, generates patch + failing/passing tests + SBOM/provenance, opens DRAFT PR; merge & prod stay approval-bound
+    wave: 4
+    max_autonomy_level: 5
+    human_approval_required: true
+    grants_authority: false
+    status: planned
+  - id: response_broker
+    system: Reversible response broker
+    component: core/response_broker
+    kind: guardian_native
+    function: separate service verifying identity/ownership/OPA/signed-capability/blast-radius/rollback before any reversible action; everything expires or rolls back
+    wave: 4
+    max_autonomy_level: 5
+    human_approval_required: true
+    grants_authority: false
+    status: planned
+  - id: confidential_shadow
+    system: Confidential execution & independent Shadow Guardian
+    component: confidential-containers/confidential-containers
+    kind: upstream
+    function: sensitive workers in TEEs; a separate-credential Shadow recomputes decisions, verifies envelope/artifact hashes, can FREEZE capability issuance but never take over prod
+    wave: 4
+    max_autonomy_level: 4
+    human_approval_required: false
+    grants_authority: false
+    status: planned

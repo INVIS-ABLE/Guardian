@@ -1,5 +1,9 @@
 # Guardian Brain V2 — Cognition Architecture
 
+> **Next phase:** once this cognition layer is built, [`sovereign_ops_plane.md`](sovereign_ops_plane.md)
+> takes Guardian to total awareness, brokered operational power and an independent Shadow verifier
+> — catalogue in [`architecture/sovereign_capabilities.yaml`](architecture/sovereign_capabilities.yaml).
+
 > **Going deeper than [`brain.md`](brain.md).** The V1 Brain is an ordered, dependency-free
 > state machine over a shared mutable blackboard — the *controls came before the intelligence*,
 > which is the right order. V2 makes the intelligence real: a durable, bounded, replayable
