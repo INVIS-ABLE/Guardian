@@ -10,6 +10,13 @@
 
 from __future__ import annotations
 
+from .graph import (
+    build_execution_graph,
+    build_investigation_graph,
+    run_execution,
+    run_investigation,
+)
+from .failures import FailureBehavior, FailureClass, behavior_for, is_fatal
 from .orchestrator import (
     POST_APPROVAL_STAGES,
     WORKFLOW,
@@ -44,4 +51,13 @@ __all__ = [
     "ExecutionBudgets",
     "VerifiedScope",
     "CaseTrigger",
+    # reasoning graph (LangGraph) + failure taxonomy
+    "build_investigation_graph",
+    "build_execution_graph",
+    "run_investigation",
+    "run_execution",
+    "FailureClass",
+    "FailureBehavior",
+    "behavior_for",
+    "is_fatal",
 ]

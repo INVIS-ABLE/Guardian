@@ -55,7 +55,12 @@ guardian:
   # not train a model from scratch.
   brain:
     enabled: true
-    workflow_engine: builtin       # builtin | langgraph (optional dependency)
+    workflow_engine: builtin       # builtin | langgraph (the legacy linear orchestrator)
+    # Bounded reasoning graph (inner) + durable case workflow (outer). See
+    # core/brain/graph.py, core/brain/temporal_workflow.py and docs/reasoning_graph.md.
+    reasoning_graph:
+      engine: langgraph            # LangGraph StateGraph over the typed GuardianCaseState
+      durable_workflow: temporal   # Temporal owns retries, suspension and crash-replay
     halt_for_human_approval: true  # hard stop before any deploy stage; cannot disable
     memory_writes: true            # persist detect/simulate/evidence outputs to memory
 
