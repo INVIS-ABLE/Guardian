@@ -28,6 +28,8 @@ allowed_modes:
   - privacy_leakage
   - safeguarding
   - abuse_simulation
+  - mobile_security
+  - credential_audit
 
 blocked_actions:
   - third_party_scan
@@ -45,6 +47,7 @@ approval_required:
   - account_locking_test
   - data_export_test
   - admin_permission_test
+  - credential_audit
 
 rate_limits:
   max_requests_per_second: 5

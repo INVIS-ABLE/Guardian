@@ -69,6 +69,8 @@ properties:
         - container_scan
         - iac_scan
         - runtime_monitoring
+        - credential_audit      # password-policy strength / login-defence resilience
+        - mobile_security       # MASVS/MASTG mobile + PWA defence checks
     description: Test modes permitted for this scope.
   blocked_actions:
     type: array
@@ -97,6 +99,7 @@ properties:
         - account_locking_test
         - data_export_test
         - admin_permission_test
+        - credential_audit      # hashcat/john/hydra-style auditing requires sign-off
   rate_limits:
     type: object
     additionalProperties: false

@@ -1,0 +1,77 @@
+# Mobile Guardian Modules
+# Defensive control catalogue for mobile / PWA surfaces of INVISABLE-owned apps.
+# Maps to OWASP MASVS/MASTG. These are DEFENCES Guardian verifies are present and
+# effective on owned staging — never techniques used against third parties or users.
+mobile_guardian_modules:
+  sim_swap_risk:
+    masvs: [MASVS-AUTH]
+    defences:
+      - avoid_sms_mfa
+      - detect_phone_number_change
+      - delay_sensitive_actions_after_number_change
+      - require_passkey_or_authenticator
+    guardian_checks:
+      - assert_sms_is_not_sole_mfa_factor
+      - assert_cooldown_on_sensitive_actions_after_number_change
+      - assert_passkey_or_totp_available
+
+  session_theft:
+    masvs: [MASVS-AUTH, MASVS-NETWORK]
+    defences:
+      - httpOnly_secure_sameSite_cookies
+      - refresh_token_rotation
+      - device_binding
+      - impossible_travel_detection
+      - force_reauth_for_sensitive_actions
+    guardian_checks:
+      - assert_session_cookies_httponly_secure_samesite
+      - assert_refresh_tokens_rotate_and_revoke_on_reuse
+      - assert_impossible_travel_triggers_reauth
+
+  pwa_browser_security:
+    masvs: [MASVS-PLATFORM, MASVS-STORAGE]
+    defences:
+      - strict_content_security_policy
+      - hsts
+      - no_tokens_in_localStorage
+      - service_worker_scope_lockdown
+      - cache_sensitive_data_never
+      - secure_push_notification_rules
+    guardian_checks:
+      - assert_csp_present_and_strict
+      - assert_hsts_header_present
+      - assert_no_auth_tokens_in_localstorage
+      - assert_service_worker_scope_restricted
+      - assert_sensitive_responses_not_cached
+
+  vulnerable_user_protection:
+    masvs: [MASVS-AUTH, MASVS-PRIVACY]
+    safeguarding: true
+    defences:
+      - verified_staff_badges
+      - anti_impersonation_detection
+      - panic_logout
+      - remote_session_kill
+      - privacy_by_default
+      - sensitive_profile_fields_hidden
+    guardian_checks:
+      - assert_staff_accounts_show_verified_badge
+      - assert_impersonation_signals_flagged
+      - assert_panic_logout_kills_all_sessions
+      - assert_admin_can_remote_kill_session
+      - assert_vulnerable_user_privacy_defaults_protective
+
+  malicious_uploads:
+    masvs: [MASVS-PLATFORM, MASVS-CODE]
+    defences:
+      - file_type_validation
+      - antivirus_scan
+      - image_metadata_stripping
+      - sandbox_preview
+      - quarantine_suspicious_files
+    guardian_checks:
+      - assert_upload_rejects_disallowed_types
+      - assert_uploads_are_av_scanned
+      - assert_image_exif_metadata_stripped
+      - assert_previews_render_sandboxed
+      - assert_suspicious_files_quarantined_not_served

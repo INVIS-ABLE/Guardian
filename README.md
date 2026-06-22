@@ -122,6 +122,8 @@ OWASP **WSTG**, **ASVS 5.0**, **SAMM**, **MASVS/MASTG**; **NIST SSDF**; **SLSA**
 - [docs/architecture.md](docs/architecture.md) — system architecture
 - [docs/agents.md](docs/agents.md) — the 17 Guardian agents
 - [docs/workflow.md](docs/workflow.md) — self-healing workflow detail
+- [docs/credential_audit_tools.md](docs/credential_audit_tools.md) — hashcat/John/Hydra, authorised defensive use only
+- [policies/mobile_guardian_modules.yaml](policies/mobile_guardian_modules.yaml) — mobile/PWA defence modules (MASVS/MASTG)
 
 ---
 
