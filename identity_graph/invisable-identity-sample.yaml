@@ -1,0 +1,41 @@
+# Sample identity & permission attack graph for the INVISABLE estate.
+#
+# Companion to twin/invisable-sample.yaml — the same estate, viewed through principals and
+# permissions instead of assets. It demonstrates all four questions the graph answers:
+#
+#   guardian id-perms    identity_graph/invisable-identity-sample.yaml id:human-dev
+#   guardian id-escalate identity_graph/invisable-identity-sample.yaml id:human-dev
+#   guardian id-dormant  identity_graph/invisable-identity-sample.yaml --idle-days 30 --as-of 2026-06-22
+#   guardian id-sod      identity_graph/invisable-identity-sample.yaml
+#
+# Findings it is built to surface:
+#   * effective    — id:human-dev holds only repo write (author), via engineers → repo-writer.
+#   * escalation   — id:human-dev can_assume role:release-admin, gaining approve_release.
+#   * dormant      — id:old-deploy still holds a sensitive deploy grant but went quiet in Feb.
+#   * SoD break    — id:release-bot can BOTH author and approve a release (one principal, both duties).
+#
+# Metadata only: a principal is an identifier; a grant names an action on a resource, never
+# the data. This graph is structurally outside private content (mirrors the digital twin).
+principals:
+  - { id: "id:human-dev",      kind: human,           name: "Developer",         owner: eng,      last_active: 2026-06-20 }
+  - { id: "id:release-bot",    kind: service_account, name: "Release bot",        owner: platform, last_active: 2026-06-21 }
+  - { id: "id:ci-token",       kind: machine,         name: "CI deploy token",    owner: platform, last_active: 2026-06-22 }
+  - { id: "id:old-deploy",     kind: service_account, name: "Legacy deploy bot",  owner: platform, last_active: 2025-02-01 }
+  - { id: "group:engineers",   kind: group,           name: "Engineers" }
+  - { id: "role:repo-writer",  kind: role,            name: "Repository writer" }
+  - { id: "role:release-admin", kind: role,           name: "Release admin" }
+  - { id: "role:deployer",     kind: role,            name: "Deployer" }
+
+edges:
+  - { src: "id:human-dev",   dst: "group:engineers",    kind: member_of }
+  - { src: "group:engineers", dst: "role:repo-writer",  kind: member_of }
+  - { src: "id:human-dev",   dst: "role:release-admin", kind: can_assume }   # escalation seam
+  - { src: "id:release-bot", dst: "role:repo-writer",   kind: member_of }
+  - { src: "id:release-bot", dst: "role:release-admin", kind: member_of }    # both duties → SoD break
+  - { src: "id:ci-token",    dst: "role:deployer",      kind: member_of }
+  - { src: "id:old-deploy",  dst: "role:deployer",      kind: member_of }
+
+grants:
+  - { holder: "role:repo-writer",   action: write,           resource: "repo:guardian",       duty: author }
+  - { holder: "role:release-admin", action: approve_release, resource: "repo:guardian",       duty: approve, sensitive: true }
+  - { holder: "role:deployer",      action: deploy,          resource: "svc:messaging-relay", duty: deploy,  sensitive: true }

@@ -189,5 +189,104 @@ def twin_assess_cmd(spec_file: str, changed: str, fail_on: str, max_depth: int |
     raise SystemExit(1 if breached else 0)
 
 
+@main.command("id-perms")
+@click.argument("spec_file", type=click.Path(exists=True))
+@click.argument("principal_id")
+def id_perms_cmd(spec_file: str, principal_id: str) -> None:
+    """Identity graph: effective + transitive permissions of PRINCIPAL_ID."""
+    from .identity_graph import load_graph
+
+    graph = load_graph(spec_file)
+    who = graph.principal(principal_id)
+    perms = graph.effective_permissions(principal_id)
+    click.echo(f"Effective permissions of {who.kind.value} '{who.name}' ({principal_id}):")
+    if not perms:
+        click.echo("  (no permissions)")
+    for p in perms:
+        src = "direct" if not p.inherited else f"via {p.via}"
+        tags = (" [sensitive]" if p.sensitive else "") + (f" [{p.duty}]" if p.duty else "")
+        click.echo(f"  {p.action:16s} {p.resource:24s} ({src}){tags}")
+    AuditLog().record("id-perms", actor="cli", scope=principal_id, decision="allowed",
+                      detail={"permissions": len(perms)})
+
+
+@main.command("id-escalate")
+@click.argument("spec_file", type=click.Path(exists=True))
+@click.argument("principal_id")
+@click.option("--max-depth", type=int, default=None, help="Limit escalation path length.")
+def id_escalate_cmd(spec_file: str, principal_id: str, max_depth: int | None) -> None:
+    """Identity graph: privilege-escalation paths open to PRINCIPAL_ID."""
+    from .identity_graph import load_graph
+
+    graph = load_graph(spec_file)
+    who = graph.principal(principal_id)
+    paths = graph.escalation_paths(principal_id, max_depth=max_depth)
+    click.echo(f"Escalation paths from {who.kind.value} '{who.name}' ({principal_id}):")
+    if not paths:
+        click.echo("  (none — cannot acquire rights beyond its effective set)")
+    for ep in paths:
+        trail = principal_id + "".join(f" → {s.via.value} → {s.principal}" for s in ep.path)
+        gained = ", ".join(f"{g.action}:{g.resource}" for g in ep.gained)
+        click.echo(f"  {trail}")
+        click.echo(f"      gains: {gained}")
+    AuditLog().record("id-escalate", actor="cli", scope=principal_id, decision="allowed",
+                      detail={"paths": len(paths)})
+
+
+@main.command("id-dormant")
+@click.argument("spec_file", type=click.Path(exists=True))
+@click.option("--idle-days", type=int, default=90, help="Idle threshold in days (default 90).")
+@click.option("--as-of", default=None, help="Reference date YYYY-MM-DD (default: today).")
+@click.option("--sensitive-only", is_flag=True, help="Only principals holding sensitive grants.")
+def id_dormant_cmd(spec_file: str, idle_days: int, as_of: str | None,
+                   sensitive_only: bool) -> None:
+    """Identity graph: privileged principals that have gone dormant."""
+    from datetime import date
+
+    from .identity_graph import load_graph
+
+    graph = load_graph(spec_file)
+    ref = date.fromisoformat(as_of) if as_of else date.today()
+    dormant = graph.dormant_privileges(as_of=ref, idle_days=idle_days,
+                                       sensitive_only=sensitive_only)
+    click.echo(f"Dormant privileged principals (idle ≥ {idle_days}d as of {ref.isoformat()}):")
+    if not dormant:
+        click.echo("  (none)")
+    for d in dormant:
+        idle = "never active" if d.idle_days is None else f"idle {d.idle_days}d"
+        tag = " [sensitive]" if d.sensitive else ""
+        click.echo(f"  {d.principal.id:18s} {idle:16s} {d.permissions} perm(s){tag}")
+    AuditLog().record("id-dormant", actor="cli", scope=spec_file, decision="allowed",
+                      detail={"dormant": len(dormant)})
+
+
+@main.command("id-sod")
+@click.argument("spec_file", type=click.Path(exists=True))
+@click.option("--conflict", "conflicts", multiple=True, metavar="NAME:A:B",
+              help="Duty conflict as name:dutyA:dutyB (repeatable). Default: release author/approve.")
+def id_sod_cmd(spec_file: str, conflicts: tuple[str, ...]) -> None:
+    """Identity graph: separation-of-duties breaks (one principal, two conflicting duties)."""
+    from .identity_graph import DutyConflict, load_graph
+
+    graph = load_graph(spec_file)
+    if conflicts:
+        parsed = []
+        for raw in conflicts:
+            name, a, b = raw.split(":", 2)
+            parsed.append(DutyConflict(name=name, a=a, b=b))
+    else:
+        parsed = [DutyConflict(name="release author/approver", a="author", b="approve")]
+    breaks = graph.separation_of_duties_breaks(parsed)
+    click.echo("Separation-of-duties breaks:")
+    if not breaks:
+        click.echo("  (none)")
+    for b in breaks:
+        click.echo(f"  {b.principal:18s} {b.conflict.name}: "
+                   f"{b.action_a} ({b.conflict.a}) + {b.action_b} ({b.conflict.b})")
+    AuditLog().record("id-sod", actor="cli", scope=spec_file, decision="allowed",
+                      detail={"breaks": len(breaks)})
+    raise SystemExit(1 if breaks else 0)
+
+
 if __name__ == "__main__":  # pragma: no cover
     main()
