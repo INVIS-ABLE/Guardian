@@ -1,0 +1,261 @@
+# Guardian target architecture — component manifest (single source of truth).
+#
+# Principle: ONE authoritative owner per function. Do not add overlapping platforms to
+# inflate tool count. Every component is pinned (sha256 digest for images, full commit SHA
+# for Actions), runs private-by-default, and maps to a hardening-roadmap area + phase.
+#
+# trust_zone:
+#   edge        — controlled external entry (DMZ)
+#   management  — Guardian's own control plane (separate from protected systems)
+#   identity    — authn/z, secrets, PKI
+#   execution   — sandboxed scanner/repo-processing workloads
+#   evidence    — immutable audit, attestation, findings, backups
+#   detection   — runtime/network detection, IR, forensics
+#   observability — telemetry pipeline
+#
+# status: present | planned   |   phase: 0..6 (see docs/hardening_roadmap.md)
+version: 0.1.0
+principle: one_authoritative_owner_per_function
+defaults:
+  pin: digest          # images by sha256; Actions by full commit SHA
+  network: private_by_default
+  egress: default_deny
+
+components:
+  # --- Edge -----------------------------------------------------------------------------
+  - id: edge_gateway
+    component: envoyproxy/gateway
+    function: controlled entry point for every API and dashboard
+    trust_zone: edge
+    roadmap_area: 7
+    phase: 3
+    status: planned
+  - id: waf_engine
+    component: corazawaf/coraza
+    function: embedded web application firewall engine
+    trust_zone: edge
+    roadmap_area: 16
+    phase: 3
+    status: planned
+  - id: waf_rules
+    component: coreruleset/coreruleset
+    function: OWASP CRS attack-detection rules for the WAF
+    trust_zone: edge
+    roadmap_area: 16
+    phase: 3
+    status: planned
+  - id: dashboard_auth
+    component: oauth2-proxy/oauth2-proxy
+    function: OIDC authentication in front of Guardian dashboard/APIs
+    trust_zone: edge
+    roadmap_area: 7
+    phase: 2
+    status: planned
+
+  # --- Network / runtime enforcement & detection ----------------------------------------
+  - id: network_policy
+    component: cilium/cilium
+    function: identity-aware, deny-by-default network policies
+    trust_zone: execution
+    roadmap_area: 7
+    phase: 3
+    status: planned
+  - id: runtime_enforcement
+    component: cilium/tetragon
+    function: block prohibited processes and network activity at runtime
+    trust_zone: execution
+    roadmap_area: 8
+    phase: 3
+    status: planned
+  - id: runtime_detection
+    component: falcosecurity/falco
+    function: detect suspicious container/host behaviour
+    trust_zone: detection
+    roadmap_area: 8
+    phase: 6
+    status: planned
+  - id: network_ids
+    component: OISF/suricata
+    function: signature/protocol network IDS-IPS
+    trust_zone: detection
+    roadmap_area: 19
+    phase: 6
+    status: planned
+  - id: network_analysis
+    component: zeek/zeek
+    function: deep network metadata + behavioural evidence
+    trust_zone: detection
+    roadmap_area: 19
+    phase: 6
+    status: planned
+  - id: reputation_defence
+    component: crowdsecurity/crowdsec
+    function: shared malicious-IP/behaviour detection + blocking
+    trust_zone: detection
+    roadmap_area: 20
+    phase: 6
+    status: planned
+
+  # --- Authority (policy & authorization) -----------------------------------------------
+  - id: policy_engine
+    component: open-policy-agent/opa
+    function: central allow/deny authority (the one reference monitor)
+    trust_zone: management
+    roadmap_area: 1
+    phase: 1
+    status: present          # core/policy_gate.py + policies/opa/guardian.rego
+  - id: k8s_admission
+    component: open-policy-agent/gatekeeper
+    function: Kubernetes admission-policy enforcement
+    trust_zone: management
+    roadmap_area: 18
+    phase: 1
+    status: planned
+  - id: relationship_authz
+    component: openfga/openfga
+    function: repo/org/asset-level relationship authorization (ReBAC)
+    trust_zone: identity
+    roadmap_area: 2
+    phase: 2
+    status: planned
+
+  # --- Identity, PKI, secrets -----------------------------------------------------------
+  - id: identity_provider
+    component: keycloak/keycloak
+    function: OIDC, MFA, role management
+    trust_zone: identity
+    roadmap_area: 7
+    phase: 2
+    status: planned
+  - id: workload_identity
+    component: spiffe/spire
+    function: cryptographic service identities (SVIDs)
+    trust_zone: identity
+    roadmap_area: 5
+    phase: 2
+    status: planned
+  - id: cert_manager
+    component: cert-manager/cert-manager
+    function: automated certificate lifecycle
+    trust_zone: identity
+    roadmap_area: 7
+    phase: 2
+    status: planned
+  - id: internal_ca
+    component: smallstep/certificates
+    function: private PKI, short-lived certificates
+    trust_zone: identity
+    roadmap_area: 14
+    phase: 2
+    status: planned
+  - id: secrets_vault
+    component: openbao/openbao
+    function: dynamic credentials, signing + encryption keys
+    trust_zone: identity
+    roadmap_area: 4
+    phase: 2
+    status: planned
+  - id: git_secret_encryption
+    component: getsops/sops
+    function: encrypt configuration stored in Git (age/KMS)
+    trust_zone: identity
+    roadmap_area: 4
+    phase: 2
+    status: planned
+  - id: secret_delivery
+    component: external-secrets/external-secrets
+    function: deliver secrets to workloads without hard-coding
+    trust_zone: identity
+    roadmap_area: 4
+    phase: 2
+    status: planned
+
+  # --- Orchestration & isolation --------------------------------------------------------
+  - id: durable_orchestration
+    component: temporalio/temporal
+    function: approval-aware, restart-safe security workflows
+    trust_zone: management
+    roadmap_area: 3
+    phase: 1
+    status: planned
+  - id: execution_isolation
+    component: google/gvisor
+    function: sandbox scanners/repo processing from the host
+    trust_zone: execution
+    roadmap_area: 8
+    phase: 3
+    status: planned
+
+  # --- Findings, evidence, attestation, recovery ----------------------------------------
+  - id: findings_ledger
+    component: DefectDojo/django-DefectDojo
+    function: central findings/remediation system (one ledger)
+    trust_zone: management
+    roadmap_area: 6
+    phase: 4
+    status: planned
+  - id: component_risk
+    component: DependencyTrack/dependency-track
+    function: continuous SBOM + dependency analysis
+    trust_zone: management
+    roadmap_area: 9
+    phase: 4
+    status: planned
+  - id: immutable_evidence
+    component: codenotary/immudb
+    function: cryptographically verifiable audit records (system of record)
+    trust_zone: evidence
+    roadmap_area: 5
+    phase: 2
+    status: planned          # local hash chain (core/audit.py) is the cache today
+  - id: artifact_signing
+    component: sigstore/cosign
+    function: sign images, reports, releases; verify by digest
+    trust_zone: evidence
+    roadmap_area: 9
+    phase: 4
+    status: planned
+  - id: pipeline_evidence
+    component: in-toto/witness
+    function: attest security + build steps across the pipeline
+    trust_zone: evidence
+    roadmap_area: 9
+    phase: 4
+    status: planned
+  - id: recovery
+    component: restic/restic
+    function: encrypted, verifiable backups (immutable/WORM)
+    trust_zone: evidence
+    roadmap_area: 26
+    phase: 6
+    status: planned
+
+  # --- Incident response, host detection, forensics, telemetry --------------------------
+  - id: incident_response
+    component: dfir-iris/iris-web
+    function: cases, evidence, tasks, investigations
+    trust_zone: detection
+    roadmap_area: 27
+    phase: 6
+    status: planned
+  - id: host_detection
+    component: wazuh/wazuh
+    function: SIEM, endpoint monitoring, compliance
+    trust_zone: detection
+    roadmap_area: 19
+    phase: 6
+    status: planned
+  - id: endpoint_forensics
+    component: Velocidex/velociraptor
+    function: deep remote forensic collection
+    trust_zone: detection
+    roadmap_area: 27
+    phase: 6
+    status: planned
+  - id: telemetry
+    component: open-telemetry/opentelemetry-collector
+    function: central metrics/log/trace pipeline (trace IDs everywhere)
+    trust_zone: observability
+    roadmap_area: 12
+    phase: 6
+    status: planned
