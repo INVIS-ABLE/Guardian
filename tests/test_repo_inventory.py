@@ -138,3 +138,23 @@ def test_no_unsanctioned_subprocess_via_live_scan() -> None:
 def test_report_path_under_repo() -> None:
     assert REPORT_JSON.is_relative_to(REPO_ROOT)
     assert isinstance(Path(REPORT_JSON), Path)
+
+
+def test_freshness_check_ignores_test_list_churn(report: dict) -> None:
+    # Multi-worker robustness: another PR adding a test file must NOT make the committed
+    # report "stale". The drift check enforces registries + security surface, not the
+    # volatile test-file list.
+    import copy
+
+    mutated = copy.deepcopy(report)
+    mutated["tests"].append("tests/test_brand_new_worker.py")
+    mutated.setdefault("summary", {})["tests"] = mutated["summary"].get("tests", 0) + 1
+    assert inventory._stable(report) == inventory._stable(mutated)
+
+
+def test_freshness_check_still_catches_registry_drift(report: dict) -> None:
+    import copy
+
+    mutated = copy.deepcopy(report)
+    mutated["agents"] = mutated["agents"][:-1]  # drop an agent
+    assert inventory._stable(report) != inventory._stable(mutated)
