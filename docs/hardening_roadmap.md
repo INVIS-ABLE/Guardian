@@ -25,7 +25,7 @@ plugs into that single decision point.
 | # | Area | Upstream | Status | Where |
 | - | ---- | -------- | ------ | ----- |
 | 1 | Policy & authorisation | OPA, conftest | ✅ keystone | `core/policy_gate.py`, `policies/opa/*.rego`, `docs/authorization.md` |
-| 2 | Ownership verification | PyGithub, dnspython | ⬜ | inject a real verifier into `Guardrails.ownership_verifier`; expiring evidence |
+| 2 | Ownership verification | PyGithub, dnspython | 🟡 | live, expiring, fail-closed verifier shipped (`ownership/`): DNS-TXT challenge + GitHub-App owner proof via injected resolvers, re-resolves immediately before use (TTL-bounded), drops into `Guardrails.ownership_verifier`; concrete dnspython/PyGithub resolver wiring pending |
 | 3 | Durable workflows & approvals | Temporal + sdk-python | 🟡 | state machine + engine shipped (`orchestration/`): monotonic states, two-reviewer approvals, replay protection, kill switches, budgets, **re-ask policy before execute**; Temporal cluster wiring pending |
 | 4 | Secrets & keys | OpenBao, SOPS | 🟡 | short-lived credential broker shipped (`identity/credentials.py`: TTL ceiling, expiry, revoke); OpenBao + SOPS wiring pending |
 | 5 | Immutable audit & evidence | immudb, in-toto/witness, cosign | 🟡 | system-of-record + Ed25519-signed attestations shipped (`attestation/`); local deletion can't erase evidence; immudb + cosign/witness wiring pending |
@@ -48,7 +48,7 @@ plugs into that single decision point.
 | ---------- | ------ | -------- |
 | Authorisation — one central path, no `allow_production` | ✅ | `core/policy_gate.py`; `tests/test_guardrails.py::test_authorize_has_no_allow_production_parameter` |
 | Approvals — two distinct people, action/commit/workflow-bound, expire | 🟡 | policy enforces 2-distinct + expiry; durable signal flow (Temporal) pending |
-| Ownership — verified immediately before sensitive execution | ⬜ | verifier hook present; PyGithub/dnspython impl pending |
+| Ownership — verified immediately before sensitive execution | 🟡 | live re-resolving verifier shipped (`ownership/`, `tests/test_ownership.py`): TTL=0 re-proves every call, fail-closed; dnspython/PyGithub resolver wiring pending |
 | Audit — allowed/denied/failed/cancelled, immutable + signed | 🟡 | denials audited in hash chain; immudb + attestations pending |
 | Secrets — none long-lived in Git/.env/compose | ⬜ | OpenBao/SOPS pending |
 | CI — all security jobs block; Actions by SHA; containers by digest | ⬜ | next PR |
