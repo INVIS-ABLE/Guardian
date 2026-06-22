@@ -42,6 +42,11 @@ guardian:
     grype:    { enabled: true }
     checkov:  { enabled: false }
     playwright: { enabled: true, config: playwright/playwright.config.ts }
+    # Credential-audit connectors: AUTHORISED DEFENSIVE USE ONLY. Disabled by default;
+    # owned staging + test accounts only, and approval-gated (credential_audit).
+    hashcat:  { enabled: false, purpose: password_policy_strength_audit }
+    john:     { enabled: false, purpose: password_policy_strength_audit }
+    hydra:    { enabled: false, purpose: login_defence_resilience }
 
   # --- Self-healing workflow --------------------------------------------------
   self_healing:
