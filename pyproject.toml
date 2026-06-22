@@ -62,6 +62,9 @@ packages = [
     "connectors",
     "simulators",
     "shadow_guardian",
+    "adaptive",
+    "adaptive.autonomy",
+    "adaptive.healing",
 ]
 
 [tool.pytest.ini_options]
