@@ -35,6 +35,19 @@ BLOCKED_ACTIONS: frozenset[str] = frozenset(
         "exploit_deployment",
         "hack_back",
         "destructive_testing",
+        # --- Privacy Fabric invariants -------------------------------------------------
+        # Guardian protects the cryptographic system; it is NEVER a reader inside it.
+        # Globally blocked so no scope, model, or agent can request them. See
+        # docs/privacy_fabric/ and policies/privacy_invariants.yaml.
+        "decrypt_private_content",
+        "access_message_plaintext",
+        "copy_private_content_to_memory",
+        "send_private_content_to_model",
+        "store_decryption_keys",
+        "silent_moderation_participant",
+        "create_master_access_key",
+        "plaintext_in_observability",
+        "train_on_user_content",
     }
 )
 

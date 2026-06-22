@@ -16,6 +16,7 @@ without an automated check is a gap to close.
 | Denied actions are audited, not just successful ones | `Guardrails._audit_denial` | manual + audit chain |
 | Only registered test accounts are ever used | policy gate | `test_non_test_account_*` |
 | Crypto: no plaintext passwords, keys not stored beside data, no tokens in localStorage | `security/crypto/*` + `cryptoPolicyChecker` | `security/crypto/__tests__/*` |
+| Privacy: Guardian never decrypts/reads private content, holds keys, or trains on user data | privacy invariants are globally blocked actions in `core/policy_gate.py` + `policies/opa/guardian.rego` | `tests/test_privacy_invariants.py` |
 
 ## The "bulletproof" acceptance tests (target state)
 
