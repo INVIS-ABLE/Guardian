@@ -33,7 +33,6 @@ class ModelProvider(Protocol):
 
     def available(self) -> bool:
         """Whether this provider can currently serve a call (SDK + credentials)."""
-        ...
 
     def complete(
         self,
@@ -45,7 +44,6 @@ class ModelProvider(Protocol):
         timeout_s: float,
     ) -> ProviderResult:
         """Run a single completion. Raise on any failure — the gateway fails closed."""
-        ...
 
 
 __all__ = ["ProviderResult", "ModelProvider"]
