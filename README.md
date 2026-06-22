@@ -141,6 +141,8 @@ OWASP **WSTG**, **ASVS 5.0**, **SAMM**, **MASVS/MASTG**; **NIST SSDF**; **SLSA**
 - [docs/tooling_catalogue.md](docs/tooling_catalogue.md) — every tool Guardian orchestrates, with upstream sources
 - [docs/authorization.md](docs/authorization.md) — central OPA-backed authorization (no `allow_production`)
 - [docs/hardening_roadmap.md](docs/hardening_roadmap.md) — 12-area hardening blueprint → 10/10 acceptance gate
+- [docs/architecture/target_stack.md](docs/architecture/target_stack.md) — target production stack ([components.yaml](docs/architecture/components.yaml))
+- [docs/governance/](docs/governance/) — threat model, invariants, exception process, IR/DR plans
 - [docs/tool_independence.md](docs/tool_independence.md) — defensive vendor/pin + detection-learning plan
 - [policies/mobile_guardian_modules.yaml](policies/mobile_guardian_modules.yaml) — mobile/PWA defence modules (MASVS/MASTG)
 - **Encryption & hashing layer** — [security/README.md](security/README.md),
