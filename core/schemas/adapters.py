@@ -22,7 +22,8 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 
 
 class _HasToDict(Protocol):
-    def to_dict(self) -> dict: ...
+    def to_dict(self) -> dict:  # pragma: no cover - structural typing only
+        """Legacy result objects expose their plain-dict form via ``to_dict()``."""
 
 
 def route_result_to_event(
