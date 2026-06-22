@@ -17,7 +17,7 @@ from adaptive.autonomy.states import (
 
 def test_production_class_is_never_structurally_permitted():
     # Class E is approval-bound; no control state grants it autonomously.
-    for state in ControlState:
+    for state in ControlState.__members__.values():
         assert AutonomyClass.PRODUCTION not in permitted_classes(state)
 
 
@@ -87,11 +87,11 @@ def test_invalid_transition_is_refused():
 
 
 def test_any_state_may_drop_to_frozen_or_degraded():
-    for state in ControlState:
+    for state in ControlState.__members__.values():
         if state is ControlState.FROZEN:
             continue
         assert propose_transition(state, ControlState.FROZEN, reason="safe").valid
-    for state in ControlState:
+    for state in ControlState.__members__.values():
         if state is ControlState.DEGRADED:
             continue
         assert propose_transition(state, ControlState.DEGRADED, reason="safe").valid
