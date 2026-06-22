@@ -50,16 +50,18 @@ class _Frozen(BaseModel):
 class Classification(str, Enum):
     """Data-classification label that must *propagate* through every transformation.
 
-    Mirrors docs/governance/DATA_CLASSIFICATION.md. ``MESSAGE_PLAINTEXT`` and
-    ``DECRYPTION_KEY`` are tracked so the privacy boundary can refuse to let them
-    near a model or long-term memory (policy_gate BLOCKED_ACTIONS enforce the act;
-    the label lets us detect and refuse *content* too).
+    The coarse tiers mirror docs/governance/DATA_CLASSIFICATION.md
+    (PUBLIC | INTERNAL | CONFIDENTIAL | RESTRICTED). ``PII``/``HEALTH`` are finer
+    labels for the RESTRICTED tier; ``MESSAGE_PLAINTEXT`` and ``DECRYPTION_KEY`` are
+    tracked so the privacy boundary can refuse to let them near a model or long-term
+    memory (policy_gate BLOCKED_ACTIONS enforce the act; the label lets us detect and
+    refuse *content* too).
     """
 
     PUBLIC = "public"
     INTERNAL = "internal"
     CONFIDENTIAL = "confidential"
-    SECRET = "secret"
+    RESTRICTED = "restricted"  # real-user PII / health / safeguarding (governance tier)
     PII = "pii"
     HEALTH = "health"
     MESSAGE_PLAINTEXT = "message_plaintext"
