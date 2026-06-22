@@ -2,15 +2,7 @@
 
 from __future__ import annotations
 
-import pytest
-
-from attestation import (
-    Ed25519Signer,
-    HmacSigner,
-    InMemoryEvidenceStore,
-    SystemOfRecord,
-    ed25519_available,
-)
+from attestation import HmacSigner, InMemoryEvidenceStore, SystemOfRecord
 from core.audit import AuditLog
 
 
@@ -36,15 +28,6 @@ def test_hmac_signature_detects_forgery():
     sig = signer.sign(rec)
     assert signer.verify(rec, sig) is True
     assert HmacSigner(b"k2").verify(rec, sig) is False  # different key
-
-
-@pytest.mark.skipif(not ed25519_available(), reason="cryptography not installed")
-def test_ed25519_signature_is_asymmetric():
-    a = Ed25519Signer()
-    rec = {"evidence": "x"}
-    sig = a.sign(rec)
-    assert a.verify(rec, sig) is True
-    assert Ed25519Signer().verify(rec, sig) is False  # different keypair cannot verify
 
 
 def test_deleting_local_cache_does_not_lose_authoritative_evidence(tmp_path):

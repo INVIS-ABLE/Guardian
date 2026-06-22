@@ -55,13 +55,16 @@ class EvidenceStore(ABC):
     """Append-only, verifiable evidence store."""
 
     @abstractmethod
-    def append(self, record: dict[str, Any]) -> Attestation: ...
+    def append(self, record: dict[str, Any]) -> Attestation:
+        """Append a record and return its signed, chained attestation."""
 
     @abstractmethod
-    def all(self) -> list[Attestation]: ...
+    def all(self) -> list[Attestation]:
+        """Return all attestations in order."""
 
     @abstractmethod
-    def verify(self) -> bool: ...
+    def verify(self) -> bool:
+        """Recompute the chain + signatures; True if intact."""
 
 
 class InMemoryEvidenceStore(EvidenceStore):
