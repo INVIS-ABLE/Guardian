@@ -3,6 +3,7 @@
 # sufficient — a scope file must still authorise the specific run.
 assets:
   - id: invisable-staging
+    tenant: invisable
     name: INVISABLE App (staging)
     environment: staging
     type: web_app
@@ -17,6 +18,7 @@ assets:
     safeguarding_relevant: true
 
   - id: invisable-api-staging
+    tenant: invisable
     name: INVISABLE API (staging)
     environment: staging
     type: api
@@ -34,6 +36,7 @@ assets:
   # Production assets are listed for inventory only. Targeting any of these requires
   # a separate, human-approved production scope file (approval_required: production_scan).
   - id: invisable-production
+    tenant: invisable
     name: INVISABLE App (production)
     environment: production
     type: web_app
