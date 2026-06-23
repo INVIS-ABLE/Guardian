@@ -1,0 +1,28 @@
+# Fuzzing campaign for the INVISABLE security-critical parsers.
+#
+# Guardian fuzzes the surfaces an attacker would target — the crypto envelope, attachment and
+# token parsers — and turns the noisy crash stream into durable knowledge: dedup by signature,
+# then mint a regression seed for every unique crash so it can never silently return.
+#
+# Run:
+#   guardian fuzz      fuzzing/invisable-fuzz-campaign.yaml
+#   guardian fuzz-gate fuzzing/invisable-fuzz-campaign.yaml   # exits non-zero on any new crash
+#
+# Crash inputs are referenced by HASH only, never inlined — the farm is metadata-only and a
+# malicious corpus entry never becomes content.
+campaign: "nightly crypto-parser fuzz"
+
+targets:
+  - { id: "fuzz:crypto-envelope", name: "Crypto envelope parser", surface: crypto_envelope, engine: atheris }
+  - { id: "fuzz:attachment",      name: "Attachment decoder",     surface: attachment,      engine: atheris }
+  - { id: "fuzz:token",           name: "Capability token parser", surface: token,          engine: atheris }
+
+crashes:
+  # Three inputs hit the SAME envelope bug → one unique crash (deduped by signature).
+  - { target_id: "fuzz:crypto-envelope", signature: "env-oob-read-7f3a", kind: crash,     input_hash: "sha256:1111aaaa", severity: critical }
+  - { target_id: "fuzz:crypto-envelope", signature: "env-oob-read-7f3a", kind: crash,     input_hash: "sha256:2222bbbb", severity: high }
+  - { target_id: "fuzz:crypto-envelope", signature: "env-oob-read-7f3a", kind: crash,     input_hash: "sha256:3333cccc", severity: critical }
+  # A distinct attachment hang.
+  - { target_id: "fuzz:attachment",      signature: "att-decompress-loop", kind: timeout, input_hash: "sha256:4444dddd", severity: medium }
+  # A token assertion failure.
+  - { target_id: "fuzz:token",           signature: "tok-len-assert",      kind: assertion, input_hash: "sha256:5555eeee", severity: high }
