@@ -5,6 +5,24 @@ Each decision records: context, decision, rationale, and how to reverse it.
 
 ---
 
+## D-0007 — Durable, signed grant store + registry tenant column (Phase D)
+- **Date:** 2026-06-23
+- **Context:** Grants were in-memory only (Phase A). Tenant authority needs a managed,
+  revocable, persistent record; and the asset registry had no tenant column, so scope
+  ↔ asset tenant matching could not be enforced.
+- **Decision:** Add `AuthorisationGrant.to_dict()/from_dict()` round-trip and
+  `core/grants.py` (`GrantStore`: JSON persistence, `issue` [requires signing key],
+  `revoke`, `active_grants`, tenant-isolated `authorise`). Add a `tenant` column
+  (default `invisable`) to `scope/assets.yaml` and `scope/test_accounts.yaml`, and
+  enforce in `core/scope.py` that a scope may only target an asset owned by its own
+  tenant (cross-tenant reference → `ScopeError`).
+- **Rationale:** Makes authority durable and revocable without weakening any control:
+  empty/missing/malformed store ⇒ deny; issuance needs the key (no self-granted
+  authority); signatures persist and re-verify; lookups are tenant-isolated. The
+  registry default `invisable` keeps every existing scope valid.
+- **Reverse:** Delete `core/grants.py`, the (de)serialisers, the scope cross-check, and
+  the registry `tenant:` columns. Defaults are `invisable`; no data migration occurred.
+
 ## D-0005 — Tenant-scope the data plane additively, defaulting to INVISABLE (Phase C)
 - **Date:** 2026-06-23
 - **Context:** Evidence, findings, connector authorisations, the target root of trust,

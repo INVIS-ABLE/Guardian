@@ -47,3 +47,28 @@ def test_unregistered_test_account_rejected(tmp_path):
     )
     with pytest.raises(ScopeError):
         load_scope(bad)
+
+
+def test_pre_tenancy_scope_matches_invisable_asset(staging_scope):
+    """A scope with no explicit tenant targets an invisable-owned asset cleanly."""
+    assert staging_scope.tenant == "invisable"  # default
+    # load_scope already cross-checked tenant == asset tenant without raising.
+
+
+def test_cross_tenant_asset_reference_is_denied(tmp_path):
+    """A scope declaring tenant 'globex' may not target an invisable-owned asset."""
+    bad = tmp_path / "cross.yaml"
+    bad.write_text(
+        "asset: invisable-staging\n"
+        "environment: staging\n"
+        "tenant: globex\n"
+        "allowed_domains: [staging.invisable.co.uk]\n"
+        "allowed_repos: [github.com/invisable/app]\n"
+        "allowed_test_accounts: [standard_user_test]\n"
+        "allowed_modes: [code_review]\n"
+        "blocked_actions: []\n"
+        "approval_required: []\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ScopeError, match="cross-tenant"):
+        load_scope(bad)

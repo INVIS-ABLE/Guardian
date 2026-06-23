@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-23T01:23:36.155839+00:00",
+  "generated_at": "2026-06-23T01:24:00.089073+00:00",
   "wave": 0,
   "summary": {
     "agents": 17,
@@ -8,7 +8,7 @@
     "simulators": 3,
     "router_capabilities": 12,
     "tool_manifest_capabilities": 8,
-    "tests": 97,
+    "tests": 98,
     "source_directories": [
       "agents",
       "attestation",
@@ -623,6 +623,7 @@
     "tests/test_forensic_alerting.py",
     "tests/test_forensic_timeline.py",
     "tests/test_forensics_cli.py",
+    "tests/test_grants.py",
     "tests/test_guardrails.py",
     "tests/test_healing_contracts.py",
     "tests/test_healing_hierarchy.py",
