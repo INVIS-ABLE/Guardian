@@ -15,7 +15,7 @@ A wave is **delivered** only when its acceptance criteria pass with tests. Anyth
 | 26 | Protocol proof laboratory | planned | — |
 | 27 | Verified policy pipeline | partial | OPA + `core/policy_gate.py` parity (`tests/test_opa_parity.py`) |
 | 28 | Reproducible build foundry | partial | `supplychain/*` (admission/provenance/sbom) |
-| 29 | Transparency fabric | planned | — |
+| 29 | Transparency fabric | **delivered** | `citadel/foundry/transparency.py` + `promotion.py` + `tests/test_citadel_transparency_runtime.py` |
 | 30 | Exposure intelligence | partial | `ownership/verifier.py`, `core/twin` |
 | 31 | Deception grid | planned | — |
 | 32 | Data-protection & exfiltration | partial | `isolation/egress.py`, gitleaks |

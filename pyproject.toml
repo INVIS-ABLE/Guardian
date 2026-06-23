@@ -84,6 +84,7 @@ packages = [
     "citadel.confidential",
     "citadel.crypto_agility",
     "citadel.quorum",
+    "citadel.foundry",
 ]
 
 [tool.pytest.ini_options]
