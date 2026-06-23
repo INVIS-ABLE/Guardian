@@ -1,0 +1,81 @@
+{
+  "additionalProperties": false,
+  "description": "A signable, verifiable collection of evidence artifacts (master map \u00a723).",
+  "properties": {
+    "attestation_uri": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Attestation Uri"
+    },
+    "bundle_id": {
+      "format": "uuid",
+      "title": "Bundle Id",
+      "type": "string"
+    },
+    "case_id": {
+      "format": "uuid",
+      "title": "Case Id",
+      "type": "string"
+    },
+    "classification": {
+      "default": "internal",
+      "title": "Classification",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "evidence_ids": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Evidence Ids",
+      "type": "array"
+    },
+    "evidence_sha256": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Evidence Sha256",
+      "type": "array"
+    },
+    "merkle_root": {
+      "default": "",
+      "title": "Merkle Root",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "signature": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Signature"
+    }
+  },
+  "required": [
+    "case_id"
+  ],
+  "title": "EvidenceBundle",
+  "type": "object"
+}

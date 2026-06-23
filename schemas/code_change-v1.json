@@ -1,0 +1,38 @@
+{
+  "additionalProperties": false,
+  "description": "A single file change within a remediation option (a reviewable unit diff).",
+  "properties": {
+    "additions": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Additions",
+      "type": "integer"
+    },
+    "deletions": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Deletions",
+      "type": "integer"
+    },
+    "diff": {
+      "default": "",
+      "title": "Diff",
+      "type": "string"
+    },
+    "language": {
+      "default": "",
+      "title": "Language",
+      "type": "string"
+    },
+    "path": {
+      "minLength": 1,
+      "title": "Path",
+      "type": "string"
+    }
+  },
+  "required": [
+    "path"
+  ],
+  "title": "CodeChange",
+  "type": "object"
+}

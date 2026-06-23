@@ -1,0 +1,38 @@
+{
+  "additionalProperties": false,
+  "description": "A content-addressable reference to an input/output artifact (never inline bytes).",
+  "properties": {
+    "artifact_id": {
+      "minLength": 1,
+      "title": "Artifact Id",
+      "type": "string"
+    },
+    "media_type": {
+      "default": "application/octet-stream",
+      "title": "Media Type",
+      "type": "string"
+    },
+    "sha256": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Sha256",
+      "type": "string"
+    },
+    "size_bytes": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Size Bytes",
+      "type": "integer"
+    },
+    "storage_uri": {
+      "default": "",
+      "title": "Storage Uri",
+      "type": "string"
+    }
+  },
+  "required": [
+    "artifact_id",
+    "sha256"
+  ],
+  "title": "ArtifactRef",
+  "type": "object"
+}

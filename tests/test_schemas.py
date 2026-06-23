@@ -132,3 +132,98 @@ def test_adapters_do_not_mutate_legacy_types() -> None:
     before = rr.to_dict()
     schemas.route_result_to_event(rr)
     assert rr.to_dict() == before
+
+
+# --- Wave 1 slice 2: execution / decision / remediation / approval / bundle ----------
+
+def test_execution_job_round_trip_and_secret_free() -> None:
+    from uuid import uuid4
+
+    job = schemas.ExecutionJob(
+        case_id=uuid4(), tool_id="semgrep", capability="code.sast",
+        args={"config": "auto"}, execution_profile="scanner-standard", timeout_seconds=600,
+    )
+    assert schemas.ExecutionJob.model_validate(json.loads(job.model_dump_json())) == job
+    # credentials are references, never inline secrets
+    assert job.credential_refs == ()
+
+
+def test_artifact_ref_requires_sha256_form() -> None:
+    with pytest.raises(Exception):
+        schemas.ArtifactRef(artifact_id="a", sha256="not-a-hash")
+    ok = schemas.ArtifactRef(artifact_id="a", sha256="sha256:" + "0" * 64)
+    assert ok.sha256.startswith("sha256:")
+
+
+def test_guardian_decision_is_capability_not_command() -> None:
+    d = schemas.GuardianDecision(
+        objective="investigate", selected_capability="secret.scan",
+        arguments={"path": "."}, confidence=0.8, requires_approval=False,
+    )
+    assert d.selected_capability == "secret.scan"
+    assert "command" not in d.model_dump()  # the model never carries a raw command
+    assert schemas.GuardianDecision.model_validate(json.loads(d.model_dump_json())) == d
+
+
+def test_guardian_decision_terminal() -> None:
+    stop = schemas.GuardianDecision(objective="done", selected_capability=None,
+                                    stop_reason="sufficient evidence")
+    assert stop.is_terminal() is True
+
+
+def test_guardian_decision_rejects_out_of_range_confidence() -> None:
+    with pytest.raises(Exception):
+        schemas.GuardianDecision(objective="x", confidence=1.5)
+
+
+def test_remediation_option_round_trip() -> None:
+    from uuid import uuid4
+
+    opt = schemas.RemediationOption(
+        case_id=uuid4(), title="bump lodash", strategy="dependency-bump",
+        changes=(schemas.CodeChange(path="package.json", additions=1, deletions=1),),
+        risk="low", rollback="revert the bump", confidence=0.9,
+    )
+    assert schemas.RemediationOption.model_validate(json.loads(opt.model_dump_json())) == opt
+
+
+def test_approval_satisfaction_requires_distinct_quorum() -> None:
+    from uuid import uuid4
+
+    cid = uuid4()
+    assert not schemas.Approval(case_id=cid, action="a", approvers=("x",), required_approvers=2,
+                                granted=True).is_satisfied()
+    assert not schemas.Approval(case_id=cid, action="a", approvers=("x", "x"),
+                                required_approvers=2, granted=True).is_satisfied()
+    assert schemas.Approval(case_id=cid, action="a", approvers=("x", "y"),
+                            required_approvers=2, granted=True).is_satisfied()
+    # not granted -> never satisfied
+    assert not schemas.Approval(case_id=cid, action="a", approvers=("x", "y"),
+                                required_approvers=2, granted=False).is_satisfied()
+
+
+def test_evidence_bundle_merkle_root_and_tamper() -> None:
+    from uuid import uuid4
+
+    h = ["sha256:" + c * 64 for c in "abc"]
+    bundle = schemas.EvidenceBundle.create(case_id=uuid4(), evidence_ids=("e1", "e2", "e3"),
+                                           evidence_sha256=tuple(h))
+    assert bundle.root_intact()
+    # order independence
+    h2 = list(reversed(h))
+    other = schemas.EvidenceBundle.create(case_id=bundle.case_id, evidence_ids=("e3", "e2", "e1"),
+                                          evidence_sha256=tuple(h2))
+    assert bundle.merkle_root == other.merkle_root
+    # tamper detection
+    tampered = bundle.model_copy(update={"evidence_sha256": ("sha256:" + "f" * 64,)})
+    assert not tampered.root_intact()
+
+
+def test_evidence_bundle_signature_preserves_root() -> None:
+    from uuid import uuid4
+
+    b = schemas.EvidenceBundle.create(case_id=uuid4(), evidence_ids=("e1",),
+                                      evidence_sha256=("sha256:" + "a" * 64,))
+    signed = b.signed("sig:xyz", attestation_uri="dsse://att")
+    assert signed.signature == "sig:xyz" and signed.attestation_uri == "dsse://att"
+    assert signed.merkle_root == b.merkle_root and signed.root_intact()
