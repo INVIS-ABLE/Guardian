@@ -146,3 +146,42 @@ def test_resolution_never_raises_on_bad_input():
         for env in ("development", "staging", "production"):
             out = r.resolve(cap, environment=env)
             assert isinstance(out, (ResolverDecision, ToolRefusal))
+
+
+# --- executor <-> health integration ---------------------------------------------------
+
+def test_executor_records_success_into_health():
+    from uuid import uuid4
+
+    from core.tools.executor import ToolExecutor
+
+    health = ToolHealthTracker()
+    ex = ToolExecutor(default_registry(), health=health)
+    out = ex.execute("static_code_scan", case_id=uuid4(), args={"x": 1}, environment="staging")
+    # dry-run execution still succeeds structurally and feeds health
+    assert not isinstance(out, ToolRefusal)
+    h = health.health("semgrep")
+    assert h.successes == 1
+    assert h.state is HealthState.HEALTHY
+
+
+def test_executor_records_failure_when_runner_raises():
+    from uuid import uuid4
+
+    from core.tools.executor import ToolExecutor
+
+    class _Boom:
+        def run(self, manifest, token, args):
+            raise RuntimeError("sandbox exploded")
+
+    health = ToolHealthTracker(failure_threshold=1)
+    ex = ToolExecutor(default_registry(), runner=_Boom(), health=health)
+    try:
+        ex.execute("static_code_scan", case_id=uuid4(), args={"x": 1}, environment="staging")
+    except RuntimeError:
+        pass
+    else:  # pragma: no cover - the runner must propagate
+        raise AssertionError("runner error should propagate")
+    h = health.health("semgrep")
+    assert h.failures == 1
+    assert h.state is HealthState.UNAVAILABLE  # threshold=1 opens the circuit
