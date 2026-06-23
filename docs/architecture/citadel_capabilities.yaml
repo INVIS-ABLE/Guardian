@@ -134,10 +134,10 @@ systems:
     citadel_wave: 25
     owner: tlaplus/apalache
     owner_kind: upstream
-    verifier: citadel/formal/counterexamples.py
+    verifier: citadel/formal/verifier.py
     models_subject: orchestration/state_machine.py
-    status: planned
-    runtime_enforced: false
+    status: partial          # Waves 25-26: models authored + linked; provers are a lab step
+    runtime_enforced: false   # consistency verified; TLC/Tamarin not run in CI
     grants_authority: false
     grants_production_authority: false
     function: formally model case/approval/capability/recovery/quorum transitions; counterexamples become test fixtures
@@ -153,9 +153,9 @@ systems:
     citadel_wave: 26
     owner: tamarin-prover/tamarin-prover
     owner_kind: upstream
-    verifier: citadel/formal/protocol.py
-    status: planned
-    runtime_enforced: false
+    verifier: citadel/formal/verifier.py
+    status: partial          # Waves 25-26: models authored + linked; provers are a lab step
+    runtime_enforced: false   # consistency verified; TLC/Tamarin not run in CI
     grants_authority: false
     grants_production_authority: false
     function: prove auth/key-exchange/attestation-secret-release/PQ-hybrid protocols; explicit assumptions + counterexamples

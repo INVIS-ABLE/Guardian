@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-23T02:55:37.537649+00:00",
+  "generated_at": "2026-06-23T03:03:56.770947+00:00",
   "wave": 0,
   "summary": {
     "agents": 17,
@@ -8,7 +8,7 @@
     "simulators": 3,
     "router_capabilities": 12,
     "tool_manifest_capabilities": 8,
-    "tests": 120,
+    "tests": 122,
     "source_directories": [
       "agents",
       "attestation",
@@ -644,6 +644,7 @@
     "tests/test_citadel_crypto_agility_runtime.py",
     "tests/test_citadel_data_protection.py",
     "tests/test_citadel_deception.py",
+    "tests/test_citadel_formal.py",
     "tests/test_citadel_privacy_invariants.py",
     "tests/test_citadel_quorum.py",
     "tests/test_citadel_quorum_invariants.py",
@@ -680,6 +681,7 @@
     "tests/test_identity.py",
     "tests/test_identity_graph.py",
     "tests/test_immune_memory.py",
+    "tests/test_integrations_contracts.py",
     "tests/test_isolation.py",
     "tests/test_lineage.py",
     "tests/test_machine_attestation.py",
