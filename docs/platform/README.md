@@ -32,9 +32,9 @@ Guardian generalises INVISABLE's protections; it never relaxes them.
 | [DEPLOYMENT_MODES.md](DEPLOYMENT_MODES.md) | ✅ written | Self-hosted, SaaS, private, dedicated, air-gapped, hybrid. |
 | [DECISION_LOG.md](DECISION_LOG.md) | ✅ living | Reversible, attributable record of platform decisions. |
 | [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md) | ✅ living | What has actually been built, tested, and merged. |
-| COMPETITOR_AND_OPEN_SOURCE_LANDSCAPE.md | ⏳ follow-up | Catalogue evaluation (`research/repositories/`). |
+| COMPETITOR_AND_OPEN_SOURCE_LANDSCAPE.md | ✅ written | Catalogue evaluation (`research/repositories/`). |
+| BUILD_BUY_ADAPT_REJECT_MATRIX.md | ✅ written | Per-candidate integration decision. |
 | CAPABILITY_GAP_ANALYSIS.md | ⏳ follow-up | What candidates do better / what Guardian lacks. |
-| BUILD_BUY_ADAPT_REJECT_MATRIX.md | ⏳ follow-up | Per-candidate integration decision. |
 | INTEGRATION_PRIORITY_ROADMAP.md | ⏳ follow-up | Sequenced integration plan. |
 | COMMERCIALISATION_AND_OPEN_SOURCE_OPTIONS.md | ⏳ follow-up | Licensing / distribution analysis. |
 | DATA_CLASSIFICATION_AND_RESIDENCY.md | ⏳ follow-up | Extends `docs/governance/DATA_CLASSIFICATION.md` per tenant. |
