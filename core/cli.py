@@ -851,5 +851,47 @@ def twin_live_cmd(twin_spec: str, stream_spec: str, min_severity: str) -> None:
                       detail={"signals": len(risk.signals), "at_risk": len(risk.at_risk)})
 
 
+def _emulation_report(spec_file: str):
+    from .emulation import load_operation
+
+    report = load_operation(spec_file)
+    click.echo(f"Operation: {report.operation}  [env: {report.environment}]")
+    glyph = {"blocked": "✓", "detected": "○", "bypass": "✗"}
+    for r in report.results:
+        ev = "" if r.evidence_preserved else "  [no evidence]"
+        via = f" by {r.detected_by}" if r.detected_by else ""
+        click.echo(f"  {glyph[r.verdict.value]} {r.verdict.value:8s} {r.technique.id:11s} "
+                   f"{r.technique.name}{via}{ev}")
+    click.echo(f"\nblocked {report.blocked}  detected {report.detected}  "
+               f"bypass {len(report.bypasses)}  evidence-gaps {len(report.evidence_gaps)}")
+    return report
+
+
+@main.command("emulate")
+@click.argument("spec_file", type=click.Path(exists=True))
+def emulate_cmd(spec_file: str) -> None:
+    """Adversary lab: emulate an ATT&CK operation (lab-only) and mint regressions for gaps."""
+    report = _emulation_report(spec_file)
+    if report.regression_tests:
+        click.echo(f"\nregression tests minted ({len(report.regression_tests)}):")
+        for t in report.regression_tests:
+            click.echo(f"  + [{t.reason.value:12s}] {t.requirement}")
+    AuditLog().record("emulate", actor="cli", scope=spec_file, decision="allowed",
+                      detail={"bypasses": len(report.bypasses),
+                              "regressions": len(report.regression_tests)})
+
+
+@main.command("emulate-gate")
+@click.argument("spec_file", type=click.Path(exists=True))
+def emulate_gate_cmd(spec_file: str) -> None:
+    """Adversary lab: fail (exit non-zero) if any emulated technique bypassed the controls."""
+    report = _emulation_report(spec_file)
+    click.echo(f"\nemulation gate: {'FAIL — bypass found' if report.has_bypass else 'PASS'}")
+    AuditLog().record("emulate-gate", actor="cli", scope=spec_file,
+                      decision="denied" if report.has_bypass else "allowed",
+                      detail={"bypasses": len(report.bypasses)})
+    raise SystemExit(1 if report.has_bypass else 0)
+
+
 if __name__ == "__main__":  # pragma: no cover
     main()
