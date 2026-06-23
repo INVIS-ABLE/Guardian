@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-23T00:54:26.745673+00:00",
+  "generated_at": "2026-06-23T01:12:52.825627+00:00",
   "wave": 0,
   "summary": {
     "agents": 17,
@@ -8,7 +8,7 @@
     "simulators": 3,
     "router_capabilities": 12,
     "tool_manifest_capabilities": 8,
-    "tests": 92,
+    "tests": 96,
     "source_directories": [
       "agents",
       "attestation",
@@ -418,6 +418,15 @@
       ]
     },
     {
+      "file": "core/emulation/ingest.py",
+      "markers": [
+        {
+          "line": 63,
+          "marker": "NotImplementedError"
+        }
+      ]
+    },
+    {
       "file": "core/endpoint/ingest.py",
       "markers": [
         {
@@ -577,6 +586,7 @@
   "tests": [
     "tests/test_agent_boundary.py",
     "tests/test_ai_gateway.py",
+    "tests/test_anti_oscillation.py",
     "tests/test_attestation.py",
     "tests/test_audit.py",
     "tests/test_authorization_properties.py",
@@ -602,6 +612,7 @@
     "tests/test_containment.py",
     "tests/test_credential_audit.py",
     "tests/test_detection.py",
+    "tests/test_emulation.py",
     "tests/test_endpoint.py",
     "tests/test_event_fabric.py",
     "tests/test_event_sources.py",
@@ -613,6 +624,7 @@
     "tests/test_forensics_cli.py",
     "tests/test_guardrails.py",
     "tests/test_healing_contracts.py",
+    "tests/test_healing_hierarchy.py",
     "tests/test_healing_runbooks.py",
     "tests/test_identity.py",
     "tests/test_identity_graph.py",
@@ -648,6 +660,7 @@
     "tests/test_shadow_guardian.py",
     "tests/test_signing.py",
     "tests/test_simulators.py",
+    "tests/test_slo.py",
     "tests/test_software_trust_admission.py",
     "tests/test_sovereign_capabilities_manifest.py",
     "tests/test_specialists.py",

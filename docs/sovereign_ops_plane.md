@@ -88,7 +88,7 @@ The authoritative, machine-checked list is
 ### Wave 3 — Proof & controlled experimentation
 | # | System | Gives Guardian |
 | - | ------ | -------------- |
-| 13 | **Continuous adversary-emulation lab** (CALDERA / Atomic Red Team / Stratus) | did prevention block it? did an independent sensor detect it? was evidence preserved? — **lab only**, every bypass → regression test |
+| 13 | **Continuous adversary-emulation lab** (CALDERA / Atomic Red Team / Stratus) — *[first slice implemented](adversary_emulation.md)* | did prevention block it? did an independent sensor detect it? was evidence preserved? — **lab only**, every bypass → regression test |
 | 14 | **Continuous fuzzing farm** (ClusterFuzzLite / AFL++ / Atheris / Jazzer) | fuzz crypto envelopes, attachments, tokens, parsers, evidence formats |
 | 15 | **Cryptographic protocol proof lab** (Tamarin / Verifpal / ProVerif) | review the crypto **system** — device/key/group/forward-secrecy/recovery flows — never plaintext |
 | 16 | **Binary & malware analysis lab** (Ghidra / angr / CAPE / YARA) | Tier-3 isolated RE: no prod route, disposable VMs, full pcap, **human approval to import unknown artifacts** |
