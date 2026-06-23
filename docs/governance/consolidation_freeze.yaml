@@ -1,4 +1,4 @@
-branch_count: 60
+branch_count: 61
 branch_tips:
   claude/area11-uv-lockfile: 1aa9d6fd280d5c388b957f116d557de6026c8c18
   claude/area2-ownership-verification: 1a1ad3b3827866f7c80a28432b70672c43fb13c8
@@ -50,6 +50,7 @@ branch_tips:
   steward/64-governor-ci-green: 56261342728435d0e40a7651d3bd6c53c2f372e5
   steward/72-inventory-robust: 5dfcc9936269ee99b3edad28f02240b40c167e48
   steward/consolidation-live-state: 0ce58074cd3bd676d0dc873a2ec4d9aee1084826
+  steward/consolidation-records: 6b607d9de564c1f75513bf9b257e4e8b2d88adea
   steward/final-structure-pr1-governor-enforcement: 1b3bb3faae6600b2d6bed4059f0416d6d9ec1dc8
   steward/forward-port-citadel-waves: 38edcfb47e24ea3f9cdd116ec60947d9c110f0d5
   steward/forward-port-legacy-phase-d: 053e926894feb6a1be16479f6bc2d40a91ae41e3
@@ -60,7 +61,7 @@ branch_tips:
   wave2/executor-resolver: d8362ae8dd1a89bdb140d2692c8f3d51cb8a63f9
   wave2/router-fabric: f93d128c8f83a4d566a820a60e9fbedd6cafd450
   wave3/execution-job-bridge: b1ebeb8b2d3541c331d8405ee91654829496f4ea
-evidence_timestamp: '2026-06-23T02:23:58Z'
+evidence_timestamp: '2026-06-23T02:35:01Z'
 note: "Final Consolidation \xA72 freeze: main is the only integration/release branch;\
   \ all branch tips recorded before reconciliation. Do not delete any branch yet."
-verified_against_main: d9377c4d8cb3a3c10931d8540a56d98415ff33a8
+verified_against_main: 70c9d80f667c32c362af6f1fe919c29ca44abbcc

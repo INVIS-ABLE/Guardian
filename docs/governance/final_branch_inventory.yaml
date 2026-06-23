@@ -1,10 +1,10 @@
 note: "Final Consolidation \xA73 inventory (cherry-pick aware). Classifications are\
   \ evidence-based per-commit, never by branch name."
-evidence_timestamp: '2026-06-23T02:23:58Z'
-verified_against_main: d9377c4d8cb3a3c10931d8540a56d98415ff33a8
-branch_count: 60
+evidence_timestamp: '2026-06-23T02:35:01Z'
+verified_against_main: 70c9d80f667c32c362af6f1fe919c29ca44abbcc
+branch_count: 61
 summary:
-  ALREADY_IN_MAIN: 56
+  ALREADY_IN_MAIN: 57
   CONFLICTING_SECURITY_MODEL: 2
   HUMAN_DECISION_REQUIRED: 1
   SUPERSEDED: 1
@@ -13,7 +13,7 @@ branches:
   tip_sha: 1aa9d6fd280d5c388b957f116d557de6026c8c18
   merge_base: 1aa9d6fd280d5c388b957f116d557de6026c8c18
   ahead_of_main: 0
-  behind_main: 156
+  behind_main: 160
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -25,7 +25,7 @@ branches:
   tip_sha: 1a1ad3b3827866f7c80a28432b70672c43fb13c8
   merge_base: 1a1ad3b3827866f7c80a28432b70672c43fb13c8
   ahead_of_main: 0
-  behind_main: 163
+  behind_main: 167
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -37,7 +37,7 @@ branches:
   tip_sha: b00a00c1fc0f15ee93e04c64e786e68c402c9f8d
   merge_base: b00a00c1fc0f15ee93e04c64e786e68c402c9f8d
   ahead_of_main: 0
-  behind_main: 188
+  behind_main: 192
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -49,7 +49,7 @@ branches:
   tip_sha: d51c6ed9597d7f493893a45069e2bceb61d188fe
   merge_base: d51c6ed9597d7f493893a45069e2bceb61d188fe
   ahead_of_main: 0
-  behind_main: 171
+  behind_main: 175
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -61,7 +61,7 @@ branches:
   tip_sha: b7739a3d2828f94b831946a868bac9cd44c0df89
   merge_base: b7739a3d2828f94b831946a868bac9cd44c0df89
   ahead_of_main: 0
-  behind_main: 234
+  behind_main: 238
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -73,7 +73,7 @@ branches:
   tip_sha: 2bd3f1c332a5da8fb247d28ce3c39c8a1d2b717e
   merge_base: 2bd3f1c332a5da8fb247d28ce3c39c8a1d2b717e
   ahead_of_main: 0
-  behind_main: 170
+  behind_main: 174
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -85,7 +85,7 @@ branches:
   tip_sha: ebbf5b2c485106195b5122d3b435909d847bcb80
   merge_base: ebbf5b2c485106195b5122d3b435909d847bcb80
   ahead_of_main: 0
-  behind_main: 128
+  behind_main: 132
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -97,7 +97,7 @@ branches:
   tip_sha: 699006786041ccc6d57ff8c2cffbf510165a027d
   merge_base: 699006786041ccc6d57ff8c2cffbf510165a027d
   ahead_of_main: 0
-  behind_main: 26
+  behind_main: 30
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -109,7 +109,7 @@ branches:
   tip_sha: 26b1b2b14913ef0c9228115d796550a707285854
   merge_base: 26b1b2b14913ef0c9228115d796550a707285854
   ahead_of_main: 0
-  behind_main: 213
+  behind_main: 217
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -121,7 +121,7 @@ branches:
   tip_sha: 6e756a2bdf32705f36986f725e5ec7a0cf028888
   merge_base: 6e756a2bdf32705f36986f725e5ec7a0cf028888
   ahead_of_main: 0
-  behind_main: 41
+  behind_main: 45
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -133,7 +133,7 @@ branches:
   tip_sha: 808e61debfd15c264bbd9e84c09456d0b354b36f
   merge_base: 808e61debfd15c264bbd9e84c09456d0b354b36f
   ahead_of_main: 0
-  behind_main: 214
+  behind_main: 218
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -145,7 +145,7 @@ branches:
   tip_sha: 035ad520fc90eff973ed99ac7c64e3aa099aa50d
   merge_base: 38f482b6e6ee7c2d8ada3483ae43ee618e21e66d
   ahead_of_main: 1
-  behind_main: 179
+  behind_main: 183
   unique_commits: 1
   unique_paths:
   - .github/workflows/opa-policy.yml
@@ -164,7 +164,7 @@ branches:
   tip_sha: d084674f8ac1058b8c9436bcbfcaf474f1920859
   merge_base: d084674f8ac1058b8c9436bcbfcaf474f1920859
   ahead_of_main: 0
-  behind_main: 132
+  behind_main: 136
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -176,7 +176,7 @@ branches:
   tip_sha: f4775e0917971560175b3d71a2e743d9ad0eba0a
   merge_base: f4775e0917971560175b3d71a2e743d9ad0eba0a
   ahead_of_main: 0
-  behind_main: 232
+  behind_main: 236
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -188,7 +188,7 @@ branches:
   tip_sha: a97713553b59481c5ae8f37185eb40a713f3ccc4
   merge_base: a97713553b59481c5ae8f37185eb40a713f3ccc4
   ahead_of_main: 0
-  behind_main: 67
+  behind_main: 71
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -200,7 +200,7 @@ branches:
   tip_sha: 6ef6690b5d147d76e4aa7f351c616e0dbef2f6d3
   merge_base: 6ef6690b5d147d76e4aa7f351c616e0dbef2f6d3
   ahead_of_main: 0
-  behind_main: 19
+  behind_main: 23
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -212,7 +212,7 @@ branches:
   tip_sha: abba9000e1732d603b7db245b7c0f404958b57fc
   merge_base: c906e586609ab99f2cb3c86f907ecaa56915cb56
   ahead_of_main: 1
-  behind_main: 36
+  behind_main: 40
   unique_commits: 1
   unique_paths:
   - chaos/invisable-gameday.yaml
@@ -262,7 +262,7 @@ branches:
   tip_sha: 8f55815841c13d6dc62883b146d08c0e7d881f36
   merge_base: 8f55815841c13d6dc62883b146d08c0e7d881f36
   ahead_of_main: 0
-  behind_main: 6
+  behind_main: 10
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -275,7 +275,7 @@ branches:
   tip_sha: 3952a9a7a441741ed4a07327a51b344054bb3463
   merge_base: 3952a9a7a441741ed4a07327a51b344054bb3463
   ahead_of_main: 0
-  behind_main: 238
+  behind_main: 242
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -287,7 +287,7 @@ branches:
   tip_sha: 2ab794db39750a9f14f8287203aa21ecb4bee261
   merge_base: 497cd27e3c483a822638643c89aa533ffdae6e13
   ahead_of_main: 1
-  behind_main: 201
+  behind_main: 205
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -299,7 +299,7 @@ branches:
   tip_sha: 73b32fa052e96b6753493bb5ff15282f3033ee21
   merge_base: 73b32fa052e96b6753493bb5ff15282f3033ee21
   ahead_of_main: 0
-  behind_main: 164
+  behind_main: 168
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -311,7 +311,7 @@ branches:
   tip_sha: 978345982612f1066300b669cf41f3c1862a635a
   merge_base: 978345982612f1066300b669cf41f3c1862a635a
   ahead_of_main: 0
-  behind_main: 219
+  behind_main: 223
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -323,7 +323,7 @@ branches:
   tip_sha: d3469d5d82331c24a20e500b8c8b7b2aeaa64042
   merge_base: d3469d5d82331c24a20e500b8c8b7b2aeaa64042
   ahead_of_main: 0
-  behind_main: 230
+  behind_main: 234
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -335,7 +335,7 @@ branches:
   tip_sha: afebe7760df35e824745aedfcafc53be8c791651
   merge_base: afebe7760df35e824745aedfcafc53be8c791651
   ahead_of_main: 0
-  behind_main: 215
+  behind_main: 219
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -347,7 +347,7 @@ branches:
   tip_sha: 61802d10100138cc5906b9680b10788128530629
   merge_base: 61802d10100138cc5906b9680b10788128530629
   ahead_of_main: 0
-  behind_main: 209
+  behind_main: 213
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -359,7 +359,7 @@ branches:
   tip_sha: 9858778e3ab350d166cef3019dc32236bd4f3db2
   merge_base: 9858778e3ab350d166cef3019dc32236bd4f3db2
   ahead_of_main: 0
-  behind_main: 213
+  behind_main: 217
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -371,7 +371,7 @@ branches:
   tip_sha: 9101a74c2d9a2f7522efc06dde6960a9b4615bee
   merge_base: 9101a74c2d9a2f7522efc06dde6960a9b4615bee
   ahead_of_main: 0
-  behind_main: 204
+  behind_main: 208
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -383,7 +383,7 @@ branches:
   tip_sha: 726072462b942445459436c8621290c7c3e803ac
   merge_base: 726072462b942445459436c8621290c7c3e803ac
   ahead_of_main: 0
-  behind_main: 195
+  behind_main: 199
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -395,7 +395,7 @@ branches:
   tip_sha: 3777eae79d884778efe48c571874756e0687385d
   merge_base: 3777eae79d884778efe48c571874756e0687385d
   ahead_of_main: 0
-  behind_main: 190
+  behind_main: 194
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -407,7 +407,7 @@ branches:
   tip_sha: b4aa95df492d2b67d9953b443f598d147b740754
   merge_base: b4aa95df492d2b67d9953b443f598d147b740754
   ahead_of_main: 0
-  behind_main: 184
+  behind_main: 188
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -419,7 +419,7 @@ branches:
   tip_sha: 6c29aef9f8d86cf71a0980faa2a13708cfba800a
   merge_base: 6c29aef9f8d86cf71a0980faa2a13708cfba800a
   ahead_of_main: 0
-  behind_main: 172
+  behind_main: 176
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -431,7 +431,7 @@ branches:
   tip_sha: bf03094f77a80fe19a1ae3f7ff3f57611889f758
   merge_base: bf03094f77a80fe19a1ae3f7ff3f57611889f758
   ahead_of_main: 0
-  behind_main: 172
+  behind_main: 176
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -443,7 +443,7 @@ branches:
   tip_sha: 77ad0392a3b4a140dbf122a146bc3ba0eb3b72c1
   merge_base: 77ad0392a3b4a140dbf122a146bc3ba0eb3b72c1
   ahead_of_main: 0
-  behind_main: 188
+  behind_main: 192
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -455,7 +455,7 @@ branches:
   tip_sha: abd35ff401ffb6ddeaa35d473f250db159e59a0f
   merge_base: abd35ff401ffb6ddeaa35d473f250db159e59a0f
   ahead_of_main: 0
-  behind_main: 236
+  behind_main: 240
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -467,7 +467,7 @@ branches:
   tip_sha: f94b7bf8db073b3e44b9304f65872fe9aa033a0c
   merge_base: f94b7bf8db073b3e44b9304f65872fe9aa033a0c
   ahead_of_main: 0
-  behind_main: 178
+  behind_main: 182
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -479,7 +479,7 @@ branches:
   tip_sha: 4322b6a6d7941c5b980354cc4f57b5f68af3993b
   merge_base: 4322b6a6d7941c5b980354cc4f57b5f68af3993b
   ahead_of_main: 0
-  behind_main: 228
+  behind_main: 232
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -491,7 +491,7 @@ branches:
   tip_sha: f64cd150e38ed76a7df4a189a3327449f5505f2b
   merge_base: f64cd150e38ed76a7df4a189a3327449f5505f2b
   ahead_of_main: 0
-  behind_main: 184
+  behind_main: 188
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -503,7 +503,7 @@ branches:
   tip_sha: f32ba74bc0ac79152ca090f0f5be7acbf1f4f122
   merge_base: f32ba74bc0ac79152ca090f0f5be7acbf1f4f122
   ahead_of_main: 0
-  behind_main: 164
+  behind_main: 168
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -515,7 +515,7 @@ branches:
   tip_sha: 34fa83ce30b84f5f723108ef6d785177522b3650
   merge_base: 34fa83ce30b84f5f723108ef6d785177522b3650
   ahead_of_main: 0
-  behind_main: 142
+  behind_main: 146
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -527,7 +527,7 @@ branches:
   tip_sha: e4666a909cb7312427ecd8a662a4b4131044831d
   merge_base: e4666a909cb7312427ecd8a662a4b4131044831d
   ahead_of_main: 0
-  behind_main: 116
+  behind_main: 120
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -539,7 +539,7 @@ branches:
   tip_sha: c3d9e7d563ed9b207046950dacba3502fe3d5d7e
   merge_base: c3d9e7d563ed9b207046950dacba3502fe3d5d7e
   ahead_of_main: 0
-  behind_main: 44
+  behind_main: 48
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -551,7 +551,7 @@ branches:
   tip_sha: 617e96d60bf9421091ea62ec32c4864d72fdb24f
   merge_base: 617e96d60bf9421091ea62ec32c4864d72fdb24f
   ahead_of_main: 0
-  behind_main: 35
+  behind_main: 39
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -563,7 +563,7 @@ branches:
   tip_sha: 6f6807209f18b66ed2e00874b209c21b7fedc039
   merge_base: 6f6807209f18b66ed2e00874b209c21b7fedc039
   ahead_of_main: 0
-  behind_main: 69
+  behind_main: 73
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -575,7 +575,7 @@ branches:
   tip_sha: 5fa77a1a4e82bfe6bac7e28b4831eeabd639d1c8
   merge_base: 5fa77a1a4e82bfe6bac7e28b4831eeabd639d1c8
   ahead_of_main: 0
-  behind_main: 99
+  behind_main: 103
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -587,7 +587,7 @@ branches:
   tip_sha: 68b8736f017477c52899fff59eca19584c229d2b
   merge_base: 68b8736f017477c52899fff59eca19584c229d2b
   ahead_of_main: 0
-  behind_main: 143
+  behind_main: 147
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -599,7 +599,7 @@ branches:
   tip_sha: 7b0ac3e6f42d54511219dbe010f07800e45be266
   merge_base: 7b0ac3e6f42d54511219dbe010f07800e45be266
   ahead_of_main: 0
-  behind_main: 116
+  behind_main: 120
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -611,7 +611,7 @@ branches:
   tip_sha: b63c3c25a2e61ec51d784a9a2e0adf0cc45051f7
   merge_base: b63c3c25a2e61ec51d784a9a2e0adf0cc45051f7
   ahead_of_main: 0
-  behind_main: 126
+  behind_main: 130
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -623,7 +623,7 @@ branches:
   tip_sha: 56261342728435d0e40a7651d3bd6c53c2f372e5
   merge_base: 56261342728435d0e40a7651d3bd6c53c2f372e5
   ahead_of_main: 0
-  behind_main: 122
+  behind_main: 126
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -635,7 +635,7 @@ branches:
   tip_sha: 5dfcc9936269ee99b3edad28f02240b40c167e48
   merge_base: 5dfcc9936269ee99b3edad28f02240b40c167e48
   ahead_of_main: 0
-  behind_main: 112
+  behind_main: 116
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -647,7 +647,7 @@ branches:
   tip_sha: 0ce58074cd3bd676d0dc873a2ec4d9aee1084826
   merge_base: 05ab77703bf57aa7d1022c581602514374a052b2
   ahead_of_main: 1
-  behind_main: 6
+  behind_main: 10
   unique_commits: 1
   unique_paths:
   - docs/governance/consolidation_freeze.yaml
@@ -659,11 +659,23 @@ branches:
   classification: ALREADY_IN_MAIN
   recommended_action: 'steward consolidation records branch (this PR #108)'
   human_review_required: false
+- branch: steward/consolidation-records
+  tip_sha: 6b607d9de564c1f75513bf9b257e4e8b2d88adea
+  merge_base: 6b607d9de564c1f75513bf9b257e4e8b2d88adea
+  ahead_of_main: 0
+  behind_main: 3
+  unique_commits: 0
+  unique_paths: []
+  security_sensitive_paths: []
+  generated_only_changes: false
+  classification: ALREADY_IN_MAIN
+  recommended_action: retire_after_default_flip
+  human_review_required: false
 - branch: steward/final-structure-pr1-governor-enforcement
   tip_sha: 1b3bb3faae6600b2d6bed4059f0416d6d9ec1dc8
   merge_base: 1b3bb3faae6600b2d6bed4059f0416d6d9ec1dc8
   ahead_of_main: 0
-  behind_main: 24
+  behind_main: 28
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -675,7 +687,7 @@ branches:
   tip_sha: 38edcfb47e24ea3f9cdd116ec60947d9c110f0d5
   merge_base: 12ceeee8f1b91b1af353ec3cf4f67cb788d80bca
   ahead_of_main: 5
-  behind_main: 23
+  behind_main: 27
   unique_commits: 5
   unique_paths:
   - citadel/crypto_agility/__init__.py
@@ -746,7 +758,7 @@ branches:
   tip_sha: 053e926894feb6a1be16479f6bc2d40a91ae41e3
   merge_base: 053e926894feb6a1be16479f6bc2d40a91ae41e3
   ahead_of_main: 0
-  behind_main: 30
+  behind_main: 34
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -758,7 +770,7 @@ branches:
   tip_sha: 6980b8088afcb86354ad77aa10c75f697869afe0
   merge_base: 6980b8088afcb86354ad77aa10c75f697869afe0
   ahead_of_main: 0
-  behind_main: 65
+  behind_main: 69
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -770,7 +782,7 @@ branches:
   tip_sha: afde61db08a7760d4a17d37d33f2ab160682669c
   merge_base: afde61db08a7760d4a17d37d33f2ab160682669c
   ahead_of_main: 0
-  behind_main: 59
+  behind_main: 63
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -782,7 +794,7 @@ branches:
   tip_sha: 339c61282e2d248b3c8a5b13720e987f3fbb0d6a
   merge_base: 339c61282e2d248b3c8a5b13720e987f3fbb0d6a
   ahead_of_main: 0
-  behind_main: 98
+  behind_main: 102
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -794,7 +806,7 @@ branches:
   tip_sha: ee80cdbc2f53ff8d3eff5808840fcd73c59ad7a8
   merge_base: ee80cdbc2f53ff8d3eff5808840fcd73c59ad7a8
   ahead_of_main: 0
-  behind_main: 103
+  behind_main: 107
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -806,7 +818,7 @@ branches:
   tip_sha: d8362ae8dd1a89bdb140d2692c8f3d51cb8a63f9
   merge_base: d8362ae8dd1a89bdb140d2692c8f3d51cb8a63f9
   ahead_of_main: 0
-  behind_main: 30
+  behind_main: 34
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -818,7 +830,7 @@ branches:
   tip_sha: f93d128c8f83a4d566a820a60e9fbedd6cafd450
   merge_base: f93d128c8f83a4d566a820a60e9fbedd6cafd450
   ahead_of_main: 0
-  behind_main: 34
+  behind_main: 38
   unique_commits: 0
   unique_paths: []
   security_sensitive_paths: []
@@ -830,7 +842,7 @@ branches:
   tip_sha: b1ebeb8b2d3541c331d8405ee91654829496f4ea
   merge_base: e566760fc799ca91e9d77e30622ea91023552631
   ahead_of_main: 1
-  behind_main: 31
+  behind_main: 35
   unique_commits: 1
   unique_paths:
   - core/tools/jobs.py
