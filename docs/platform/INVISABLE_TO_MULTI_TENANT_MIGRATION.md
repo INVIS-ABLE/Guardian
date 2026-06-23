@@ -65,9 +65,9 @@ runtime behaviour without an explicit, separate decision.
   `core/tenancy.load_tenant` / `load_tenant_registry` into a `TenantRegistry`. The
   in-code `INVISABLE_TENANT` default is retained (and always seeded) so pre-tenancy
   scopes are unaffected. (See D-0008.)
-- *Next:* pass the loaded registry into `authorise_target` at the enforcement edge so
-  suspended/archived/unknown tenants are rejected end-to-end (the decision function
-  already supports a `tenants=` argument).
+- ✅ The loaded registry is now wired into the policy edge: when enforcement is on,
+  `PolicyInput.tenants` (or the cached `tenants/` load) is passed to `authorise_target`,
+  so a suspended/archived/unknown tenant is rejected end-to-end. (See D-0009.)
 
 ## Rollback
 

@@ -5,6 +5,22 @@ Each decision records: context, decision, rationale, and how to reverse it.
 
 ---
 
+## D-0009 — Enforce tenant status at the policy edge via the loaded registry
+- **Date:** 2026-06-23
+- **Context:** Phase E shipped the tenant registry loader, but the policy gate's
+  tenant check didn't consult it — a suspended/archived/unknown tenant with an
+  otherwise-valid grant was still authorised.
+- **Decision:** `PolicyInput` gains an optional `tenants: TenantRegistry`. When
+  enforcement is on (`GUARDIAN_TENANCY_ENFORCE=1`) and a target is named,
+  `_tenant_denies` passes a registry to `authorise_target` — the injected one, or the
+  committed `tenants/` profiles loaded once and cached (`_default_tenant_registry`).
+  An unknown or non-active tenant now denies before grants are even considered.
+- **Rationale:** Closes the suspended/unknown-tenant gap end-to-end with machinery
+  already present (`authorise_target` already accepted `tenants=`). Still default-off,
+  so INVISABLE is unchanged; the cache keeps the default path off-disk.
+- **Reverse:** Drop the `tenants` field, the cache loader, and the `tenants=` argument
+  in `_tenant_denies`. Behaviour returns to grant-only enforcement.
+
 ## D-0008 — INVISABLE becomes an explicit tenant profile (Phase E)
 - **Date:** 2026-06-23
 - **Context:** INVISABLE was the *implicit* default tenant (a code constant). The

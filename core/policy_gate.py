@@ -28,7 +28,13 @@ from dataclasses import dataclass, field
 from time import time
 from typing import Any
 
-from core.tenancy import INVISABLE_TENANT_ID, AuthorisationGrant, authorise_target
+from core.tenancy import (
+    INVISABLE_TENANT_ID,
+    AuthorisationGrant,
+    TenantRegistry,
+    authorise_target,
+    load_tenant_registry,
+)
 
 # Globally blocked actions — denied in every mode and scope; a scope cannot re-enable them.
 BLOCKED_ACTIONS: frozenset[str] = frozenset(
@@ -142,6 +148,9 @@ class PolicyInput:
     asset_id: str | None = None            # the asset under test (defaults to the named target)
     grants: list[AuthorisationGrant] = field(default_factory=list)
     verify_grant_key: str | None = None    # public key; when set, grant signatures must verify
+    # Optional tenant registry. When enforcement is on and this is unset, the committed
+    # tenants/ profiles are loaded so a suspended/archived/unknown tenant is rejected.
+    tenants: TenantRegistry | None = None
 
     def to_opa_input(self) -> dict[str, Any]:
         return {
@@ -309,6 +318,22 @@ def _tenancy_enforced() -> bool:
     return _guardian_env() in _OPA_REQUIRED_ENVS
 
 
+_TENANT_REGISTRY_CACHE: TenantRegistry | None = None
+
+
+def _default_tenant_registry() -> TenantRegistry:
+    """The committed tenants/ registry, loaded once and cached.
+
+    Loaded lazily and only when enforcement consults it, so the default (enforcement
+    off) path never touches disk. Tests inject their own registry via
+    ``PolicyInput.tenants`` and so never hit this.
+    """
+    global _TENANT_REGISTRY_CACHE
+    if _TENANT_REGISTRY_CACHE is None:
+        _TENANT_REGISTRY_CACHE = load_tenant_registry()
+    return _TENANT_REGISTRY_CACHE
+
+
 def _tenant_denies(inp: PolicyInput) -> list[str]:
     """Tenant-authorisation denials, applied as an outer AND over the action policy.
 
@@ -318,8 +343,9 @@ def _tenant_denies(inp: PolicyInput) -> list[str]:
     outside :func:`decide` so the OPA / embedded mirror parity is untouched.
 
     Inert unless enforcement is on. When on, any action naming a target must be backed
-    by a valid grant; non-target actions (no domain/repo/asset) are left to the action
-    policy. Fails closed: missing capability, no grant, or an unauthorised grant denies.
+    by a valid grant for an **active, known tenant**; non-target actions (no
+    domain/repo/asset) are left to the action policy. Fails closed: an unknown or
+    suspended tenant, a missing capability, no grant, or an unauthorised grant denies.
     """
     if not _tenancy_enforced():
         return []
@@ -328,6 +354,7 @@ def _tenant_denies(inp: PolicyInput) -> list[str]:
         return []  # nothing targeted; action policy alone governs
     if not inp.capability:
         return ["tenant_capability_unspecified"]
+    registry = inp.tenants if inp.tenants is not None else _default_tenant_registry()
     decision = authorise_target(
         inp.grants,
         tenant_id=inp.tenant_id,
@@ -336,6 +363,7 @@ def _tenant_denies(inp: PolicyInput) -> list[str]:
         environment=inp.environment,
         now=inp.now,
         verify_key=inp.verify_grant_key,
+        tenants=registry,
     )
     if not decision.allowed:
         return [f"tenant_unauthorised:{decision.reason}"]
