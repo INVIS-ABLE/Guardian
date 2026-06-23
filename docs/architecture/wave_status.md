@@ -8,7 +8,7 @@ yet delivered is **planned** — never marked done prematurely.
 | --- | --- | --- | --- |
 | 0 | Baseline and repository truth | **delivered** | `core/inventory.py`, `reports/audit/current_state.{json,md}`, `tests/test_repo_inventory.py`, ADR-0001, `invariants.md` |
 | 1 | Typed contracts / core schemas | **delivered** | `core/schemas/` (registry, `CaseEvent`, `ExecutionJob`, `GuardianDecision`, `RemediationOption`/`CodeChange`, `Approval`, `EvidenceBundle`, adapters), `schemas/*.json` (23), router emits `CaseEvent`s (`core/router.py`), `tests/test_schemas.py`, `tests/test_router_events.py` |
-| 2 | Router fabric | **in progress** (health-aware candidate resolver + tool-health circuit breaker added over `core/tools/` gateway) | `core/tools/health.py`, `core/tools/resolver.py`, `core/tools/` (manifest+token gateway), `tests/test_router_fabric.py`, `test_tool_manifest.py` |
+| 2 | Router fabric | **delivered** | health-aware `CapabilityResolver` (candidate scoring) + `ToolHealthTracker` (circuit breaker) over the signed `core/tools/` gateway, wired into the executor's resolution path: `core/tools/health.py`, `core/tools/resolver.py`, `core/tools/executor.py`, `tests/test_router_fabric.py`, `test_tool_manifest.py` |
 | 3 | Execution workers | planned | — |
 | 4 | Temporal durability | partial (pre-existing `core/brain/temporal_workflow.py`) | `test_orchestration.py` |
 | 5 | LangGraph brain | partial (pre-existing reasoning graph) | `core/brain/graph.py`, `test_reasoning_graph.py`, `test_brain.py` |
