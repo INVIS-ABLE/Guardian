@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-23T00:10:55.703449+00:00",
+  "generated_at": "2026-06-23T00:15:52.640833+00:00",
   "wave": 0,
   "summary": {
     "agents": 17,
@@ -8,7 +8,7 @@
     "simulators": 3,
     "router_capabilities": 12,
     "tool_manifest_capabilities": 8,
-    "tests": 82,
+    "tests": 84,
     "source_directories": [
       "agents",
       "attestation",
@@ -607,7 +607,9 @@
     "tests/test_privacy_invariants.py",
     "tests/test_reasoning_calibration.py",
     "tests/test_reasoning_causal.py",
+    "tests/test_reasoning_council.py",
     "tests/test_reasoning_graph.py",
+    "tests/test_reasoning_hunting.py",
     "tests/test_reasoning_hypothesis.py",
     "tests/test_recovery.py",
     "tests/test_repo_inventory.py",

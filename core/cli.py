@@ -718,5 +718,39 @@ def reason_causal_cmd(spec_file: str, observed: str, sink: str) -> None:
                       detail={"root_cause": r.root_cause, "first_event": r.first_event})
 
 
+@main.command("threat-hunt")
+@click.option("--twin", "twin_spec", type=click.Path(exists=True), help="Digital-twin spec.")
+@click.option("--identity", "identity_spec", type=click.Path(exists=True), help="Identity-graph spec.")
+@click.option("--lineage", "lineage_spec", type=click.Path(exists=True), help="Lineage-graph spec.")
+@click.option("--fail-on-high", is_flag=True, help="Exit non-zero if any HIGH/CRITICAL hunt fires.")
+def threat_hunt_cmd(twin_spec, identity_spec, lineage_spec, fail_on_high) -> None:
+    """Wave 2: run read-only defensive hunts over the awareness graphs (Sovereign #11)."""
+    from .reasoning import run_hunts
+
+    twin = identity = lineage = None
+    if twin_spec:
+        from .twin import load_twin
+        twin = load_twin(twin_spec)
+    if identity_spec:
+        from .identity_graph import load_graph as li
+        identity = li(identity_spec)
+    if lineage_spec:
+        from .lineage import load_graph as ll
+        lineage = ll(lineage_spec)
+
+    results = run_hunts(twin=twin, identity=identity, lineage=lineage)
+    if not results:
+        click.echo("threat-hunt: no findings.")
+    for r in results:
+        flag = "+" if r.truncated else " "
+        click.echo(f"[{r.severity.upper():8s}] {r.title} ({r.hunt_id})")
+        click.echo(f"    hits{flag}: {', '.join(r.hits)}")
+        click.echo(f"    → detection: {r.detection}")
+    high = [r for r in results if r.severity in ("high", "critical")]
+    AuditLog().record("threat-hunt", actor="cli", decision="allowed",
+                      detail={"findings": len(results), "high": len(high)})
+    raise SystemExit(1 if (fail_on_high and high) else 0)
+
+
 if __name__ == "__main__":  # pragma: no cover
     main()

@@ -5,7 +5,9 @@ Three composing engines that turn a rich map into investigated, calibrated concl
 
   * #7  evidence & competing-hypothesis engine  — :mod:`core.reasoning.hypothesis`
   * #8  causal root-cause engine                — :mod:`core.reasoning.causal`
+  * #9  multi-model reasoning council           — :mod:`core.reasoning.council`
   * #10 confidence calibration & abstention      — :mod:`core.reasoning.calibration`
+  * #11 autonomous threat-hunting engine         — :mod:`core.reasoning.hunting`
 
 All read-only and metadata-only: they reason over the typed evidence contracts
 (:mod:`core.evidence.models`) and the digital twin (:mod:`core.twin`), and add no authority —
@@ -16,6 +18,8 @@ from __future__ import annotations
 
 from .calibration import Bin, Calibrator
 from .causal import CausalReport, Counterfactual, root_cause
+from .council import Case, CouncilVerdict, convene
+from .hunting import HuntResult, run_hunts
 from .hypothesis import (
     CaseVerdict,
     HypothesisVerdict,
@@ -33,4 +37,9 @@ __all__ = [
     "CausalReport",
     "Counterfactual",
     "root_cause",
+    "Case",
+    "CouncilVerdict",
+    "convene",
+    "HuntResult",
+    "run_hunts",
 ]
