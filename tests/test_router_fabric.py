@@ -185,3 +185,38 @@ def test_executor_records_failure_when_runner_raises():
     h = health.health("semgrep")
     assert h.failures == 1
     assert h.state is HealthState.UNAVAILABLE  # threshold=1 opens the circuit
+
+
+def test_executor_uses_resolver_for_health_aware_selection():
+    from uuid import uuid4
+
+    from core.tools.executor import ToolExecutor
+
+    health = ToolHealthTracker(failure_threshold=3, cooldown_seconds=60)
+    resolver = CapabilityResolver(health=health)
+    resolver.register(_signed("scan", "primary"))
+    resolver.register(_signed("scan", "backup"))
+    # open the primary's circuit
+    for _ in range(3):
+        resolver.record_outcome("primary", ok=False, error="down")
+    ex = ToolExecutor(default_registry(), resolver=resolver)
+    out = ex.execute("scan", case_id=uuid4(), args={"x": 1}, environment="staging")
+    assert not isinstance(out, ToolRefusal)
+    assert out.tool == "backup"  # executor ran the healthy candidate, not the tripped one
+    # the successful run is recorded on the shared health tracker
+    assert health.health("backup").successes == 1
+
+
+def test_executor_resolver_refuses_when_all_unavailable():
+    from uuid import uuid4
+
+    from core.tools.executor import ToolExecutor
+
+    health = ToolHealthTracker(failure_threshold=1, cooldown_seconds=60)
+    resolver = CapabilityResolver(health=health)
+    resolver.register(_signed("scan", "only"))
+    resolver.record_outcome("only", ok=False)
+    ex = ToolExecutor(default_registry(), resolver=resolver)
+    out = ex.execute("scan", case_id=uuid4(), args={"x": 1}, environment="staging")
+    assert isinstance(out, ToolRefusal)
+    assert out.reason is RefusalReason.TOKEN_REJECTED
