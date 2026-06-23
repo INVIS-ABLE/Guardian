@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-23T01:29:35.844214+00:00",
+  "generated_at": "2026-06-23T01:30:41.388689+00:00",
   "wave": 0,
   "summary": {
     "agents": 17,
@@ -8,7 +8,7 @@
     "simulators": 3,
     "router_capabilities": 12,
     "tool_manifest_capabilities": 8,
-    "tests": 106,
+    "tests": 107,
     "source_directories": [
       "agents",
       "attestation",
@@ -610,6 +610,7 @@
     "tests/test_citadel_root_of_trust.py",
     "tests/test_citadel_tools_manifest.py",
     "tests/test_citadel_transparency.py",
+    "tests/test_citadel_transparency_runtime.py",
     "tests/test_components_manifest.py",
     "tests/test_connector_contract.py",
     "tests/test_connector_contract_migration.py",
