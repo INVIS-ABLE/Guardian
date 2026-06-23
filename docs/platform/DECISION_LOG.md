@@ -43,6 +43,20 @@ Each decision records: context, decision, rationale, and how to reverse it.
   `_tenant_denies`/`_tenancy_enforced`, the new `PolicyInput` fields, and the two
   `tenant_id=` lines. No data migration occurred.
 
+## D-0006 — Ship the candidate catalogue as a framework with pending live metadata
+- **Date:** 2026-06-23
+- **Context:** D-0003 deferred the ~200-repo evaluation for lack of live metadata.
+  The architectural decisions, however, do not need live metadata — they follow from
+  each project's category and purpose.
+- **Decision:** Ship `research/repositories/` (217 candidates) with **decisions made**
+  and **numeric metadata explicitly marked `pending_live_discovery`** plus reproducible
+  `gh` commands. Decisions are generated deterministically (`generate.py`) and guarded
+  by `tests/test_repository_catalogue.py`. Supersedes D-0003.
+- **Rationale:** Honours "do not fabricate metadata" while still delivering the
+  actionable build/buy/adapt/reject judgement the brief asks for. The test pins the
+  safety-critical invariants (no offensive tool adopted; OPA remains sole authority).
+- **Reverse:** Delete `research/repositories/`, the two narrative docs, and the test.
+
 ## D-0003 — Defer the candidate-catalogue evaluation to a follow-up
 - **Date:** 2026-06-22
 - **Context:** The master prompt lists ~200 candidate repositories to evaluate

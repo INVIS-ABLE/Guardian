@@ -60,10 +60,24 @@ programme. Claims here are only made for code that exists and passes tests.
 - **Rollback:** remove the fields and the verifier's tenant maps/cache key. Lossless.
 - **Owner:** Platform architecture. **Review date:** at Phase D start.
 
+### Candidate repository catalogue (research framework)
+- **Decision:** D-0003 superseded (DECISION_LOG.md) — catalogue framework now shipped.
+- **Artifacts:** `research/repositories/` — `catalogue.yaml` (217 candidates),
+  `decisions.yaml`, `licences.yaml`, `security_review.yaml`, `data_flows.yaml`,
+  `generate.py` (deterministic generator), README. Narrative:
+  `docs/platform/COMPETITOR_AND_OPEN_SOURCE_LANDSCAPE.md` and
+  `BUILD_BUY_ADAPT_REJECT_MATRIX.md`.
+- **Honesty:** live numeric metadata is marked `pending_live_discovery` with a
+  reproducible `gh` command — never fabricated. Decisions are architectural.
+- **Tests:** `tests/test_repository_catalogue.py` — well-formedness, decision/category
+  present, metadata-pending, offensive tools never adopted, single policy authority
+  (OPA) preserved.
+
 ### Phase 0 platform documentation
 - `docs/platform/`: README, CURRENT_STATE_ASSESSMENT, GUARDIAN_UNIVERSAL_PRODUCT_VISION,
   TENANT_AND_AUTHORISED_TARGET_MODEL, INVISABLE_TO_MULTI_TENANT_MIGRATION,
-  DEPLOYMENT_MODES, DECISION_LOG, IMPLEMENTATION_LEDGER.
+  DEPLOYMENT_MODES, COMPETITOR_AND_OPEN_SOURCE_LANDSCAPE, BUILD_BUY_ADAPT_REJECT_MATRIX,
+  DECISION_LOG, IMPLEMENTATION_LEDGER.
 
 ## Planned (not yet built — do not claim as done)
 
