@@ -89,10 +89,10 @@ The authoritative, machine-checked list is
 | # | System | Gives Guardian |
 | - | ------ | -------------- |
 | 13 | **Continuous adversary-emulation lab** (CALDERA / Atomic Red Team / Stratus) — *[first slice implemented](adversary_emulation.md)* | did prevention block it? did an independent sensor detect it? was evidence preserved? — **lab only**, every bypass → regression test |
-| 14 | **Continuous fuzzing farm** (ClusterFuzzLite / AFL++ / Atheris / Jazzer) | fuzz crypto envelopes, attachments, tokens, parsers, evidence formats |
-| 15 | **Cryptographic protocol proof lab** (Tamarin / Verifpal / ProVerif) | review the crypto **system** — device/key/group/forward-secrecy/recovery flows — never plaintext |
-| 16 | **Binary & malware analysis lab** (Ghidra / angr / CAPE / YARA) | Tier-3 isolated RE: no prod route, disposable VMs, full pcap, **human approval to import unknown artifacts** |
-| 17 | **Digital-twin chaos & recovery simulator** | failure scenarios against the **cloned** twin; compare predicted vs actual impact to learn which controls actually work |
+| 14 | **Continuous fuzzing farm** (ClusterFuzzLite / AFL++ / Atheris / Jazzer) — *[first slice implemented](fuzzing_farm.md)* | fuzz crypto envelopes, attachments, tokens, parsers, evidence formats |
+| 15 | **Cryptographic protocol proof lab** (Tamarin / Verifpal / ProVerif) — *[first slice implemented](crypto_proof_lab.md)* | review the crypto **system** — device/key/group/forward-secrecy/recovery flows — never plaintext |
+| 16 | **Binary & malware analysis lab** (Ghidra / angr / CAPE / YARA) — *[first slice implemented](malware_lab.md)* | Tier-3 isolated RE: no prod route, disposable VMs, full pcap, **human approval to import unknown artifacts** |
+| 17 | **Digital-twin chaos & recovery simulator** — *[first slice implemented](chaos_recovery.md)* | failure scenarios against the **cloned** twin; compare predicted vs actual impact to learn which controls actually work |
 
 ### Wave 4 — Brokered operational power
 | # | System | Gives Guardian |
