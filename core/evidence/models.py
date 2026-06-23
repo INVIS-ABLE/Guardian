@@ -31,6 +31,8 @@ from uuid import UUID, uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from core.tenancy import INVISABLE_TENANT_ID
+
 SCHEMA_VERSION = 1
 
 
@@ -150,6 +152,7 @@ class EvidenceItem(_Frozen):
     """
 
     id: UUID = Field(default_factory=uuid4)
+    tenant_id: str = INVISABLE_TENANT_ID  # owning tenant; isolates evidence per tenant
     kind: str  # e.g. "sarif_result" | "log_line" | "sbom_entry" | "dns_txt"
     summary: str = Field(max_length=4000)
     classification: Classification = Classification.INTERNAL
@@ -240,6 +243,7 @@ class Finding(_Frozen):
     """A normalised, deduplicated finding traceable to evidence and an asset (§4)."""
 
     id: UUID = Field(default_factory=uuid4)
+    tenant_id: str = INVISABLE_TENANT_ID  # owning tenant; isolates findings per tenant
     title: str = Field(max_length=500)
     severity: Severity = "info"
     description: str = Field(max_length=8000, default="")

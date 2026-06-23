@@ -40,12 +40,16 @@ runtime behaviour without an explicit, separate decision.
   `core/roots_of_trust.py` (ownership verified *for this tenant's* authorising
   identity).
 
-### Phase C — data-plane tenant scoping
-- Add `tenant_id` to `ActionRequest` (`connectors/contract.py`) and `EvidenceItem`
-  (`core/evidence/models.py`); tenant-scope evidence storage and RAG collections.
-- Generalise `ownership/verifier.py` maps to `tenant → {domain: token}` /
-  `tenant → {owners}`.
-- Tenant-partition memory/telemetry; add cross-tenant leakage tests.
+### Phase C — data-plane tenant scoping (shipped, additive) ✅
+- `tenant_id` added to `ActionRequest` (bound into `canonical_request`, so a signed
+  capability cannot be replayed cross-tenant), `EvidenceItem`, `Finding`, and
+  `TargetTrust` (empty tenant fails the target root of trust). (See D-0005.)
+- `ownership/verifier.py` generalised to `tenant → {domain: token}` /
+  `tenant → {owners}` with a `(kind, target, tenant)` cache key; flat maps belong to
+  the configured tenant, unconfigured tenants fail closed.
+- Cross-tenant isolation tests in `tests/test_tenant_isolation.py`.
+- *Deferred to Phase D:* tenant-partitioning of memory/telemetry/RAG collections and
+  their leakage tests (needs the storage layer, not just the contracts).
 
 ### Phase D — registries & onboarding
 - Add a `tenant:` column to asset/test-account registries (default `invisable`).

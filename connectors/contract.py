@@ -27,6 +27,7 @@ from time import time
 from typing import Any, Protocol, runtime_checkable
 
 from core import signing
+from core.tenancy import INVISABLE_TENANT_ID
 
 
 class ContractViolation(PermissionError):
@@ -69,6 +70,10 @@ class ActionRequest:
     args: dict[str, Any] = field(default_factory=dict)  # typed args only
     repo: str | None = None
     commit: str | None = None
+    # Owning tenant. Bound into the signed authorization (see canonical_request) so a
+    # capability minted for one tenant can never be replayed against another. Defaults
+    # to the founding INVISABLE tenant for backward compatibility. See core/tenancy.py.
+    tenant_id: str = INVISABLE_TENANT_ID
 
 
 @dataclass(frozen=True)
@@ -202,6 +207,7 @@ def canonical_request(request: ActionRequest) -> bytes:
         {
             "action": request.action, "target": request.target,
             "args": request.args, "repo": request.repo, "commit": request.commit,
+            "tenant_id": request.tenant_id,
         },
         sort_keys=True, separators=(",", ":"),
     ).encode("utf-8")
