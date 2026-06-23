@@ -142,6 +142,28 @@ Hunts span every domain: entry-identity-reaches-regulated-data and single-point-
 privilege-escalation and dormant-sensitive-privilege (identity), boundary and retention violations
 (lineage). Use `--fail-on-high` to gate CI on any high/critical hit.
 
+## Runtime-triggered investigation — nervous system → brain
+
+[`core/reasoning/incident.py`](../core/reasoning/incident.py) is the capstone that wires the layers
+into one flow: a live signal on the **event fabric** (#5) flags at-risk assets on the **twin**
+(runtime fold), the **causal engine** (#8) explains how it reaches the crown jewels, the signals
+become typed **evidence**, and the **council** (#9) adjudicates competing hypotheses (active
+compromise vs. controls held). Because a raw sensor alert is *unverified tool output*, the council
+cannot confirm it alone — so the pipeline **escalates to a human** with the whole picture rather
+than acting.
+
+```bash
+guardian incident twin/invisable-sample.yaml event_fabric/invisable-stream.yaml
+# INCIDENT — 6 notable signal(s); 6 asset(s) at risk; reaching data:ciphertext;
+#            council: INSUFFICIENT EVIDENCE; root cause: db:mailbox
+#   at risk now: api:messaging, data:ciphertext, db:mailbox, img:messaging, repo:guardian, svc:messaging-relay
+#   decision:    INSUFFICIENT EVIDENCE  → ESCALATE TO HUMAN
+```
+
+That is the Sovereign diagram realised end to end — *event fabric → reasoning council → escalate* —
+and exactly the right posture: Guardian **notices, explains, and escalates**; it never auto-acts on
+an unverified signal.
+
 ## What this is not
 
 These engines never grant authority, place a control, or execute a remediation — they produce
