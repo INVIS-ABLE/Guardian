@@ -39,7 +39,8 @@ def build_report(
 class TpmQuoteSource(Protocol):
     """A source of signed TPM quotes (production: real TPM/Keylime; tests: ``SoftwareTpm``)."""
 
-    def quote(self, node_id: str, nonce: str) -> tuple[AttestationReport, str]: ...
+    def quote(self, node_id: str, nonce: str) -> tuple[AttestationReport, str]:
+        """Produce a signed, nonce-bound attestation quote for the node."""
 
 
 class SoftwareTpm:

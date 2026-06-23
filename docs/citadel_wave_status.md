@@ -8,7 +8,7 @@ A wave is **delivered** only when its acceptance criteria pass with tests. Anyth
 |------|-------|--------|----------|
 | 20 | Citadel reconciliation — manifests, configs, invariant tests | **delivered** | `docs/citadel_*`, `docs/architecture/citadel_*.yaml`, `configs/citadel/*`, `tests/test_citadel_*` (49 tests) |
 | 21 | Hardware root of trust | **delivered** | `citadel/root_of_trust/` + `tests/test_citadel_root_of_trust.py` (see below) |
-| 22 | Confidential worker fabric | planned | — |
+| 22 | Confidential worker fabric | **delivered** | `citadel/confidential/` + `tests/test_citadel_confidential.py` (see below) |
 | 23 | Cryptographic agility | planned | — |
 | 24 | Key custody & ceremonies | planned | — |
 | 25 | Formal state-machine proof | planned | — |
@@ -50,3 +50,24 @@ A wave is **delivered** only when its acceptance criteria pass with tests. Anyth
 pass the machine root (no production capability); attestation evidence (a content-addressable
 digest) attaches to execution; drift creates a durable event **and** a case and quarantines the
 platform. The independent verifier agrees with the authoritative owner.
+
+## Wave 22 — Confidential worker fabric (delivered)
+
+`citadel/confidential/` builds on `isolation.sandbox` (the worker-isolation owner, reused) and
+Wave 21's platform attestation:
+
+- **Profiles** (`profiles.py`) — six worker classes mapped to the strict sandbox posture plus
+  confidential-compute requirements (attestation, measured/signed image, ephemerality, externally
+  committed evidence). Confidential classes require attestation; sandbox classes do not.
+- **Workload attestation** (`attestation.py`) — combines the Wave 21 platform attestation with a
+  canonical, content-addressable **workload measurement** (image + class + config).
+- **Attestation-bound secret release** (`secret_release.py`) — a secret is sealed to one exact
+  workload measurement and released only against a passing attestation that matches it.
+- **Runtimes** (`confidential_containers.py` CoCo/Kata owner; `gramine.py`, `enarx.py` specialist
+  adapters) — launch / attest / destroy, ephemeral by construction.
+- **Independent verifier** (`verifier.py`) — commits worker evidence to an independent sink
+  (outside the worker's control) and verifies worker destruction (no worker outlives its job).
+
+**Acceptance (tested in `tests/test_citadel_confidential.py`):** failed attestation prevents secret
+release; release is tied to the exact workload measurement; sensitive worker evidence is
+independently committed; worker destruction is verified.
