@@ -84,20 +84,31 @@ gates.
 Tests: `test_autonomy_states`, `test_autonomy_budget`, `test_healing_contracts`,
 `test_healing_runbooks`, `test_slo`, `test_anti_oscillation`, `test_healing_hierarchy`,
 `test_telemetry_completeness`, `test_control_effectiveness`, `test_immune_memory`,
-`test_prediction`, `test_adaptive_resilience`, `test_outcome_learning` (116 cases).
+`test_prediction`, `test_adaptive_resilience`, `test_outcome_learning`,
+`test_integrations_contracts` (142 cases).
 
-## Queued (subsequent increments)
+## Integration-contract layer (`adaptive/integrations/`, directive §4, §10, §11, §15–16, §18, §24, §28)
 
-The remaining work is **infra-bound** — it needs the real control-plane / MLOps systems,
-so it will land as typed contracts/adapter interfaces behind the existing authorities, not
-as hollow stubs:
+The external control-plane and MLOps systems are infra-bound, so they land as **typed
+manifests, adapter contracts and invariant validators** — the part CI and the gates
+enforce. The real network-talking adapters are deployment-specific and implement these
+shapes. **No integration grants authority**; all produce evidence/signals only.
 
-- **Governed learning** (§14–20) and the integration **adapters** (§37) — Argo CD/Rollouts,
-  Keptn, OpenFeature/Flipt, Cluster API, Karmada, Crossplane, OpenTofu, Node Problem
-  Detector/Kured/Descheduler, Velero/Kanister/CloudNativePG, Flink, and the governed
-  learning stack (lakeFS/Great Expectations/OpenLineage/Feast/MLflow/KServe/Evidently/
-  Alibi Detect/NannyML/River/Label Studio). None grants authority; all produce evidence
-  and signals.
+| Module | Directive | Invariant enforced |
+|---|---|---|
+| `integrations/base.py` | §4, §11, §37 | `IntegrationAdapter` protocol + `assert_no_authority()` — an adapter claiming authority is refused. |
+| `integrations/reconciliation.py` | §24 | One authoritative controller per resource (OpenTofu/Cluster API/Crossplane/Argo CD); conflicting ownership fails CI; Crossplane may not own constitutional infra. |
+| `integrations/delivery.py` | §4, §10 | Failed safety signal → rollback; missing signal → hold (no promotion); only all-passing → promote. Keptn/Argo grant no authority. |
+| `integrations/models.py` | §15, §16, §18 | Every model has an approved digest + reproducible dataset + rollback version; production endpoints use approved digests and are isolated/revocable; a model never self-promotes (promotion needs an `AuthorityGrant`); challengers promote only on clean safety/privacy/drift metrics. |
+| `integrations/datasets.py` | §15, §19 | Datasets need lineage + validation; features need an owner, leakage check and allowed consumers; forbidden-class data (plaintext/keys/secrets) can never become training data. |
+| `integrations/flink.py` | §11 | Jobs are signed, tenant-isolated, checkpointed and replay-tested, and **never grant authority**. |
+| `integrations/wasm.py` | §28 | Extensions are signed, import-allowlisted, no-network/no-filesystem by default, fully limited (memory/fuel/timeout/output); Wasm cannot be the boundary for high-risk scanners. |
+
+## Queued (genuinely external)
+
+What remains is the *running deployment* of those systems (Argo/Karmada/Crossplane/Flink/
+MLflow/KServe instances) and their concrete network adapters — operational wiring, not new
+Guardian logic. They implement the contracts above and register as evidence sources.
 
 ## Acceptance-test traceability (directive §39)
 
@@ -128,9 +139,21 @@ Items already enforced in code by this increment:
 | §21 | No memory item receives permanent trust automatically | `memory/immune.py` (decaying `effective_trust`) |
 | §29 | Predictors recommend; preventive action stays in approved envelopes | `prediction/` (advisory `Prediction`) |
 | §30 | Identify controls installed-but-not-functioning / singly-protected assets | `controls/effectiveness.py` |
+| 1 | No learning process changes OPA policy | `integrations/base.py` (`assert_no_authority`) |
+| 2 | No model changes its own production manifest / self-promotes | `integrations/models.py` (`promote_challenger` needs `AuthorityGrant`) |
+| 3 | No model directly issues capabilities | `integrations/base.py` (adapters grant no authority) |
+| 4 | Every learned model has a reproducible dataset | `models.py` (`dataset_ref`); `datasets.py` |
+| 5 | Every dataset has lineage and validation | `datasets.py` (`assert_dataset_governed`) |
+| 6 | Every model has an approved registry version | `models.py` (`ModelManifest`, `eval_ref`) |
+| 7 | Every production inference endpoint uses an approved digest | `models.py` (`assert_endpoint_valid`) |
+| 8 | Every model can be rolled back | `models.py` (`rollback_version` required) |
+| 24 | Conflicting reconciler ownership fails CI | `integrations/reconciliation.py` (`assert_no_conflicts`) |
+| 34 | Wasm extensions have explicit capabilities and limits | `integrations/wasm.py` (`assert_wasm_safe`) |
+| 35 | Event-processing state recovers from checkpoints | `integrations/flink.py` (checkpoint policy required) |
 
-Remaining §39 items (1–8, 15, 17–21, 24–29, 33–40) are covered by the queued increments and
-the existing Level 5 authorities; this matrix grows as each phase lands.
+Remaining §39 items (15, 17, 19, 25–29, 33, 36–40) depend on the *running* external systems
+(failover drills, restoration tests, region loss) and are validated by their contracts here
+plus operational rehearsal; this matrix grows as each system is deployed.
 
 ## Design principle (directive §40)
 
