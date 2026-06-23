@@ -17,9 +17,33 @@ from .contracts import (
     RepairAction,
     assert_repair_allowed,
 )
+from .anti_oscillation import (
+    AntiOscillationPolicy,
+    OscillationVerdict,
+    RepairAttempt,
+    RepairLedger,
+    check_repair,
+)
+from .hierarchy import (
+    LAYER_NAMES,
+    HierarchyError,
+    RepairSelection,
+    assert_no_layer_jump,
+    select_repair,
+)
 from .runbooks import Runbook, RunbookBudget, RunbookOperation, RunbookTrigger
 
 __all__ = [
+    "RepairAttempt",
+    "AntiOscillationPolicy",
+    "OscillationVerdict",
+    "RepairLedger",
+    "check_repair",
+    "LAYER_NAMES",
+    "HierarchyError",
+    "RepairSelection",
+    "select_repair",
+    "assert_no_layer_jump",
     "HealingContract",
     "HealingContractViolation",
     "RepairAction",

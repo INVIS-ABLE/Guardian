@@ -72,6 +72,7 @@ packages = [
     "adaptive",
     "adaptive.autonomy",
     "adaptive.healing",
+    "adaptive.slo",
     "citadel",
     "citadel.root_of_trust",
     "citadel.confidential",

@@ -36,6 +36,11 @@ consume.
 | `adaptive/healing/contracts.py` | §5, §7, §27 | The `HealingContract` (parses the directive's example YAML), the canonical reversible `RepairAction`s mapped to the §7 healing-hierarchy layers, structural privacy/rollback enforcement, and `assert_repair_allowed()` — **Guardian refuses to repair a service without a valid contract**. |
 | `adaptive/healing/runbooks.py` | §6 | The restricted **Healing Runbook IR** — typed `RepairAction`s bound to exact targets with bounded scalar args, **no arbitrary shell**; mandatory rollback/abort/verification criteria and budgets (max operations/duration/blast-radius/cooldown), rejected at construction otherwise. |
 | `adaptive/healing/compiler.py` | §6, §22 | The **runbook compiler + 10-gate pipeline**. Decides the deterministic gates (schema · ownership · data-classification) fail-closed; the authority-owned gates (CUE · Z3 · OPA · synthetic · staging · rollback-verification · human-approval) stay `PENDING_EXTERNAL` until a signed `GateAttestation` arrives. A runbook is `production_eligible` only when **all ten** pass. `plan_execution_jobs()` materialises operations into the existing `core.schemas.execution.ExecutionJob` (never shell), each still requiring a one-use capability token. |
+| `adaptive/healing/hierarchy.py` | §7 | **Self-healing hierarchy selection** — picks the *lowest viable* repair layer (1 process replacement → 10 regional recovery) and refuses to jump to a broader repair while a narrower one is viable. |
+| `adaptive/healing/anti_oscillation.py` | §35 | **Anti-oscillation governor** — per-target repair locks, cooldowns, per-window rate limits, loop/flapping detection, and a freeze-and-escalate after repeated failure. Grants nothing; only allows or refuses, with a reason. |
+| `adaptive/slo/definitions.py` | §9 | **SLOs** including the INVISABLE invariant objectives (privacy, safeguarding, notification confidentiality, cross-tenant access, encryption-downgrade, key-directory consistency, account recovery), marked `privacy_critical`. Registry flags critical services with no SLO. |
+| `adaptive/slo/burn_rates.py` | §9 | **Error-budget burn** — burn rate, remaining budget, exhaustion and multi-window severity bands. |
+| `adaptive/slo/safety_gates.py` | §9 | **Availability-vs-privacy safety gate** — rejects any repair that regresses a privacy-critical invariant, regardless of availability benefit. |
 
 Class **E is never granted autonomously**: the budget only ever reasons about A–D, and E
 always returns to the existing identity/ownership/policy/approval/attestation/evidence
@@ -59,17 +64,27 @@ gates.
 - A runbook operation **cannot** carry shell — operations are typed `RepairAction`s with
   scalar args only; a `command`/`script`/`exec` arg or a non-scalar value is rejected.
 
+- An availability win that regresses any privacy-critical SLO is **rejected** by the safety
+  gate, regardless of the reliability benefit (§9).
+- Repairs are attempted **lowest-layer-first** and a broader repair cannot skip a viable
+  narrower one (§7); repeated failure **freezes** automation for that target and escalates (§35).
+
 Tests: `tests/test_autonomy_states.py`, `tests/test_autonomy_budget.py`,
-`tests/test_healing_contracts.py`, `tests/test_healing_runbooks.py` (52 cases).
+`tests/test_healing_contracts.py`, `tests/test_healing_runbooks.py`, `tests/test_slo.py`,
+`tests/test_anti_oscillation.py`, `tests/test_healing_hierarchy.py` (74 cases).
 
 ## Queued (subsequent increments)
 
 Following the directive's Phase order (§38) and the required layout (§37):
 
-- **Anti-oscillation controls** (§35) — cooldowns, repair locks, loop detection, backoff.
-- **SLO + error-budget + telemetry-completeness** layer (§9, §13, Phase 1 remainder).
-- **Self-healing hierarchy executor** (§7) — lowest-viable-layer selection.
-- Integrations (§37) are **adapters** behind the existing authorities — Argo CD/Rollouts,
+- **Telemetry-completeness authority** (§13) — sensor-health scoring that feeds the
+  autonomy budget's `telemetry_completeness`.
+- **Predictive defence** (§29) — advisory predictors (capacity, certificate expiry,
+  failure probability, recovery readiness).
+- **Resilience contracts** (§23–26) — typed failover / database / backup-verification /
+  rehearsal invariants (failover must not bypass OPA, change residency, or use stale state).
+- **Governed learning** (§14–20) and the integration **adapters** (§37) are infra-bound —
+  they will land as typed contracts/manifests behind the existing authorities — Argo CD/Rollouts,
   Keptn, OpenFeature/Flipt, Cluster API, Karmada, Crossplane, OpenTofu, Node Problem
   Detector/Kured/Descheduler, Velero/Kanister/CloudNativePG, Flink, and the governed
   learning stack (lakeFS/Great Expectations/OpenLineage/Feast/MLflow/KServe/Evidently/
@@ -93,8 +108,13 @@ Items already enforced in code by this increment:
 | 32 | No availability repair bypasses privacy controls | forbidden-repair intersection check |
 | §6 | No runbook contains arbitrary shell; all actions compile into existing Plan IR (`ExecutionJob`) | `runbooks.py` (no-shell, scalar-args); `compiler.plan_execution_jobs()` |
 | §6 | Human approval before production eligibility | `compiler.py` (production needs all 10 gates incl. human-approval attestation) |
+| 12 | Every critical service has an SLO | `slo/definitions.py` (`SLORegistry.services_without_slo`) |
+| 16 | Repeated repair failure freezes automation | `anti_oscillation.py` (freeze + escalate) |
+| §7 | Select lowest viable repair; no jump to broader | `hierarchy.py` (`select_repair`, `assert_no_layer_jump`) |
+| §9 | Action improving availability but weakening privacy is rejected | `slo/safety_gates.py` |
+| §35 | Anti-oscillation (cooldowns, locks, loop detection) | `anti_oscillation.py` |
 
-Remaining §39 items (1–8, 12, 15, 17–29, 33–40) are covered by the queued increments and
+Remaining §39 items (1–8, 15, 17–29, 33–40) are covered by the queued increments and
 the existing Level 5 authorities; this matrix grows as each phase lands.
 
 ## Design principle (directive §40)
