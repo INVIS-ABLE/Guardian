@@ -4,13 +4,12 @@ Capabilities are the stable vocabulary the Brain and agents speak. Two registrie
 exist today and are preserved through Wave 0:
 
 1. **Router capabilities** (`core/router.py` `CAPABILITY_MAP`) — the legacy
-   capability→tool routing the CLI and agents already use.
+   capability->tool routing the CLI and agents already use.
 2. **Signed tool-manifest capabilities** (`core/tools/registry.py`
    `default_registry()`) — pinned, signed manifests with one-use capability tokens.
 
-The Final Power-Up capability vocabulary (`code.sast`, `secret.scan`, …) is the
-target; it will be mapped onto these via compatibility adapters in later waves so
-existing names keep working. Enforced by `tests/test_repo_inventory.py`.
+The Final Power-Up capability vocabulary is the target; it maps onto these via
+compatibility adapters in later waves. Enforced by `tests/test_repo_inventory.py`.
 
 ## Router capabilities
 

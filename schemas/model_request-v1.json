@@ -1,0 +1,376 @@
+{
+  "$defs": {
+    "AssetRef": {
+      "additionalProperties": false,
+      "description": "A reference into the security knowledge graph / digital twin (\u00a75, \u00a714).",
+      "properties": {
+        "identifier": {
+          "title": "Identifier",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "schema_version": {
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "identifier"
+      ],
+      "title": "AssetRef",
+      "type": "object"
+    },
+    "Classification": {
+      "description": "Data-classification label that must *propagate* through every transformation.\n\nThe coarse tiers mirror docs/governance/DATA_CLASSIFICATION.md\n(PUBLIC | INTERNAL | CONFIDENTIAL | RESTRICTED). ``PII``/``HEALTH`` are finer\nlabels for the RESTRICTED tier; ``MESSAGE_PLAINTEXT`` and ``DECRYPTION_KEY`` are\ntracked so the privacy boundary can refuse to let them near a model or long-term\nmemory (policy_gate BLOCKED_ACTIONS enforce the act; the label lets us detect and\nrefuse *content* too).",
+      "enum": [
+        "public",
+        "internal",
+        "confidential",
+        "restricted",
+        "pii",
+        "health",
+        "message_plaintext",
+        "decryption_key"
+      ],
+      "title": "Classification",
+      "type": "string"
+    },
+    "EvidenceItem": {
+      "additionalProperties": false,
+      "description": "One immutable piece of evidence with full provenance, trust and classification.\n\nThe ``summary`` is a short human/model-readable description; ``source_hash`` and\n``content_hash`` make the item content-addressable and tamper-evident. Raw\nartifacts live in the raw-evidence store (\u00a79) and are referenced by hash, not\ninlined, so this object stays bounded.",
+      "properties": {
+        "assets": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/AssetRef"
+          },
+          "title": "Assets",
+          "type": "array"
+        },
+        "classification": {
+          "$ref": "#/$defs/Classification",
+          "default": "internal"
+        },
+        "content_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Content Hash"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/Provenance"
+        },
+        "schema_version": {
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "source_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Hash"
+        },
+        "summary": {
+          "maxLength": 4000,
+          "title": "Summary",
+          "type": "string"
+        },
+        "trust_level": {
+          "$ref": "#/$defs/TrustLevel",
+          "default": "untrusted_evidence"
+        },
+        "validation_state": {
+          "$ref": "#/$defs/ValidationState",
+          "default": "unvalidated"
+        }
+      },
+      "required": [
+        "kind",
+        "summary",
+        "provenance"
+      ],
+      "title": "EvidenceItem",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "description": "Where a piece of evidence came from and how it was transformed.\n\nEvery finding must be traceable to original raw evidence, the tool + version +\ndigest that produced it, when it was acquired, the asset/commit it concerns, the\nparser that read it, its transformation history, and the analyst/model that\ninterpreted it (target architecture \u00a74).",
+      "properties": {
+        "acquired_at": {
+          "format": "date-time",
+          "title": "Acquired At",
+          "type": "string"
+        },
+        "asset": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Asset"
+        },
+        "commit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Commit"
+        },
+        "interpreted_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Interpreted By"
+        },
+        "parser_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parser Version"
+        },
+        "schema_version": {
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        },
+        "tool_digest": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tool Digest"
+        },
+        "tool_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tool Version"
+        },
+        "transformations": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Transformations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "tool"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "TrustLevel": {
+      "description": "Context-firewall trust classes (target architecture \u00a78).\n\nOrdered loosely from most to least authoritative. The firewall's core rule:\ninstructions found inside UNTRUSTED_EVIDENCE / TOOL_OUTPUT / RETRIEVED_MEMORY /\nMODEL_GENERATED content are *data*, never commands, and a low-trust input can\nnever silently be promoted to drive policy or another agent's instructions.",
+      "enum": [
+        "system_policy",
+        "trusted_config",
+        "verified_evidence",
+        "untrusted_evidence",
+        "user_instruction",
+        "tool_output",
+        "retrieved_memory",
+        "model_generated"
+      ],
+      "title": "TrustLevel",
+      "type": "string"
+    },
+    "ValidationState": {
+      "enum": [
+        "unvalidated",
+        "validated",
+        "rejected"
+      ],
+      "title": "ValidationState",
+      "type": "string"
+    },
+    "WorkClass": {
+      "description": "What *kind* of work a call does \u2014 the input to the routing policy (\u00a72).\n\nCrucially, ``POLICY`` exists so the gateway can *refuse* it: authority, scope and\napproval decisions are deterministic and must never be delegated to a model.",
+      "enum": [
+        "parsing",
+        "sensitive",
+        "reasoning",
+        "patch",
+        "review",
+        "policy"
+      ],
+      "title": "WorkClass",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "A request to the gateway. The caller declares the work class and supplies typed\nevidence; the gateway decides which model (if any) may run it and how to frame it.\n\n``instruction`` and ``extra_context`` are the *trusted* task framing. ``evidence``\nis untrusted/typed material to reason over \u2014 the context firewall renders it as\ndata, never as instructions (\u00a78).",
+  "properties": {
+    "allow_external_processing": {
+      "default": false,
+      "title": "Allow External Processing",
+      "type": "boolean"
+    },
+    "case_id": {
+      "format": "uuid",
+      "title": "Case Id",
+      "type": "string"
+    },
+    "eval_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Eval Version"
+    },
+    "evidence": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/EvidenceItem"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "extra_context": {
+      "default": "",
+      "maxLength": 20000,
+      "title": "Extra Context",
+      "type": "string"
+    },
+    "instruction": {
+      "maxLength": 20000,
+      "title": "Instruction",
+      "type": "string"
+    },
+    "max_output_tokens": {
+      "default": 1024,
+      "maximum": 32000,
+      "minimum": 1,
+      "title": "Max Output Tokens",
+      "type": "integer"
+    },
+    "max_retries": {
+      "default": 1,
+      "maximum": 5,
+      "minimum": 0,
+      "title": "Max Retries",
+      "type": "integer"
+    },
+    "prompt_template_version": {
+      "title": "Prompt Template Version",
+      "type": "string"
+    },
+    "tenant_id": {
+      "format": "uuid",
+      "title": "Tenant Id",
+      "type": "string"
+    },
+    "timeout_s": {
+      "default": 60.0,
+      "exclusiveMinimum": 0,
+      "maximum": 600,
+      "title": "Timeout S",
+      "type": "number"
+    },
+    "tool_schema_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Tool Schema Version"
+    },
+    "work_class": {
+      "$ref": "#/$defs/WorkClass"
+    }
+  },
+  "required": [
+    "work_class",
+    "tenant_id",
+    "case_id",
+    "instruction",
+    "prompt_template_version"
+  ],
+  "title": "ModelRequest",
+  "type": "object"
+}

@@ -1,0 +1,98 @@
+{
+  "$defs": {
+    "AssetRef": {
+      "additionalProperties": false,
+      "description": "A reference into the security knowledge graph / digital twin (\u00a75, \u00a714).",
+      "properties": {
+        "identifier": {
+          "title": "Identifier",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "schema_version": {
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "identifier"
+      ],
+      "title": "AssetRef",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "A remediation/containment option the Brain proposes \u2014 never self-executes.\n\nA model may *propose* this; only deterministic policy + recorded human approval\ncan authorise it (target architecture \u00a71: \"a model must never decide whether it\nhas authority to proceed\").",
+  "properties": {
+    "finding_ids": {
+      "default": [],
+      "items": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "title": "Finding Ids",
+      "type": "array"
+    },
+    "id": {
+      "format": "uuid",
+      "title": "Id",
+      "type": "string"
+    },
+    "kind": {
+      "title": "Kind",
+      "type": "string"
+    },
+    "requires_approval": {
+      "default": true,
+      "title": "Requires Approval",
+      "type": "boolean"
+    },
+    "residual_risk": {
+      "default": "",
+      "title": "Residual Risk",
+      "type": "string"
+    },
+    "rollback_plan": {
+      "default": "",
+      "title": "Rollback Plan",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "summary": {
+      "maxLength": 4000,
+      "title": "Summary",
+      "type": "string"
+    },
+    "target": {
+      "$ref": "#/$defs/AssetRef"
+    }
+  },
+  "required": [
+    "kind",
+    "summary",
+    "target"
+  ],
+  "title": "ProposedAction",
+  "type": "object"
+}

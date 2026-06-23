@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-22T23:53:13.720207+00:00",
+  "generated_at": "2026-06-23T00:06:09.191314+00:00",
   "wave": 0,
   "summary": {
     "agents": 17,
@@ -8,7 +8,7 @@
     "simulators": 3,
     "router_capabilities": 12,
     "tool_manifest_capabilities": 8,
-    "tests": 58,
+    "tests": 77,
     "source_directories": [
       "agents",
       "attestation",
@@ -427,6 +427,19 @@
       ]
     },
     {
+      "file": "core/event_fabric/ingest.py",
+      "markers": [
+        {
+          "line": 108,
+          "marker": "NotImplementedError"
+        },
+        {
+          "line": 137,
+          "marker": "NotImplementedError"
+        }
+      ]
+    },
+    {
       "file": "core/identity_graph/ingest.py",
       "markers": [
         {
@@ -449,6 +462,39 @@
       "markers": [
         {
           "line": 79,
+          "marker": "placeholder"
+        }
+      ]
+    },
+    {
+      "file": "core/twin/federate.py",
+      "markers": [
+        {
+          "line": 26,
+          "marker": "placeholder"
+        },
+        {
+          "line": 73,
+          "marker": "placeholder"
+        },
+        {
+          "line": 120,
+          "marker": "placeholder"
+        },
+        {
+          "line": 130,
+          "marker": "placeholder"
+        },
+        {
+          "line": 131,
+          "marker": "placeholder"
+        },
+        {
+          "line": 136,
+          "marker": "placeholder"
+        },
+        {
+          "line": 137,
           "marker": "placeholder"
         }
       ]
@@ -481,10 +527,10 @@
     }
   ],
   "components": {
-    "total": 33,
+    "total": 34,
     "by_status": {
       "planned": 31,
-      "present": 2
+      "present": 3
     },
     "by_trust_zone": {
       "detection": 7,
@@ -492,12 +538,13 @@
       "evidence": 4,
       "execution": 3,
       "identity": 8,
-      "management": 6,
+      "management": 7,
       "observability": 1
     },
     "present": [
       "policy_engine",
-      "repo_inventory"
+      "repo_inventory",
+      "schema_registry"
     ]
   },
   "tests": [
@@ -510,6 +557,16 @@
     "tests/test_autonomy_states.py",
     "tests/test_brain.py",
     "tests/test_brain_tools_manifest.py",
+    "tests/test_citadel_attestation_invariants.py",
+    "tests/test_citadel_authority_invariants.py",
+    "tests/test_citadel_build_reproducibility.py",
+    "tests/test_citadel_capabilities_manifest.py",
+    "tests/test_citadel_crypto_agility.py",
+    "tests/test_citadel_privacy_invariants.py",
+    "tests/test_citadel_quorum_invariants.py",
+    "tests/test_citadel_recovery_invariants.py",
+    "tests/test_citadel_tools_manifest.py",
+    "tests/test_citadel_transparency.py",
     "tests/test_components_manifest.py",
     "tests/test_connector_contract.py",
     "tests/test_connector_contract_migration.py",
@@ -517,9 +574,13 @@
     "tests/test_credential_audit.py",
     "tests/test_detection.py",
     "tests/test_endpoint.py",
+    "tests/test_event_fabric.py",
+    "tests/test_event_sources.py",
     "tests/test_evidence_store.py",
     "tests/test_executor_roots.py",
     "tests/test_failclosed.py",
+    "tests/test_forensic_timeline.py",
+    "tests/test_forensics_cli.py",
     "tests/test_guardrails.py",
     "tests/test_healing_contracts.py",
     "tests/test_identity.py",
@@ -538,10 +599,12 @@
     "tests/test_reasoning_graph.py",
     "tests/test_recovery.py",
     "tests/test_repo_inventory.py",
+    "tests/test_repository_governor.py",
     "tests/test_resilience.py",
     "tests/test_roots_of_trust.py",
     "tests/test_router.py",
     "tests/test_router_contract_execution.py",
+    "tests/test_schemas.py",
     "tests/test_scope.py",
     "tests/test_shadow_guardian.py",
     "tests/test_signing.py",
@@ -556,7 +619,10 @@
     "tests/test_trust_producers.py",
     "tests/test_twin.py",
     "tests/test_twin_assessment.py",
+    "tests/test_twin_cartography.py",
     "tests/test_twin_changemap.py",
+    "tests/test_twin_federate.py",
+    "tests/test_twin_forecast.py",
     "tests/test_typed_state.py",
     "tests/test_verifier.py"
   ]

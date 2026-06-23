@@ -1,0 +1,148 @@
+{
+  "$defs": {
+    "FilesystemPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "input": {
+          "$ref": "#/$defs/FsAccess",
+          "default": "read_only"
+        },
+        "output": {
+          "$ref": "#/$defs/FsAccess",
+          "default": "ephemeral"
+        }
+      },
+      "title": "FilesystemPolicy",
+      "type": "object"
+    },
+    "FsAccess": {
+      "enum": [
+        "none",
+        "read_only",
+        "ephemeral"
+      ],
+      "title": "FsAccess",
+      "type": "string"
+    },
+    "NetworkMode": {
+      "enum": [
+        "deny_all",
+        "egress_allowlist"
+      ],
+      "title": "NetworkMode",
+      "type": "string"
+    },
+    "ResourceLimits": {
+      "additionalProperties": false,
+      "properties": {
+        "cpu": {
+          "default": 2.0,
+          "exclusiveMinimum": 0,
+          "title": "Cpu",
+          "type": "number"
+        },
+        "memory_mb": {
+          "default": 4096,
+          "exclusiveMinimum": 0,
+          "title": "Memory Mb",
+          "type": "integer"
+        },
+        "output_bytes": {
+          "default": 50000000,
+          "exclusiveMinimum": 0,
+          "title": "Output Bytes",
+          "type": "integer"
+        },
+        "runtime_seconds": {
+          "default": 1200,
+          "exclusiveMinimum": 0,
+          "title": "Runtime Seconds",
+          "type": "integer"
+        }
+      },
+      "title": "ResourceLimits",
+      "type": "object"
+    },
+    "ToolManifest": {
+      "additionalProperties": false,
+      "description": "A pinned, bounded description of what a capability runs.",
+      "properties": {
+        "allowed_environments": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Environments",
+          "type": "array"
+        },
+        "capability": {
+          "title": "Capability",
+          "type": "string"
+        },
+        "filesystem": {
+          "$ref": "#/$defs/FilesystemPolicy"
+        },
+        "image_digest": {
+          "title": "Image Digest",
+          "type": "string"
+        },
+        "input_schema": {
+          "title": "Input Schema",
+          "type": "string"
+        },
+        "limits": {
+          "$ref": "#/$defs/ResourceLimits"
+        },
+        "manifest_version": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Manifest Version",
+          "type": "integer"
+        },
+        "network": {
+          "$ref": "#/$defs/NetworkMode",
+          "default": "deny_all"
+        },
+        "output_schema": {
+          "title": "Output Schema",
+          "type": "string"
+        },
+        "requires_approval": {
+          "default": false,
+          "title": "Requires Approval",
+          "type": "boolean"
+        },
+        "tool": {
+          "title": "Tool",
+          "type": "string"
+        }
+      },
+      "required": [
+        "capability",
+        "tool",
+        "image_digest",
+        "input_schema",
+        "output_schema"
+      ],
+      "title": "ToolManifest",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "A manifest plus its HMAC signature.",
+  "properties": {
+    "manifest": {
+      "$ref": "#/$defs/ToolManifest"
+    },
+    "signature": {
+      "title": "Signature",
+      "type": "string"
+    }
+  },
+  "required": [
+    "manifest",
+    "signature"
+  ],
+  "title": "SignedManifest",
+  "type": "object"
+}

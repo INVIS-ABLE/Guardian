@@ -1,0 +1,105 @@
+{
+  "additionalProperties": false,
+  "description": "Where a piece of evidence came from and how it was transformed.\n\nEvery finding must be traceable to original raw evidence, the tool + version +\ndigest that produced it, when it was acquired, the asset/commit it concerns, the\nparser that read it, its transformation history, and the analyst/model that\ninterpreted it (target architecture \u00a74).",
+  "properties": {
+    "acquired_at": {
+      "format": "date-time",
+      "title": "Acquired At",
+      "type": "string"
+    },
+    "asset": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Asset"
+    },
+    "commit": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Commit"
+    },
+    "interpreted_by": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Interpreted By"
+    },
+    "parser_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Parser Version"
+    },
+    "schema_version": {
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "tool": {
+      "title": "Tool",
+      "type": "string"
+    },
+    "tool_digest": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Tool Digest"
+    },
+    "tool_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Tool Version"
+    },
+    "transformations": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Transformations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "tool"
+  ],
+  "title": "Provenance",
+  "type": "object"
+}

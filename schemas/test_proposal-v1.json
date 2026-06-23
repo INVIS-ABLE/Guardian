@@ -1,0 +1,35 @@
+{
+  "additionalProperties": false,
+  "description": "A falsification test that would confirm or disprove a hypothesis.",
+  "properties": {
+    "description": {
+      "title": "Description",
+      "type": "string"
+    },
+    "expected_if_false": {
+      "title": "Expected If False",
+      "type": "string"
+    },
+    "expected_if_true": {
+      "title": "Expected If True",
+      "type": "string"
+    },
+    "safe_to_run": {
+      "default": false,
+      "title": "Safe To Run",
+      "type": "boolean"
+    },
+    "schema_version": {
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "description",
+    "expected_if_true",
+    "expected_if_false"
+  ],
+  "title": "TestProposal",
+  "type": "object"
+}
