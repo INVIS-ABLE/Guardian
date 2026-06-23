@@ -14,7 +14,11 @@ exists elsewhere.
 from __future__ import annotations
 
 from .adapters import connector_result_to_event, route_result_to_event
+from .approvals import Approval
+from .bundles import EvidenceBundle, merkle_root
+from .decisions import GuardianDecision
 from .events import SCHEMA_VERSION, CaseEvent, canonical_payload_hash
+from .execution import ArtifactRef, ExecutionJob
 from .registry import (
     CANONICAL_SCHEMAS,
     all_json_schemas,
@@ -23,11 +27,20 @@ from .registry import (
     json_schema,
     schema_names,
 )
+from .remediation import CodeChange, RemediationOption
 
 __all__ = [
     "CaseEvent",
     "SCHEMA_VERSION",
     "canonical_payload_hash",
+    "ExecutionJob",
+    "ArtifactRef",
+    "GuardianDecision",
+    "RemediationOption",
+    "CodeChange",
+    "Approval",
+    "EvidenceBundle",
+    "merkle_root",
     "CANONICAL_SCHEMAS",
     "schema_names",
     "get_model",

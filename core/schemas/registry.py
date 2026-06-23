@@ -32,7 +32,12 @@ from core.evidence.models import (
 )
 from core.tools.manifest import SignedManifest, ToolManifest
 
+from .approvals import Approval
+from .bundles import EvidenceBundle
+from .decisions import GuardianDecision
 from .events import CaseEvent
+from .execution import ArtifactRef, ExecutionJob
+from .remediation import CodeChange, RemediationOption
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 
@@ -54,10 +59,18 @@ CANONICAL_SCHEMAS: dict[str, type[BaseModel]] = {
     # Tools / execution
     "tool_manifest": ToolManifest,
     "signed_manifest": SignedManifest,
+    "execution_job": ExecutionJob,
+    "artifact_ref": ArtifactRef,
     # Model decisions
     "model_spec": ModelSpec,
     "model_request": ModelRequest,
     "model_response": ModelResponse,
+    "guardian_decision": GuardianDecision,
+    # Approvals / remediation / evidence bundles
+    "approval": Approval,
+    "remediation_option": RemediationOption,
+    "code_change": CodeChange,
+    "evidence_bundle": EvidenceBundle,
 }
 
 

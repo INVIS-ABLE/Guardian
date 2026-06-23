@@ -7,7 +7,7 @@ yet delivered is **planned** — never marked done prematurely.
 | Wave | Title | Status | Evidence |
 | --- | --- | --- | --- |
 | 0 | Baseline and repository truth | **delivered** | `core/inventory.py`, `reports/audit/current_state.{json,md}`, `tests/test_repo_inventory.py`, ADR-0001, `invariants.md` |
-| 1 | Typed contracts / core schemas | **in progress** (registry + JSON-Schema export + `CaseEvent` envelope + compat adapters) | `core/schemas/`, `schemas/*.json`, `tests/test_schemas.py` |
+| 1 | Typed contracts / core schemas | **in progress** (registry + JSON-Schema export + `CaseEvent`, `ExecutionJob`, `GuardianDecision`, `RemediationOption`/`CodeChange`, `Approval`, `EvidenceBundle` + compat adapters) | `core/schemas/`, `schemas/*.json` (23), `tests/test_schemas.py` |
 | 2 | Router fabric | partial (pre-existing `core/tools/` manifest+token gateway) | `core/tools/`, `test_tool_manifest.py`, `test_router*.py` |
 | 3 | Execution workers | planned | — |
 | 4 | Temporal durability | partial (pre-existing `core/brain/temporal_workflow.py`) | `test_orchestration.py` |

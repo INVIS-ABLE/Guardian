@@ -1,0 +1,140 @@
+{
+  "$defs": {
+    "CodeChange": {
+      "additionalProperties": false,
+      "description": "A single file change within a remediation option (a reviewable unit diff).",
+      "properties": {
+        "additions": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Additions",
+          "type": "integer"
+        },
+        "deletions": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Deletions",
+          "type": "integer"
+        },
+        "diff": {
+          "default": "",
+          "title": "Diff",
+          "type": "string"
+        },
+        "language": {
+          "default": "",
+          "title": "Language",
+          "type": "string"
+        },
+        "path": {
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "title": "CodeChange",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "One proposed fix with its changes, risk, tests and rollback (master map \u00a723).",
+  "properties": {
+    "blast_radius": {
+      "default": "",
+      "title": "Blast Radius",
+      "type": "string"
+    },
+    "case_id": {
+      "format": "uuid",
+      "title": "Case Id",
+      "type": "string"
+    },
+    "changes": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/CodeChange"
+      },
+      "title": "Changes",
+      "type": "array"
+    },
+    "confidence": {
+      "default": 0.0,
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Confidence",
+      "type": "number"
+    },
+    "description": {
+      "default": "",
+      "title": "Description",
+      "type": "string"
+    },
+    "finding_ids": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Finding Ids",
+      "type": "array"
+    },
+    "option_id": {
+      "format": "uuid",
+      "title": "Option Id",
+      "type": "string"
+    },
+    "regression_tests": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Regression Tests",
+      "type": "array"
+    },
+    "requires_feature_flag": {
+      "default": false,
+      "title": "Requires Feature Flag",
+      "type": "boolean"
+    },
+    "risk": {
+      "default": "medium",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Risk",
+      "type": "string"
+    },
+    "rollback": {
+      "default": "",
+      "title": "Rollback",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "strategy": {
+      "default": "",
+      "title": "Strategy",
+      "type": "string"
+    },
+    "title": {
+      "maxLength": 300,
+      "minLength": 1,
+      "title": "Title",
+      "type": "string"
+    }
+  },
+  "required": [
+    "case_id",
+    "title"
+  ],
+  "title": "RemediationOption",
+  "type": "object"
+}

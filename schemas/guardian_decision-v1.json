@@ -1,0 +1,126 @@
+{
+  "additionalProperties": false,
+  "description": "A typed, untrusted-by-default model decision (master map \u00a710).\n\nThe model selects a Guardian ``selected_capability`` and supplies ``arguments``;\nreviewed connectors \u2014 not the model \u2014 turn those into executable commands.",
+  "properties": {
+    "arguments": {
+      "additionalProperties": true,
+      "title": "Arguments",
+      "type": "object"
+    },
+    "confidence": {
+      "default": 0.0,
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Confidence",
+      "type": "number"
+    },
+    "decision_id": {
+      "format": "uuid",
+      "title": "Decision Id",
+      "type": "string"
+    },
+    "expected_evidence": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Expected Evidence",
+      "type": "array"
+    },
+    "hypotheses": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Hypotheses",
+      "type": "array"
+    },
+    "model_id": {
+      "default": "",
+      "title": "Model Id",
+      "type": "string"
+    },
+    "objective": {
+      "maxLength": 4000,
+      "minLength": 1,
+      "title": "Objective",
+      "type": "string"
+    },
+    "observations_used": {
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "title": "Observations Used",
+      "type": "array"
+    },
+    "prompt_version": {
+      "default": "",
+      "title": "Prompt Version",
+      "type": "string"
+    },
+    "requires_approval": {
+      "default": true,
+      "title": "Requires Approval",
+      "type": "boolean"
+    },
+    "risk_level": {
+      "default": "low",
+      "enum": [
+        "informational",
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Risk Level",
+      "type": "string"
+    },
+    "safety_impact": {
+      "default": "none",
+      "enum": [
+        "none",
+        "low",
+        "moderate",
+        "high",
+        "immediate"
+      ],
+      "title": "Safety Impact",
+      "type": "string"
+    },
+    "schema_version": {
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "selected_capability": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Selected Capability"
+    },
+    "stop_reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Stop Reason"
+    }
+  },
+  "required": [
+    "objective"
+  ],
+  "title": "GuardianDecision",
+  "type": "object"
+}
