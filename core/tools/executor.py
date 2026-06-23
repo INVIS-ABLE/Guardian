@@ -19,6 +19,7 @@ plan rather than shelling out unbounded. A real sandbox runner slots in behind t
 from __future__ import annotations
 
 import hashlib
+import time
 from typing import Protocol
 from uuid import UUID
 
@@ -26,6 +27,7 @@ from pydantic import BaseModel, ConfigDict
 
 from ..roots_of_trust import RootsOfTrust, TrustContext, require_roots
 from .capability import CapabilityToken, TokenStore, hash_args, issue_token
+from .health import ToolHealthTracker
 from .manifest import ToolManifest
 from .registry import RefusalReason, ToolRefusal, ToolRegistry
 
@@ -76,11 +78,14 @@ class ToolExecutor:
     """Resolves, authorises, tokenises and runs a capability under its manifest."""
 
     def __init__(self, registry: ToolRegistry, *, token_store: TokenStore | None = None,
-                 runner: ToolRunner | None = None, roots: RootsOfTrust | None = None) -> None:
+                 runner: ToolRunner | None = None, roots: RootsOfTrust | None = None,
+                 health: ToolHealthTracker | None = None) -> None:
         self._registry = registry
         self._tokens = token_store or TokenStore()
         self._runner = runner or DryRunRunner()
         self._roots = roots
+        #: Optional health tracker fed by every real execution (router-fabric circuit breaker).
+        self._health = health
 
     def execute(
         self,
@@ -133,7 +138,17 @@ class ToolExecutor:
             return ToolRefusal(capability=capability, reason=RefusalReason.TOKEN_REJECTED,
                               detail="token expired or already used")
 
-        out = self._runner.run(manifest, token, args)
+        # Run the tool, feeding the outcome back into tool-health (router fabric). A raising
+        # runner counts as a failure for the circuit breaker, then the error propagates.
+        start = time.monotonic()
+        try:
+            out = self._runner.run(manifest, token, args)
+        except Exception as exc:
+            if self._health is not None:
+                self._health.record_failure(manifest.tool, error=type(exc).__name__)
+            raise
+        if self._health is not None:
+            self._health.record_success(manifest.tool, latency_ms=(time.monotonic() - start) * 1000)
         text, truncated = _bound(out.text, manifest.limits.output_bytes)
         return ToolExecution(
             capability=manifest.capability,
