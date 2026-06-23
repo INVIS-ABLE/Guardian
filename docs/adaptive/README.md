@@ -41,6 +41,13 @@ consume.
 | `adaptive/slo/definitions.py` | §9 | **SLOs** including the INVISABLE invariant objectives (privacy, safeguarding, notification confidentiality, cross-tenant access, encryption-downgrade, key-directory consistency, account recovery), marked `privacy_critical`. Registry flags critical services with no SLO. |
 | `adaptive/slo/burn_rates.py` | §9 | **Error-budget burn** — burn rate, remaining budget, exhaustion and multi-window severity bands. |
 | `adaptive/slo/safety_gates.py` | §9 | **Availability-vs-privacy safety gate** — rejects any repair that regresses a privacy-critical invariant, regardless of availability benefit. |
+| `adaptive/telemetry/completeness.py` | §13 | **Telemetry-completeness authority** — scores each sensor's health (silence, schema drift, auth/signature, data loss, clock skew, latency); a silent sensor is *not* a healthy system. Per-service score is the weakest sensor and feeds the autonomy budget. |
+| `adaptive/controls/effectiveness.py` | §30 | **Control-effectiveness scoring** — flags controls installed-but-not-functioning, without telemetry, with stale rules, or with broken assumptions; cross-control analysis finds singly-protected assets and correlated failure. |
+| `adaptive/prediction/` | §29 | **Advisory predictors** — certificate/key expiry, capacity exhaustion (linear projection), recovery readiness. Recommend only; never act, never authorise. |
+| `adaptive/memory/immune.py` | §21 | **Immune memory** — five classes (known-good · incident · repair · control · uncertainty) with **decaying trust**: confidence halves over a half-life unless revalidated; retracted/expired items carry zero trust. No item is ever permanently trusted. |
+| `adaptive/resilience/failover.py` | §23 | **Failover invariants** — a failover plan asserting any forbidden effect (bypass OPA / change residency / unapproved digest / weaken encryption / stale policy or secrets) is rejected; identity, policy and quorum must be preserved. |
+| `adaptive/resilience/backups.py` | §26 | **Backup-verification** — a backup is *proven recovery* only when every check passes **including a real restoration test**; a successful backup job without a restore test is not proven recovery. |
+| `adaptive/learning/outcomes.py` | §20 | **Outcome learning** — the typed `OutcomeRecord` and a learner that only ever emits `PROPOSED` proposals (new detection / threshold / runbook / eval case / docs / twin correction); proposals enter review and never change production directly. |
 
 Class **E is never granted autonomously**: the budget only ever reasons about A–D, and E
 always returns to the existing identity/ownership/policy/approval/attestation/evidence
@@ -69,22 +76,23 @@ gates.
 - Repairs are attempted **lowest-layer-first** and a broader repair cannot skip a viable
   narrower one (§7); repeated failure **freezes** automation for that target and escalates (§35).
 
-Tests: `tests/test_autonomy_states.py`, `tests/test_autonomy_budget.py`,
-`tests/test_healing_contracts.py`, `tests/test_healing_runbooks.py`, `tests/test_slo.py`,
-`tests/test_anti_oscillation.py`, `tests/test_healing_hierarchy.py` (74 cases).
+- A silent/unauthenticated sensor lowers telemetry completeness, which lowers autonomy (§13).
+- Immune-memory trust **decays** unless revalidated; nothing is permanently trusted (§21).
+- A failover that would loosen any control, or a backup never proven by restoration, is
+  refused (§23, §26). The outcome learner can only *propose* — never change production (§20).
+
+Tests: `test_autonomy_states`, `test_autonomy_budget`, `test_healing_contracts`,
+`test_healing_runbooks`, `test_slo`, `test_anti_oscillation`, `test_healing_hierarchy`,
+`test_telemetry_completeness`, `test_control_effectiveness`, `test_immune_memory`,
+`test_prediction`, `test_adaptive_resilience`, `test_outcome_learning` (116 cases).
 
 ## Queued (subsequent increments)
 
-Following the directive's Phase order (§38) and the required layout (§37):
+The remaining work is **infra-bound** — it needs the real control-plane / MLOps systems,
+so it will land as typed contracts/adapter interfaces behind the existing authorities, not
+as hollow stubs:
 
-- **Telemetry-completeness authority** (§13) — sensor-health scoring that feeds the
-  autonomy budget's `telemetry_completeness`.
-- **Predictive defence** (§29) — advisory predictors (capacity, certificate expiry,
-  failure probability, recovery readiness).
-- **Resilience contracts** (§23–26) — typed failover / database / backup-verification /
-  rehearsal invariants (failover must not bypass OPA, change residency, or use stale state).
-- **Governed learning** (§14–20) and the integration **adapters** (§37) are infra-bound —
-  they will land as typed contracts/manifests behind the existing authorities — Argo CD/Rollouts,
+- **Governed learning** (§14–20) and the integration **adapters** (§37) — Argo CD/Rollouts,
   Keptn, OpenFeature/Flipt, Cluster API, Karmada, Crossplane, OpenTofu, Node Problem
   Detector/Kured/Descheduler, Velero/Kanister/CloudNativePG, Flink, and the governed
   learning stack (lakeFS/Great Expectations/OpenLineage/Feast/MLflow/KServe/Evidently/
@@ -113,8 +121,15 @@ Items already enforced in code by this increment:
 | §7 | Select lowest viable repair; no jump to broader | `hierarchy.py` (`select_repair`, `assert_no_layer_jump`) |
 | §9 | Action improving availability but weakening privacy is rejected | `slo/safety_gates.py` |
 | §35 | Anti-oscillation (cooldowns, locks, loop detection) | `anti_oscillation.py` |
+| 10 | Missing telemetry lowers confidence | `telemetry/completeness.py` (silent sensor → low score → lower autonomy) |
+| 22 | Multi-cluster failover preserves identity and policy | `resilience/failover.py` (`validate_failover`) |
+| 23 | Backup restoration is tested before recovery is "proven" | `resilience/backups.py` (`is_proven_recovery`) |
+| §20 | Learned proposals never change production directly | `learning/outcomes.py` (always `PROPOSED`) |
+| §21 | No memory item receives permanent trust automatically | `memory/immune.py` (decaying `effective_trust`) |
+| §29 | Predictors recommend; preventive action stays in approved envelopes | `prediction/` (advisory `Prediction`) |
+| §30 | Identify controls installed-but-not-functioning / singly-protected assets | `controls/effectiveness.py` |
 
-Remaining §39 items (1–8, 15, 17–29, 33–40) are covered by the queued increments and
+Remaining §39 items (1–8, 15, 17–21, 24–29, 33–40) are covered by the queued increments and
 the existing Level 5 authorities; this matrix grows as each phase lands.
 
 ## Design principle (directive §40)

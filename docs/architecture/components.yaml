@@ -118,6 +118,13 @@ components:
     roadmap_area: 1
     phase: 1
     status: present          # core/schemas/ + schemas/*.json
+  - id: router_fabric
+    component: invis-able/guardian-router-fabric
+    function: tool-health service + health-aware candidate resolver (circuit breaker)
+    trust_zone: execution
+    roadmap_area: 2
+    phase: 2
+    status: present          # core/tools/health.py + core/tools/resolver.py
   - id: k8s_admission
     component: open-policy-agent/gatekeeper
     function: Kubernetes admission-policy enforcement
