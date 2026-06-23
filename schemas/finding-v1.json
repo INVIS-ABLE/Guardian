@@ -221,6 +221,11 @@
       "title": "Severity",
       "type": "string"
     },
+    "tenant_id": {
+      "default": "invisable",
+      "title": "Tenant Id",
+      "type": "string"
+    },
     "title": {
       "maxLength": 500,
       "title": "Title",

@@ -243,6 +243,11 @@
       "title": "Summary",
       "type": "string"
     },
+    "tenant_id": {
+      "default": "invisable",
+      "title": "Tenant Id",
+      "type": "string"
+    },
     "trust_level": {
       "$ref": "#/$defs/TrustLevel",
       "default": "untrusted_evidence"
