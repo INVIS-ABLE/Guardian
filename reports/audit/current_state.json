@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-23T00:24:46.476416+00:00",
+  "generated_at": "2026-06-23T00:31:16.885323+00:00",
   "wave": 0,
   "summary": {
     "agents": 17,
@@ -8,7 +8,7 @@
     "simulators": 3,
     "router_capabilities": 12,
     "tool_manifest_capabilities": 8,
-    "tests": 85,
+    "tests": 86,
     "source_directories": [
       "agents",
       "attestation",
@@ -458,6 +458,15 @@
       ]
     },
     {
+      "file": "core/reasoning/cases.py",
+      "markers": [
+        {
+          "line": 85,
+          "marker": "NotImplementedError"
+        }
+      ]
+    },
+    {
       "file": "core/timeline/ingest.py",
       "markers": [
         {
@@ -606,6 +615,7 @@
     "tests/test_policy_gate.py",
     "tests/test_policy_tenancy.py",
     "tests/test_privacy_invariants.py",
+    "tests/test_reasoning_ach.py",
     "tests/test_reasoning_calibration.py",
     "tests/test_reasoning_causal.py",
     "tests/test_reasoning_council.py",

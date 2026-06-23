@@ -1,0 +1,59 @@
+# Competing-hypothesis (ACH) case for the INVISABLE "leaked CI token" incident.
+#
+# The same incident the Wave-1 systems observed (event fabric / forensic timeline), now framed
+# as three RIVAL explanations the engine must discriminate between by seeking disproof — the
+# winner is the least-contradicted hypothesis, not the most-supported one.
+#
+#   H1  external attacker compromised the CI token
+#   H2  insider misuse by the token's owner
+#   H3  benign automation misconfiguration / false alarm
+#
+# Run:
+#   guardian case-analyze cases/invisable-ci-token-case.yaml
+#   guardian case-matrix  cases/invisable-ci-token-case.yaml
+#
+# Evidence carries its trust: a contradiction from VERIFIED evidence weighs more than one from
+# low-trust retrieved memory (E6). Metadata only — summaries describe events, never contents.
+evidence:
+  - { key: E1, kind: identity_event, summary: "token authenticated from a new ASN (AS65001)",
+      trust_level: verified_evidence, validation_state: validated, provenance: {tool: identity} }
+  - { key: E2, kind: runtime_alert, summary: "interactive shell spawned in messaging-relay container",
+      trust_level: verified_evidence, validation_state: validated, provenance: {tool: falco} }
+  - { key: E3, kind: network_flow, summary: "egress from messaging-relay to external 203.0.113.9",
+      trust_level: verified_evidence, validation_state: validated, provenance: {tool: cilium} }
+  - { key: E4, kind: policy_decision, summary: "three production_deploy attempts denied by OPA",
+      trust_level: verified_evidence, validation_state: validated, provenance: {tool: opa} }
+  - { key: E5, kind: scm_event, summary: "force-push to refs/heads/main by the CI token",
+      trust_level: verified_evidence, validation_state: validated, provenance: {tool: github} }
+  - { key: E6, kind: context_note, summary: "retrieved note: token owner is on leave this week",
+      trust_level: retrieved_memory, validation_state: unvalidated, provenance: {tool: memory} }
+
+hypotheses:
+  - statement: "External attacker compromised the CI token"
+    status: supported
+    confidence: 0.7
+    consistent:   [E1, E2, E3, E4, E5, E6]
+    inconsistent: []
+    attack_techniques: ["T1078.004", "T1567"]
+    falsification_tests:
+      - description: "Correlate 203.0.113.9 and the AS65001 session origin against threat intel"
+        expected_if_true: "destination/origin match known malicious infrastructure"
+        expected_if_false: "both resolve to sanctioned corporate or partner ranges"
+
+  - statement: "Insider misuse by the token's owner"
+    status: unverified
+    consistent:   [E2, E4, E5]
+    inconsistent: [E1, E6]   # owner would use a known network; and the owner is on leave (low trust)
+    falsification_tests:
+      - description: "Confirm the owner's whereabouts and device for the session window"
+        expected_if_true: "owner was active on a corporate device at the time"
+        expected_if_false: "owner provably absent / device offline"
+
+  - statement: "Benign automation misconfiguration (false alarm)"
+    status: unverified
+    consistent:   [E4]                 # repeated denied deploys look like a retry loop
+    inconsistent: [E1, E2, E3, E5]     # a new ASN, an interactive shell, egress and a force-push are not benign
+    falsification_tests:
+      - description: "Replay the automation run in the cyber range against the same config"
+        expected_if_true: "the same denied-deploy pattern reproduces with no shell/egress"
+        expected_if_false: "the run cannot reproduce the shell, egress or force-push"
