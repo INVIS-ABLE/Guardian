@@ -3,12 +3,14 @@
 # `role` drives RBAC/ABAC permission-matrix testing.
 test_accounts:
   - id: standard_user_test
+    tenant: invisable
     role: standard_user
     description: Baseline authenticated user with default permissions.
     mfa: optional
     synthetic: true
 
   - id: vulnerable_user_test
+    tenant: invisable
     role: standard_user
     description: >
       Represents an at-risk / vulnerable user profile (e.g. flagged for additional
@@ -18,24 +20,28 @@ test_accounts:
     synthetic: true
 
   - id: moderator_test
+    tenant: invisable
     role: moderator
     description: Content moderator. Used for moderator-abuse and report-system tests.
     mfa: required
     synthetic: true
 
   - id: admin_test
+    tenant: invisable
     role: admin
     description: Administrator. admin_permission_test actions require human approval.
     mfa: required
     synthetic: true
 
   - id: banned_user_test
+    tenant: invisable
     role: banned_user
     description: A banned identity. Used for banned-user-return simulations.
     status: banned
     synthetic: true
 
   - id: suspended_user_test
+    tenant: invisable
     role: suspended_user
     description: A suspended identity. Used for access-control regression checks.
     status: suspended

@@ -150,11 +150,25 @@ def _cross_check_registries(scope: Scope) -> None:
     # Asset group must be registered.
     if ASSETS_PATH.exists():
         assets = _load_yaml(ASSETS_PATH)
-        known = {a["id"] for a in assets.get("assets", []) if "id" in a}
+        registry = {a["id"]: a for a in assets.get("assets", []) if "id" in a}
+        known = set(registry)
         if known and scope.asset not in known:
             raise ScopeError(
                 f"Scope asset '{scope.asset}' is not in scope/assets.yaml registry."
             )
+        # Tenant isolation: a scope may only reference an asset owned by its own tenant.
+        # Assets predating the tenant column default to the founding INVISABLE tenant,
+        # so existing single-tenant scopes remain valid. See core/tenancy.py.
+        asset_rec = registry.get(scope.asset)
+        if asset_rec is not None:
+            from .tenancy import INVISABLE_TENANT_ID
+
+            asset_tenant = asset_rec.get("tenant", INVISABLE_TENANT_ID)
+            if asset_tenant != scope.tenant:
+                raise ScopeError(
+                    f"Scope tenant '{scope.tenant}' may not target asset '{scope.asset}' "
+                    f"owned by tenant '{asset_tenant}' (cross-tenant access denied)."
+                )
 
 
 # --- ownership verification ----------------------------------------------------
