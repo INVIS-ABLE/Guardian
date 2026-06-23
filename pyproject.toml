@@ -88,6 +88,7 @@ packages = [
     "citadel.foundry",
     "citadel.deception",
     "citadel.constitution",
+    "citadel.formal",
     "citadel.control_proof",
     "citadel.data_protection",
 ]

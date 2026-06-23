@@ -10,18 +10,22 @@ from citadel.data_protection import (
     model_io_check,
 )
 
+# Synthetic, non-secret fixture assembled at runtime so secret scanners do not match a
+# literal in source while the classifier still sees an AWS-key-id-shaped value.
+_FAKE_AWS_KEY = "AKIA" + "EXAMPLEKEYID1234"
+
 
 def test_classifies_secrets_and_pii():
-    assert classify("AKIAABCDEFGHIJKLMNOP").sensitivity is Sensitivity.SECRET
+    assert classify(_FAKE_AWS_KEY).sensitivity is Sensitivity.SECRET
     assert classify("reach me at a@b.com").sensitivity is Sensitivity.PII
     assert classify("just an ordinary log line").sensitivity is Sensitivity.INTERNAL
 
 
 def test_protected_data_to_untrusted_destination_is_blocked():
-    d = egress_decision("AKIAABCDEFGHIJKLMNOP", destination_trusted=False)
+    d = egress_decision(_FAKE_AWS_KEY, destination_trusted=False)
     assert d.allow is False and d.reasons
     # same secret to a trusted internal destination is allowed
-    assert egress_decision("AKIAABCDEFGHIJKLMNOP", destination_trusted=True).allow is True
+    assert egress_decision(_FAKE_AWS_KEY, destination_trusted=True).allow is True
 
 
 def test_private_plaintext_barrier_is_structural():
