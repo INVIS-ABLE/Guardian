@@ -9,7 +9,7 @@ A wave is **delivered** only when its acceptance criteria pass with tests. Anyth
 | 20 | Citadel reconciliation — manifests, configs, invariant tests | **delivered** | `docs/citadel_*`, `docs/architecture/citadel_*.yaml`, `configs/citadel/*`, `tests/test_citadel_*` (49 tests) |
 | 21 | Hardware root of trust | **delivered** | `citadel/root_of_trust/` + `tests/test_citadel_root_of_trust.py` (see below) |
 | 22 | Confidential worker fabric | **delivered** | `citadel/confidential/` + `tests/test_citadel_confidential.py` (see below) |
-| 23 | Cryptographic agility | planned | — |
+| 23 | Cryptographic agility | **delivered** | `citadel/crypto_agility/` + `tests/test_citadel_crypto_agility_runtime.py` |
 | 24 | Key custody & ceremonies | planned | — |
 | 25 | Formal state-machine proof | planned | — |
 | 26 | Protocol proof laboratory | planned | — |
