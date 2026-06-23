@@ -133,6 +133,15 @@ def test_wrong_base_is_report_only_without_fail_on_checks() -> None:
     assert rc == 0
 
 
+def test_all_repo_workflows_are_sha_pinned() -> None:
+    # Drift guard: every Action `uses:` in the real workflows must be pinned to an immutable
+    # commit SHA (zizmor's unpinned-uses policy is `hash-pin`). A reintroduced tag/branch ref
+    # fails here, in the hermetic governor self-tests, before it can reach a release.
+    findings = governor.scan_workflows(REPO_ROOT)
+    mutable = [f.location for f in findings if f.check == "mutable_action_ref"]
+    assert not mutable, f"unpinned Action refs reintroduced: {mutable}"
+
+
 def test_governor_never_exposes_merge_capability() -> None:
     # Defence-in-depth: the watchdog module must not import or expose merge actions.
     names = dir(governor)

@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name != 'workflow_dispatch' || github.event.inputs.confirm == 'staging'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           persist-credentials: false
 
@@ -32,7 +32,7 @@ jobs:
           echo "Target domain restricted to staging.invisable.co.uk by the AF plan."
 
       - name: ZAP scan (automation framework plan)
-        uses: zaproxy/action-af@v0.1.0
+        uses: zaproxy/action-af@8861038f9b7c6b24c39a049990eeda36275cdd2a # v0.1.0
         with:
           plan: zap/staging-baseline.yaml
         env:
