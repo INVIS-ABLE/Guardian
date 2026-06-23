@@ -73,15 +73,15 @@ The authoritative, machine-checked list is
 | 3 | **Data lineage & privacy graph** (DataHub / OpenLineage) — *[first slice implemented](data_lineage.md)* | field-level lineage + classification propagation — detect *"a new integration moves a health field outside its approved boundary"* |
 | 4 | **Endpoint intelligence fabric** (osquery / Fleet) — *[first slice implemented](endpoint_fabric.md)* | structured OS state via **signed, reviewed query packs only** — never model-generated commands |
 | 5 | **Real-time security event fabric** (ClickHouse / Redpanda) — *[first slice implemented](event_fabric.md)* | Guardian's nervous system: OPA/Temporal/GitHub/identity/Cilium/Falco/build/model events in one durable stream + analytical store |
-| 6 | **Forensic timeline reconstruction** (Timesketch) | automatic chronologies so the Brain reasons from *sequence*, not isolated alerts |
+| 6 | **Forensic timeline reconstruction** (Timesketch) — *[first slice implemented](forensic_timeline.md)* | automatic chronologies so the Brain reasons from *sequence*, not isolated alerts |
 
 ### Wave 2 — Intelligence (deeper reasoning)
 | # | System | Gives Guardian |
 | - | ------ | -------------- |
-| 7 | **Evidence & competing-hypothesis engine** | every case holds rival hypotheses with supporting/contradicting/missing evidence + falsification tests; it seeks *disproof* of its preferred theory |
-| 8 | **Causal root-cause engine** | counterfactual reasoning to separate first-event / root-cause / enabling-conditions / amplifiers / symptoms |
+| 7 | **Evidence & competing-hypothesis engine** — *[first slice implemented](reasoning.md)* | every case holds rival hypotheses with supporting/contradicting/missing evidence + falsification tests; it seeks *disproof* of its preferred theory |
+| 8 | **Causal root-cause engine** — *[first slice implemented](reasoning.md)* | counterfactual reasoning to separate first-event / root-cause / enabling-conditions / amplifiers / symptoms |
 | 9 | **Multi-model reasoning council** | planner · sceptic · alt-hypothesis · attack-path · privacy · adjudicator roles across model families — adjudication, **not majority vote** |
-| 10 | **Confidence calibration & abstention** | learns whether 90%-confidence is right ~90% of the time; lowers it or says *"insufficient evidence"* |
+| 10 | **Confidence calibration & abstention** — *[first slice implemented](reasoning.md)* | learns whether 90%-confidence is right ~90% of the time; lowers it or says *"insufficient evidence"* |
 | 11 | **Autonomous threat-hunting engine** | continuous read-only, budgeted, tenant-isolated, privacy-filtered hunts; a validated hunt becomes a **permanent detection** |
 | 12 | **Predictive attack-path forecasting** (NetworkX over the twin) — *[first slice implemented](digital_twin.md#cross-domain-federation--attack-path-forecasting)* | evaluates PRs & infra changes *before* deploy — not after a scanner finds the exposure |
 

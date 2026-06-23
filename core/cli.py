@@ -644,5 +644,79 @@ def twin_chokepoints_cmd(twin_spec, identity_spec, lineage_spec, bridges_spec, t
                       detail={"surface": len(surface), "chokepoints": len(ranking)})
 
 
+@main.command("timeline")
+@click.argument("stream_file", type=click.Path(exists=True))
+@click.option("--actor", default=None, help="Scope the story to one principal.")
+@click.option("--target", default=None, help="Scope the story to one asset.")
+def timeline_cmd(stream_file: str, actor: str | None, target: str | None) -> None:
+    """Forensic timeline: reconstruct the incident chronology from an event-fabric stream."""
+    from .event_fabric import load_stream
+    from .timeline import from_fabric
+
+    sketch = from_fabric(load_stream(stream_file))
+    if actor:
+        beats = sketch.for_actor(actor)
+        click.echo(f"Chronology for actor {actor} ({len(beats)} events):")
+    elif target:
+        beats = sketch.for_target(target)
+        click.echo(f"Chronology for target {target} ({len(beats)} events):")
+    else:
+        beats = sketch.chronology()
+        click.echo(f"Incident chronology ({len(beats)} events):")
+    for b in beats:
+        e = b.event
+        mark = "★" if e.key else " "
+        who = f" [{e.actor or '·'}→{e.target or '·'}]" if (e.actor or e.target) else ""
+        click.echo(f" {mark} +{b.elapsed_seconds:>5.0f}s (Δ{b.delta_seconds:>4.0f}s) "
+                   f"{e.phase.value:18s} {e.message}{who}")
+    AuditLog().record("timeline", actor="cli", scope=stream_file, decision="allowed",
+                      detail={"events": len(beats)})
+
+
+@main.command("timeline-phases")
+@click.argument("stream_file", type=click.Path(exists=True))
+def timeline_phases_cmd(stream_file: str) -> None:
+    """Forensic timeline: incident phases + dwell metrics reconstructed from a stream."""
+    from .event_fabric import load_stream
+    from .timeline import from_fabric
+
+    sketch = from_fabric(load_stream(stream_file))
+    click.echo("Incident phases (recon → … → containment):")
+    for bucket in sketch.phases():
+        ids = ", ".join(e.id for e in bucket.events)
+        click.echo(f"  {bucket.phase.value:18s} {len(bucket.events)}  ({ids})")
+    d = sketch.dwell()
+    ttr = "n/a" if d.time_to_respond_seconds is None else f"{d.time_to_respond_seconds:.0f}s"
+    click.echo(f"\nspan {d.total_span_seconds:.0f}s over {d.events} events; "
+               f"time-to-contain: {ttr}")
+    AuditLog().record("timeline-phases", actor="cli", scope=stream_file, decision="allowed",
+                      detail={"phases": len(sketch.phases()), "ttr": d.time_to_respond_seconds})
+
+
+@main.command("reason-causal")
+@click.argument("spec_file", type=click.Path(exists=True))
+@click.option("--observed", required=True, help="Comma-separated observed-compromised asset ids.")
+@click.option("--sink", required=True, help="The sensitive asset that was reached.")
+def reason_causal_cmd(spec_file: str, observed: str, sink: str) -> None:
+    """Wave 2: causal root-cause of how OBSERVED compromise reached SINK (over a twin spec)."""
+    from .reasoning import root_cause
+    from .twin import load_twin
+
+    twin = load_twin(spec_file)
+    ids = [o.strip() for o in observed.split(",") if o.strip()]
+    r = root_cause(twin, observed=ids, sink=sink)
+    if r.first_event is None:
+        click.echo(f"No path from {ids} to {sink} — sink not reached.")
+        raise SystemExit(0)
+    click.echo(f"Incident reaching {sink}:")
+    click.echo(f"  first event:    {r.first_event}")
+    click.echo(f"  root cause:     {r.root_cause}  (earliest necessary link — cut this)")
+    click.echo(f"  enabling:       {' → '.join(r.enabling_conditions) or '(none)'}")
+    click.echo(f"  amplifiers:     {', '.join(r.amplifiers) or '(none)'}")
+    click.echo(f"  symptoms:       {' → '.join(r.symptoms)}")
+    AuditLog().record("reason-causal", actor="cli", scope=sink, decision="allowed",
+                      detail={"root_cause": r.root_cause, "first_event": r.first_event})
+
+
 if __name__ == "__main__":  # pragma: no cover
     main()
