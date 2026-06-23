@@ -1,0 +1,70 @@
+# GENERATED point-in-time discovery snapshot — NOT the governance source of truth.
+# Authoritative governance state lives in docs/governance/ (branch_inventory.yaml et al.).
+# Reproduce: git fetch --all --prune && \
+#   for ref in $(git for-each-ref --format='%(refname:short)' refs/remotes/origin); do \
+#     git rev-list --left-right --count origin/main...$ref; done
+schema_version: 1
+observed_at: "2026-06-23T01:49:16Z"
+basis:
+  canonical_branch: main
+  main_tip: "fadc3a980a6310ffa340c3cb3f189a92dd04776b"
+  github_default_branch: claude/laughing-ptolemy-zfeiiu   # owner must move to main (Phase C)
+open_pr_heads:   # active-worker branches with an open PR into main (do not retire)
+  - {pr: 103, head: wave3/execution-job-bridge}
+  - {pr: 101, head: claude/keen-euler-4t9vo7}
+  - {pr: 99,  head: claude/laughing-ptolemy-zfeiiu, note: "wholesale legacy->main PR; violates rule 3.2"}
+branches:
+  - {name: "claude/area11-uv-lockfile", tip: "1aa9d6fd280d5c388b957f116d557de6026c8c18", ahead: 0, behind: 131, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/area2-ownership-verification", tip: "1a1ad3b3827866f7c80a28432b70672c43fb13c8", ahead: 0, behind: 138, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/brain-v2-prereq-fixes", tip: "b00a00c1fc0f15ee93e04c64e786e68c402c9f8d", ahead: 0, behind: 163, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/confident-planck-9t1rfs", tip: "d51c6ed9597d7f493893a45069e2bceb61d188fe", ahead: 0, behind: 146, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/crypto-ci-fixes", tip: "b7739a3d2828f94b831946a868bac9cd44c0df89", ahead: 0, behind: 209, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/digital-twin", tip: "2bd3f1c332a5da8fb247d28ce3c39c8a1d2b717e", ahead: 0, behind: 145, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/drop-eval-extra", tip: "ebbf5b2c485106195b5122d3b435909d847bcb80", ahead: 0, behind: 103, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/evidence-classification-restricted", tip: "26b1b2b14913ef0c9228115d796550a707285854", ahead: 0, behind: 188, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/exciting-goldberg-udmve1", tip: "6e756a2bdf32705f36986f725e5ec7a0cf028888", ahead: 0, behind: 16, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/festive-brahmagupta-ctyiyn", tip: "808e61debfd15c264bbd9e84c09456d0b354b36f", ahead: 0, behind: 189, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/fix-main-ci-rego-zizmor", tip: "035ad520fc90eff973ed99ac7c64e3aa099aa50d", ahead: 1, behind: 154, unique_nonmerge: 1, class: unsafe}
+  - {name: "claude/fix-trivy-eval-depgroup", tip: "d084674f8ac1058b8c9436bcbfcaf474f1920859", ahead: 0, behind: 107, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/guardian-brain", tip: "f4775e0917971560175b3d71a2e743d9ad0eba0a", ahead: 0, behind: 207, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/inventory-merge-driver", tip: "a97713553b59481c5ae8f37185eb40a713f3ccc4", ahead: 0, behind: 42, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/keen-bohr-eqhtrq", tip: "dc46f17a729fa291cd6e3e02b60338cef3574272", ahead: 2, behind: 24, unique_nonmerge: 1, class: reconcile}
+  - {name: "claude/keen-euler-4t9vo7", tip: "3856a9ff4e3e5222a879aa28d27d1a74056a9dd8", ahead: 0, behind: 12, unique_nonmerge: 0, class: active-worker}
+  - {name: "claude/laughing-ptolemy-zfeiiu", tip: "2aee882919e1e95088f72126076301c69d5603a1", ahead: 9, behind: 6, unique_nonmerge: 4, class: human-decision-required}
+  - {name: "claude/mobile-and-credential-audit", tip: "3952a9a7a441741ed4a07327a51b344054bb3463", ahead: 0, behind: 213, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/model-gateway", tip: "2ab794db39750a9f14f8287203aa21ecb4bee261", ahead: 1, behind: 176, unique_nonmerge: 1, class: reconcile}
+  - {name: "claude/phase-observability", tip: "73b32fa052e96b6753493bb5ff15282f3033ee21", ahead: 0, behind: 139, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/phase0-ci-pinning", tip: "978345982612f1066300b669cf41f3c1862a635a", ahead: 0, behind: 194, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/phase0-hardening", tip: "d3469d5d82331c24a20e500b8c8b7b2aeaa64042", ahead: 0, behind: 205, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/phase1-temporal-statemachine", tip: "afebe7760df35e824745aedfcafc53be8c791651", ahead: 0, behind: 190, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/phase2-codeql-fixes", tip: "61802d10100138cc5906b9680b10788128530629", ahead: 0, behind: 184, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/phase2-identity-evidence", tip: "9858778e3ab350d166cef3019dc32236bd4f3db2", ahead: 0, behind: 188, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/phase3-isolation", tip: "9101a74c2d9a2f7522efc06dde6960a9b4615bee", ahead: 0, behind: 179, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/phase4-supplychain", tip: "726072462b942445459436c8621290c7c3e803ac", ahead: 0, behind: 170, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/phase6-containment", tip: "3777eae79d884778efe48c571874756e0687385d", ahead: 0, behind: 165, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/phase6-detection-as-code", tip: "b4aa95df492d2b67d9953b443f598d147b740754", ahead: 0, behind: 159, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/phase6-resilience-recovery", tip: "6c29aef9f8d86cf71a0980faa2a13708cfba800a", ahead: 0, behind: 147, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/priority-agents", tip: "bf03094f77a80fe19a1ae3f7ff3f57611889f758", ahead: 0, behind: 147, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/reasoning-graph", tip: "77ad0392a3b4a140dbf122a146bc3ba0eb3b72c1", ahead: 0, behind: 163, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/security-crypto-layer", tip: "abd35ff401ffb6ddeaa35d473f250db159e59a0f", ahead: 0, behind: 211, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/sovereign-ops-plane", tip: "f94b7bf8db073b3e44b9304f65872fe9aa033a0c", ahead: 0, behind: 153, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/target-architecture", tip: "4322b6a6d7941c5b980354cc4f57b5f68af3993b", ahead: 0, behind: 203, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/tool-manifest-gateway", tip: "f64cd150e38ed76a7df4a189a3327449f5505f2b", ahead: 0, behind: 159, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/twin-blast-gate", tip: "f32ba74bc0ac79152ca090f0f5be7acbf1f4f122", ahead: 0, behind: 139, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/twin-ci-gate", tip: "34fa83ce30b84f5f723108ef6d785177522b3650", ahead: 0, behind: 117, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/twin-federation", tip: "e4666a909cb7312427ecd8a662a4b4131044831d", ahead: 0, behind: 91, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/twin-runtime-fold", tip: "c3d9e7d563ed9b207046950dacba3502fe3d5d7e", ahead: 0, behind: 19, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/vibrant-gates-8qmfxc", tip: "85a3ff40e3c43ea8e98c284ff27c3e5dbf5f21f5", ahead: 0, behind: 17, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/wave2-council-hunting", tip: "6f6807209f18b66ed2e00874b209c21b7fedc039", ahead: 0, behind: 44, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "claude/wave2-reasoning", tip: "5fa77a1a4e82bfe6bac7e28b4831eeabd639d1c8", ahead: 0, behind: 74, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "main", tip: "fadc3a980a6310ffa340c3cb3f189a92dd04776b", ahead: 0, behind: 0, unique_nonmerge: 0, class: canonical}
+  - {name: "steward/57-merge-governor-baseline", tip: "68b8736f017477c52899fff59eca19584c229d2b", ahead: 0, behind: 118, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "steward/57-reconcile-wave0", tip: "7b0ac3e6f42d54511219dbe010f07800e45be266", ahead: 0, behind: 91, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "steward/63-governor-ci-fix", tip: "b63c3c25a2e61ec51d784a9a2e0adf0cc45051f7", ahead: 0, behind: 101, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "steward/64-governor-ci-green", tip: "56261342728435d0e40a7651d3bd6c53c2f372e5", ahead: 0, behind: 97, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "steward/72-inventory-robust", tip: "5dfcc9936269ee99b3edad28f02240b40c167e48", ahead: 0, behind: 87, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "steward/forward-port-legacy-phase-d", tip: "053e926894feb6a1be16479f6bc2d40a91ae41e3", ahead: 0, behind: 5, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "steward/retire-manifest", tip: "6980b8088afcb86354ad77aa10c75f697869afe0", ahead: 0, behind: 40, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "wave1/event-emission", tip: "afde61db08a7760d4a17d37d33f2ab160682669c", ahead: 0, behind: 34, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "wave1/exec-decision-models", tip: "339c61282e2d248b3c8a5b13720e987f3fbb0d6a", ahead: 0, behind: 73, unique_nonmerge: 0, class: retirement-candidate}
+  - {name: "wave1/schemas", tip: "ee80cdbc2f53ff8d3eff5808840fcd73c59ad7a8", ahead: 0, behind: 78, unique_nonmerge: 0, class: retirement-candidate}

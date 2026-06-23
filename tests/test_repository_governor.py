@@ -102,6 +102,37 @@ def test_report_ok_ignores_low_severity_only() -> None:
     assert r.ok is False
 
 
+def test_blocking_findings_filters_by_check_name() -> None:
+    report = governor.GovernorReport(
+        findings=[
+            governor.Finding("pr_base_not_canonical", "high", "base=x", "wrong base"),
+            governor.Finding("mutable_action_ref", "low", "wf.yml:1", "tag"),
+        ]
+    )
+    blocking = governor.blocking_findings(report, frozenset({"pr_base_not_canonical"}))
+    assert [f.check for f in blocking] == ["pr_base_not_canonical"]
+
+
+def test_fail_on_checks_blocks_wrong_base_pr() -> None:
+    # base != main with the check named -> non-zero exit (the workflow's blocking gate).
+    rc = governor.main(
+        ["--pr-base", "claude/laughing-ptolemy-zfeiiu", "--fail-on-checks", "pr_base_not_canonical"]
+    )
+    assert rc == 1
+
+
+def test_fail_on_checks_passes_canonical_base() -> None:
+    rc = governor.main(["--pr-base", "main", "--fail-on-checks", "pr_base_not_canonical"])
+    assert rc == 0
+
+
+def test_wrong_base_is_report_only_without_fail_on_checks() -> None:
+    # Without the blocking flag the governor stays report-only (exit 0) even on a wrong base,
+    # preserving the existing non-blocking default.
+    rc = governor.main(["--pr-base", "claude/laughing-ptolemy-zfeiiu"])
+    assert rc == 0
+
+
 def test_governor_never_exposes_merge_capability() -> None:
     # Defence-in-depth: the watchdog module must not import or expose merge actions.
     names = dir(governor)
