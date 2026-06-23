@@ -718,5 +718,83 @@ def reason_causal_cmd(spec_file: str, observed: str, sink: str) -> None:
                       detail={"root_cause": r.root_cause, "first_event": r.first_event})
 
 
+@main.command("threat-hunt")
+@click.option("--twin", "twin_spec", type=click.Path(exists=True), help="Digital-twin spec.")
+@click.option("--identity", "identity_spec", type=click.Path(exists=True), help="Identity-graph spec.")
+@click.option("--lineage", "lineage_spec", type=click.Path(exists=True), help="Lineage-graph spec.")
+@click.option("--fail-on-high", is_flag=True, help="Exit non-zero if any HIGH/CRITICAL hunt fires.")
+def threat_hunt_cmd(twin_spec, identity_spec, lineage_spec, fail_on_high) -> None:
+    """Wave 2: run read-only defensive hunts over the awareness graphs (Sovereign #11)."""
+    from .reasoning import run_hunts
+
+    twin = identity = lineage = None
+    if twin_spec:
+        from .twin import load_twin
+        twin = load_twin(twin_spec)
+    if identity_spec:
+        from .identity_graph import load_graph as li
+        identity = li(identity_spec)
+    if lineage_spec:
+        from .lineage import load_graph as ll
+        lineage = ll(lineage_spec)
+
+    results = run_hunts(twin=twin, identity=identity, lineage=lineage)
+    if not results:
+        click.echo("threat-hunt: no findings.")
+    for r in results:
+        flag = "+" if r.truncated else " "
+        click.echo(f"[{r.severity.upper():8s}] {r.title} ({r.hunt_id})")
+        click.echo(f"    hits{flag}: {', '.join(r.hits)}")
+        click.echo(f"    → detection: {r.detection}")
+    high = [r for r in results if r.severity in ("high", "critical")]
+    AuditLog().record("threat-hunt", actor="cli", decision="allowed",
+                      detail={"findings": len(results), "high": len(high)})
+    raise SystemExit(1 if (fail_on_high and high) else 0)
+
+
+@main.command("reason-ach")
+@click.argument("case_file", type=click.Path(exists=True))
+def reason_ach_cmd(case_file: str) -> None:
+    """Competing hypotheses (ACH): rank rival explanations by least-contradicted; seek disproof."""
+    from .reasoning import analyze, load_case
+
+    case = load_case(case_file)
+    view = analyze(case.hypotheses, case.evidence)
+    click.echo(f"Analysis of Competing Hypotheses ({len(case.hypotheses)} hypotheses):")
+    for v in view.ranked:
+        lead = "→" if v.hypothesis_id == view.leading_id else " "
+        click.echo(f" {lead} contradiction {v.contradiction_weight:>4.1f}  support {v.support_weight:>4.1f}  "
+                   f"[{v.status}] {v.statement}")
+    click.echo(f"\ndiagnostic evidence ({len(view.diagnostic_evidence)} discriminating, "
+               f"{len(view.non_diagnostic_evidence)} non-diagnostic):")
+    for d in view.diagnostic_evidence:
+        click.echo(f"  • {d.summary}  (rules against {len(d.inconsistent_with)} hypothesis/es)")
+    click.echo(f"\nverdict: {view.verdict}")
+    if view.next_tests:
+        click.echo("seek disproof — run next:")
+        for t in view.next_tests:
+            click.echo(f"  ? {t.description}")
+    AuditLog().record("reason-ach", actor="cli", scope=case_file,
+                      decision="allowed" if view.decisive else "inconclusive",
+                      detail={"leading": str(view.leading_id), "decisive": view.decisive,
+                              "abstained": view.case.abstained})
+
+
+@main.command("reason-matrix")
+@click.argument("case_file", type=click.Path(exists=True))
+def reason_matrix_cmd(case_file: str) -> None:
+    """Competing hypotheses (ACH): print the hypothesis × evidence consistency matrix."""
+    from .reasoning import ach_matrix, load_case
+
+    case = load_case(case_file)
+    glyph = {"consistent": "+", "inconsistent": "−", "neutral": "·"}
+    for row in ach_matrix(case.hypotheses, case.evidence):
+        click.echo(row.statement)
+        for cell in row.cells:
+            click.echo(f"  {glyph[cell.consistency.value]} (w{cell.weight:g}) {cell.summary}")
+    AuditLog().record("reason-matrix", actor="cli", scope=case_file, decision="allowed",
+                      detail={"hypotheses": len(case.hypotheses)})
+
+
 if __name__ == "__main__":  # pragma: no cover
     main()
