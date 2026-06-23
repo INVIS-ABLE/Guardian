@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-23T01:43:23.662191+00:00",
+  "generated_at": "2026-06-23T02:48:33.130672+00:00",
   "wave": 0,
   "summary": {
     "agents": 17,
@@ -364,7 +364,7 @@
       "file": "core/policy_gate.py",
       "lines": [
         26,
-        249
+        258
       ]
     }
   ],
