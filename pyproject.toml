@@ -79,6 +79,7 @@ packages = [
     "adaptive.memory",
     "adaptive.resilience",
     "adaptive.learning",
+    "adaptive.integrations",
     "citadel",
     "citadel.root_of_trust",
     "citadel.confidential",
