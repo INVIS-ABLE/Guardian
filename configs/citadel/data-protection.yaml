@@ -1,0 +1,17 @@
+# Citadel — Data-Exfiltration Detection Fabric (System 31). Owner: microsoft/presidio.
+# Verifier: isolation/egress.py. Private-message plaintext is structurally excluded.
+citadel:
+  enabled: true
+  fail_closed: true
+  data_protection:
+    classification_required: true
+    model_io_scanning: true
+    browser_io_scanning: true
+    build_artifact_scanning: true
+    evidence_export_scanning: true
+    egress_correlation: true
+    private_message_plaintext_excluded: true   # invariant 20 (structural)
+    forbidden_fields: [private_key, plaintext, message, conversation_key, secret, media]
+    classification_denylist: [MESSAGE_PLAINTEXT, DECRYPTION_KEY]
+    techniques: [classification_tags, data_fingerprints, exact_data_matching, pattern_detection, entropy_checks, secret_detection, pii_detection, egress_correlation]
+    on_protected_egress_to_untrusted: create_exfiltration_case

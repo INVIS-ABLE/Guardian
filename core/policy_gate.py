@@ -28,6 +28,8 @@ from dataclasses import dataclass, field
 from time import time
 from typing import Any
 
+from core.tenancy import INVISABLE_TENANT_ID, AuthorisationGrant, authorise_target
+
 # Globally blocked actions — denied in every mode and scope; a scope cannot re-enable them.
 BLOCKED_ACTIONS: frozenset[str] = frozenset(
     {
@@ -130,6 +132,16 @@ class PolicyInput:
     commit: str | None = None
     workflow_run: str | None = None
     now: float = field(default_factory=time)
+    # --- Tenancy (Phase B) -----------------------------------------------------------
+    # The owning tenant and the authorisation context for tenant-aware enforcement. These
+    # default to the founding INVISABLE tenant and are INERT unless tenancy enforcement is
+    # switched on (GUARDIAN_TENANCY_ENFORCE=1); when off, behaviour is exactly as before.
+    # See core/tenancy.py and docs/platform/INVISABLE_TO_MULTI_TENANT_MIGRATION.md.
+    tenant_id: str = INVISABLE_TENANT_ID
+    capability: str | None = None          # the tool capability being exercised (e.g. static_code)
+    asset_id: str | None = None            # the asset under test (defaults to the named target)
+    grants: list[AuthorisationGrant] = field(default_factory=list)
+    verify_grant_key: str | None = None    # public key; when set, grant signatures must verify
 
     def to_opa_input(self) -> dict[str, Any]:
         return {
@@ -282,6 +294,48 @@ def _embedded_permitted(inp: PolicyInput) -> bool:
     return True
 
 
+def _tenancy_enforced() -> bool:
+    """Whether tenant-aware target authorisation is enforced (default: off).
+
+    Off by default so the founding INVISABLE deployment behaves exactly as before.
+    Turn on per the migration plan with ``GUARDIAN_TENANCY_ENFORCE=1``.
+    """
+    return os.environ.get("GUARDIAN_TENANCY_ENFORCE", "").strip().lower() in {"1", "true", "yes"}
+
+
+def _tenant_denies(inp: PolicyInput) -> list[str]:
+    """Tenant-authorisation denials, applied as an outer AND over the action policy.
+
+    This is the placement from the migration doc: target legitimacy (does a current,
+    signed grant for *this tenant* cover this asset/capability/environment?) is decided
+    by :func:`core.tenancy.authorise_target` **before** the action policy. It sits
+    outside :func:`decide` so the OPA / embedded mirror parity is untouched.
+
+    Inert unless enforcement is on. When on, any action naming a target must be backed
+    by a valid grant; non-target actions (no domain/repo/asset) are left to the action
+    policy. Fails closed: missing capability, no grant, or an unauthorised grant denies.
+    """
+    if not _tenancy_enforced():
+        return []
+    asset = inp.asset_id or inp.domain or inp.repo
+    if asset is None:
+        return []  # nothing targeted; action policy alone governs
+    if not inp.capability:
+        return ["tenant_capability_unspecified"]
+    decision = authorise_target(
+        inp.grants,
+        tenant_id=inp.tenant_id,
+        asset_id=asset,
+        capability=inp.capability,
+        environment=inp.environment,
+        now=inp.now,
+        verify_key=inp.verify_grant_key,
+    )
+    if not decision.allowed:
+        return [f"tenant_unauthorised:{decision.reason}"]
+    return []
+
+
 def evaluate(inp: PolicyInput) -> PolicyDecision:
     """Single entry point. Delegates to OPA when configured.
 
@@ -289,7 +343,19 @@ def evaluate(inp: PolicyInput) -> PolicyDecision:
     acceptable authority for this posture/target, **deny** rather than silently fall
     back to the in-process mirror (target architecture §10). In CI, when OPA *is*
     available, the OPA decision and the embedded mirror must agree.
+
+    Tenant-aware target authorisation (when enforced) is applied as an outer AND: the
+    request must satisfy both the tenant grant check and the action policy.
     """
+    core = _evaluate_core(inp)
+    tenant_denies = _tenant_denies(inp)
+    if tenant_denies:
+        return PolicyDecision(allow=False, denies=tenant_denies + core.denies)
+    return core
+
+
+def _evaluate_core(inp: PolicyInput) -> PolicyDecision:
+    """The action-policy decision (OPA or embedded mirror), unchanged by tenancy."""
     if _opa_available():
         decision = _decide_via_opa(inp)
         if _guardian_env() == "ci":

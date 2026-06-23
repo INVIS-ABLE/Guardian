@@ -20,6 +20,8 @@ from enum import Enum
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from core.tenancy import INVISABLE_TENANT_ID
+
 
 class Root(str, Enum):
     HUMAN = "human"
@@ -92,6 +94,10 @@ class TargetTrust(BaseModel):
     resolved_addresses: tuple[str, ...] = ()
     dns_unchanged: bool = False                 # no post-authorisation DNS change
     not_third_party: bool = False
+    # The tenant for whom ownership was verified. A target is only legitimate within a
+    # tenant boundary; an empty tenant fails the target root. Defaults to the founding
+    # INVISABLE tenant so pre-tenancy contexts remain valid. See core/tenancy.py.
+    tenant_id: str = INVISABLE_TENANT_ID
 
 
 class EvidenceTrust(BaseModel):
@@ -194,6 +200,8 @@ def _check_target(t: TargetTrust) -> RootCheck:
         reasons.append("no_environment")
     if not t.resolved_addresses:
         reasons.append("no_resolved_addresses")
+    if not t.tenant_id:
+        reasons.append("no_tenant")
     return RootCheck(root=Root.TARGET, ok=not reasons, reasons=tuple(reasons))
 
 

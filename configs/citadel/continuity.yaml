@@ -1,0 +1,28 @@
+# Citadel — Isolated Continuity Mode (System 36) + Secure Time (System 35).
+# Owners: resilience/health.py, chrony+nts. Continuity must not silently weaken any invariant.
+citadel:
+  enabled: true
+  fail_closed: true
+  continuity:
+    enabled: true
+    local_policy: true
+    local_model: true
+    local_embedding_model: true
+    local_memory: true
+    local_evidence_queue: true
+    local_case_queue: true
+    local_asset_inventory: true
+    local_critical_runbooks: true
+    local_alert_routing: true
+    read_only_cyber_vault_access: true
+    deferred_transparency_submission: true
+    reconcile_on_exit: true
+    must_not_weaken: [scope, ownership, policy, evidence, approval, privacy, safeguarding_isolation]
+  secure_time:
+    authenticated_time: true
+    multiple_sources: true
+    drift_threshold_seconds: 2
+    suspend_sensitive_operations_on_failure: true   # invariant 24
+    suspends: [signing, release, high_impact_execution]
+    monotonic_sequence: true
+    signed_checkpoints: true

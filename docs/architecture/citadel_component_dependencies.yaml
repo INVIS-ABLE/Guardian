@@ -1,0 +1,69 @@
+# Guardian Crown Citadel — component dependencies.
+#
+# How each Citadel system depends on existing Guardian owners (so we extend, never duplicate). The
+# left side is a Citadel system id; depends_on lists existing authoritative modules/owners it builds
+# on; provides_to lists what consumes it. (tests/test_citadel_component_dependencies — folded into
+# the capabilities manifest test — assert every depends_on target is a real owner or system id.)
+version: 0.1.0
+
+dependencies:
+  - system: root_of_trust
+    depends_on: [core/roots_of_trust.py, core/machine_attestation.py, spiffe/spire]
+    provides_to: [confidential_execution, trust_quorum, build_foundry]
+  - system: confidential_execution
+    depends_on: [isolation/sandbox.py, isolation/egress.py, root_of_trust]
+    provides_to: [defensive_degradation, control_proof_engine]
+  - system: crypto_agility
+    depends_on: [docs/crypto_architecture.md, attestation/signing.py]
+    provides_to: [key_custody, protocol_verification, build_foundry]
+  - system: key_custody
+    depends_on: [openbao, crypto_agility, trust_quorum]
+    provides_to: [build_foundry, cyber_vault, shadow_federation]
+  - system: formal_state_machine
+    depends_on: [orchestration/state_machine.py, core/brain/state.py]
+    provides_to: [verified_policy, integrity_constitution]
+  - system: protocol_verification
+    depends_on: [core/verifier.py, attestation/signing.py, crypto_agility]
+    provides_to: [build_foundry, integrity_constitution]
+  - system: verified_policy
+    depends_on: [policies/opa/guardian.rego, core/policy_gate.py, tests/test_opa_parity.py]
+    provides_to: [defensive_degradation, trust_quorum, control_proof_engine]
+  - system: build_foundry
+    depends_on: [supplychain/provenance.py, supplychain/sbom.py, supplychain/admission.py, sigstore/rekor]
+    provides_to: [confidential_execution, control_proof_engine, shadow_federation]
+  - system: exposure_intelligence
+    depends_on: [ownership/verifier.py, core/twin, lyft/cartography]
+    provides_to: [defensive_degradation, data_exfiltration_detection]
+  - system: deception_grid
+    depends_on: [core/event_fabric/stream.py, thinkst/opencanary]
+    provides_to: [data_exfiltration_detection, control_proof_engine]
+  - system: data_exfiltration_detection
+    depends_on: [isolation/egress.py, gitleaks/.gitleaks.toml, microsoft/presidio]
+    provides_to: [defensive_degradation, control_proof_engine]
+  - system: defensive_degradation
+    depends_on: [containment/adapter.py, core/twin/assessment.py, verified_policy]
+    provides_to: [control_proof_engine]
+  - system: cyber_vault
+    depends_on: [recovery/backup.py, recovery/drill.py, key_custody]
+    provides_to: [continuity_mode, shadow_federation]
+  - system: chaos_recovery_lab
+    depends_on: [core/twin, resilience/health.py]
+    provides_to: [continuity_mode, control_proof_engine]
+  - system: secure_time
+    depends_on: [core/event_fabric/stream.py, core/audit.py, chrony+nts]
+    provides_to: [build_foundry, trust_quorum, defensive_degradation]
+  - system: continuity_mode
+    depends_on: [resilience/health.py, core/ai/routing.py, cyber_vault]
+    provides_to: [control_proof_engine]
+  - system: shadow_federation
+    depends_on: [shadow_guardian/verifier.py, core/verifier.py]
+    provides_to: [trust_quorum, control_proof_engine]
+  - system: trust_quorum
+    depends_on: [orchestration/approvals.py, core/policy_gate.py]
+    provides_to: [key_custody, shadow_federation, cyber_vault]
+  - system: control_proof_engine
+    depends_on: [docs/governance/SECURITY_INVARIANTS.md, tests]
+    provides_to: [integrity_constitution]
+  - system: integrity_constitution
+    depends_on: [policies/privacy_invariants.yaml, policies/opa/guardian.rego, GUARDRAILS.md]
+    provides_to: [verified_policy, control_proof_engine]

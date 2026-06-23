@@ -1,0 +1,17 @@
+# Citadel — Deception and Tripwire Grid (System 30). Owner: thinkst/opencanary.
+# Verifier: citadel/deception/evidence.py.
+citadel:
+  enabled: true
+  fail_closed: true
+  deception:
+    enabled: true
+    real_privilege_prohibited: true            # invariant 22
+    real_user_data_prohibited: true
+    test_or_deception_credentials_authenticate_to_production: false  # invariant 21
+    registration_required: true
+    rotation_required: true
+    expiry_required: true
+    false_positive_testing: true
+    incident_creation: true
+    asset_types: [honeytokens, honey_credentials, decoy_files, decoy_api_keys, decoy_repositories, decoy_database_records, decoy_cloud_objects, decoy_admin_routes, decoy_service_accounts, decoy_containers, decoy_hosts, decoy_support_workflows]
+    on_trigger: { signed_evidence: true, route_to_alert_owner: true, create_case: true }

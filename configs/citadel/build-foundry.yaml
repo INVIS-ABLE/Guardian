@@ -1,0 +1,18 @@
+# Citadel — Reproducible Build Foundry (System 28). Owner: supplychain/provenance.py.
+# Verifier: supplychain/admission.py.
+citadel:
+  enabled: true
+  fail_closed: true
+  build_foundry:
+    hermetic_builds: true
+    reproducible_critical_builds: true
+    independent_rebuilders: 2
+    digest_match_required: true
+    sbom_required: true
+    provenance_required: true
+    signature_required: true
+    transparency_proof_required: true
+    build_classes: [python_packages, typescript_bundles, pwa_releases, container_images, policy_bundles, rule_packs, worker_images, firmware_configuration, recovery_images, documentation_bundles]
+    release_candidate_requires: [source_identity, lockfile, hermetic_build_definition, independent_rebuild, matching_digest, sbom, provenance, signature, transparency_inclusion]
+    non_reproducible_critical_build: block_promotion
+    signature_alone_insufficient: true        # provenance + identity also required

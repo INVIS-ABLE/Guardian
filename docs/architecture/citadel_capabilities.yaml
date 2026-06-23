@@ -1,0 +1,478 @@
+# Guardian Crown Citadel — capability catalogue (single source of truth for the Citadel plane).
+#
+# The high-assurance FOUNDATION beneath the existing Brain V2 + Sovereign Operations Plane.
+# It does NOT replace Guardian's intelligence; it proves that intelligence, its tools, workers,
+# policies, evidence and recovery run on trustworthy foundations. See docs/citadel_plane.md.
+#
+# Cardinal rule (extends docs/architecture/sovereign_capabilities.yaml):
+#
+#       ONE authoritative production owner
+#     + ONE independently implemented verifier
+#     + optional specialist adapters
+#
+#   No Citadel subsystem grants authority. No attestation service grants production authority.
+#   Cognition proposes · Authority (OPA) disposes · Broker issues one-action capabilities ·
+#   Verifier proves legitimacy · Shadow + Quorum independently confirm. (Wave 20 reconciliation.)
+#
+# This catalogue is SEPARATE from and references — never duplicates — the existing manifests:
+parent_manifests:
+  components:   docs/architecture/components.yaml          # deployable trust-zone infrastructure
+  brain_tools:  docs/architecture/brain_tools.yaml         # 20 cognitive tools the Brain reasons WITH
+  sovereign:    docs/architecture/sovereign_capabilities.yaml  # 20 brokered capability systems
+
+version: 0.1.0
+principle: one_authoritative_owner_plus_one_independent_verifier
+phase: citadel_wave_20_reconciliation
+
+# The four separated powers are INHERITED unchanged from the Sovereign plane. The Citadel adds
+# no new authority; it adds proof. (tests/test_citadel_authority_invariants.py asserts this.)
+powers:
+  brain:    core/brain         # reasons and proposes
+  policy:   core/policy_gate   # the ONE reference monitor (OPA-backed) — only thing that authorises
+  broker:   core/tools         # issues one-action capability tokens
+  verifier: core/verifier      # proves legitimacy (independent monitor)
+
+crowns:
+  I:   Hardware and Cryptographic Sovereignty
+  II:  Formal Proof and Software Correctness
+  III: Active Exposure and Deception Defence
+  IV:  Resilience, Continuity and Recovery
+  V:   Independent Verification and Trust Quorum
+
+# status:           present | partial | planned   (honest current state — Wave 20 rule)
+# runtime_enforced: whether enforcement code exists today (vs. catalogued-only)
+# owner_kind:       existing_module | guardian_native | upstream
+# grants_authority / grants_production_authority: ALWAYS false (cardinal rule)
+systems:
+
+  # ============================ Crown I — Hardware & Cryptographic Sovereignty ============================
+  - id: root_of_trust
+    system: Root-of-Trust Fabric
+    crown: I
+    citadel_wave: 21
+    owner: core/machine_attestation.py
+    owner_kind: existing_module
+    verifier: citadel/root_of_trust/verifier.py
+    is_attestation_service: true
+    attestation_gates_capability: true
+    status: partial
+    runtime_enforced: true
+    grants_authority: false
+    grants_production_authority: false
+    function: hardware-backed platform identity, measured/secure boot, IMA/EVM and remote attestation
+    trust_assumptions: [tpm_2_0_endorsement_genuine, golden_pcr_baseline_signed_offline, attestation_nonce_unpredictable]
+    failure_mode: unknown or drifted platform cannot be attested
+    recovery: re-enrol platform via quorum-approved attestation root; quarantine until golden PCRs match
+    when_unavailable: deny capability issuance to the affected worker (fail closed)
+    evidence: guardian.attestation.*, guardian.boot.*, guardian.integrity.*
+
+  - id: confidential_execution
+    system: Confidential Execution Fabric
+    crown: I
+    citadel_wave: 22
+    owner: isolation/sandbox.py
+    owner_kind: existing_module
+    verifier: citadel/confidential/verifier.py
+    is_attestation_service: true
+    attestation_gates_capability: true
+    status: partial
+    runtime_enforced: true
+    grants_authority: false
+    grants_production_authority: false
+    function: run sensitive workers in attested confidential/high-isolation environments; secrets bound to attestation
+    trust_assumptions: [tee_or_sandbox_isolation_holds, worker_image_signed_and_measured, secret_release_bound_to_measurement]
+    failure_mode: attestation fails -> secret release denied -> worker cannot run sensitive work
+    recovery: rebuild and re-measure worker image; re-attest before any secret release
+    when_unavailable: fall back to standard sandbox with no sensitive-secret access
+    evidence: guardian.confidential.*
+
+  - id: crypto_agility
+    system: Cryptographic Agility Fabric
+    crown: I
+    citadel_wave: 23
+    owner: citadel/crypto_agility/inventory.py
+    owner_kind: guardian_native
+    verifier: citadel/crypto_agility/downgrade.py
+    status: planned
+    runtime_enforced: false
+    grants_authority: false
+    grants_production_authority: false
+    function: inventory every algorithm/cert/key/protocol; controlled migration; downgrade detection; PQ readiness
+    migration_states: [discovered, classified, dual-write, dual-read, hybrid, new-primary, legacy-read-only, retired, destroyed, verified]
+    requires_dual_read_before_cutover: true
+    pq_must_not_reduce_classical_security: true
+    trust_assumptions: [inventory_is_complete, allowlist_is_authoritative, second_library_cross_check_independent]
+    failure_mode: unknown or deprecated crypto use detected -> blocking finding
+    recovery: migrate via dual-read then cutover; never silently downgrade
+    when_unavailable: freeze algorithm migrations; keep current classical primary
+    evidence: guardian.crypto.*
+
+  - id: key_custody
+    system: Key Custody and Threshold Trust
+    crown: I
+    citadel_wave: 24
+    owner: openbao
+    owner_kind: upstream
+    verifier: citadel/quorum/threshold.py
+    requires_quorum: true
+    status: planned
+    runtime_enforced: false
+    grants_authority: false
+    grants_production_authority: false
+    function: split high-value authority across custodians; quorum for root operations; offline recovery material
+    key_classes: [root_signing, release_signing, attestation_root, evidence_signing, recovery_root, certificate_authority, backup_encryption, transparency_log, service_identity, user_export]
+    trust_assumptions: [custodians_independent, threshold_credentials_separate, recovery_material_offline]
+    failure_mode: single custodian cannot complete a root operation
+    recovery: quorum ceremony with separate custodians; rotation/revocation drills recorded
+    when_unavailable: root operations suspended; service identities continue on cached short-lived creds
+    evidence: guardian.key.*, guardian.quorum.*
+
+  # ============================ Crown II — Formal Proof & Software Correctness ============================
+  - id: formal_state_machine
+    system: Formal State-Machine Verification
+    crown: II
+    citadel_wave: 25
+    owner: tlaplus/apalache
+    owner_kind: upstream
+    verifier: citadel/formal/counterexamples.py
+    models_subject: orchestration/state_machine.py
+    status: planned
+    runtime_enforced: false
+    grants_authority: false
+    grants_production_authority: false
+    function: formally model case/approval/capability/recovery/quorum transitions; counterexamples become test fixtures
+    trust_assumptions: [model_faithfully_reflects_code, invariants_capture_intent]
+    failure_mode: a model change without re-check leaves an unproven transition
+    recovery: re-run TLC/Apalache; import counterexample as a regression fixture
+    when_unavailable: state-machine changes blocked from promotion until re-proven
+    evidence: guardian.formal.*
+
+  - id: protocol_verification
+    system: Cryptographic Protocol Verification
+    crown: II
+    citadel_wave: 26
+    owner: tamarin-prover/tamarin-prover
+    owner_kind: upstream
+    verifier: citadel/formal/protocol.py
+    status: planned
+    runtime_enforced: false
+    grants_authority: false
+    grants_production_authority: false
+    function: prove auth/key-exchange/attestation-secret-release/PQ-hybrid protocols; explicit assumptions + counterexamples
+    cross_check: proverif_or_verifpal
+    trust_assumptions: [protocol_model_matches_implementation, assumptions_made_explicit]
+    failure_mode: a declared security property fails -> release blocked
+    recovery: fix protocol or model; re-prove; publish signed verification report
+    when_unavailable: protocol changes blocked from release
+    evidence: guardian.formal.*
+
+  - id: verified_policy
+    system: Verified Policy and Authorisation Fabric
+    crown: II
+    citadel_wave: 27
+    owner: open-policy-agent/opa
+    owner_kind: existing_module
+    verifier: core/policy_gate.py
+    status: present
+    runtime_enforced: true
+    grants_authority: false   # the SYSTEM proves policy; OPA-as-reference-monitor is the `policy` power, not a self-authorising Citadel subsystem
+    grants_production_authority: false
+    authority_owner: policies/opa/guardian.rego   # the underlying authority this system verifies
+    function: prove OPA invariants; embedded/OPA decision parity; mutation+differential tests; signed bundles before promotion
+    trust_assumptions: [opa_bundle_signed, embedded_and_opa_agree, exceptions_expire]
+    failure_mode: policy/implementation divergence caught by parity tests (tests/test_opa_parity.py)
+    recovery: re-derive embedded decision table from rego; re-run parity differential
+    when_unavailable: deny by default (fail closed) — no action without an allow decision
+    evidence: guardian.constitution.*, opa decision logs
+
+  - id: build_foundry
+    system: Reproducible Build Foundry
+    crown: II
+    citadel_wave: 28
+    owner: supplychain/provenance.py
+    owner_kind: existing_module
+    verifier: supplychain/admission.py
+    status: partial
+    runtime_enforced: true
+    grants_authority: false
+    grants_production_authority: false
+    function: hermetic, pinned, deterministic critical builds; independent rebuild + digest match; SBOM + provenance + signature
+    requires_independent_rebuild: true
+    requires_transparency_proof: true
+    trust_assumptions: [build_inputs_pinned, independent_rebuilder_separate, digests_compared]
+    failure_mode: non-reproducible critical build -> promotion blocked
+    recovery: rebuild from pinned inputs on independent builder; compare with diffoscope
+    when_unavailable: no new critical artefact promotes; last signed+reproduced artefact stays
+    evidence: guardian.foundry.*, guardian.rebuild.*
+
+  # ============================ Crown III — Active Exposure & Deception Defence ============================
+  - id: exposure_intelligence
+    system: Continuous Exposure Intelligence
+    crown: III
+    citadel_wave: 30
+    owner: lyft/cartography
+    owner_kind: upstream
+    verifier: ownership/verifier.py
+    status: partial
+    runtime_enforced: false
+    grants_authority: false
+    grants_production_authority: false
+    function: continuous view of domains/DNS/certs/cloud/packages/PWA exposure correlated to owner + data class
+    scope_bound_to: owned_assets_and_approved_scope
+    trust_assumptions: [observation_limited_to_owned_assets, ownership_correlation_authoritative]
+    failure_mode: discovered exposure with no owner -> finding/case
+    recovery: re-resolve ownership (DNS TXT + repo challenge); assign owner or quarantine
+    when_unavailable: serve last inventory read-only; defer active observation
+    evidence: guardian.exposure.*
+
+  - id: deception_grid
+    system: Deception and Tripwire Grid
+    crown: III
+    citadel_wave: 31
+    owner: thinkst/opencanary
+    owner_kind: upstream
+    verifier: citadel/deception/evidence.py
+    status: planned
+    runtime_enforced: false
+    grants_authority: false
+    grants_production_authority: false
+    function: honeytokens/decoys across owned infrastructure; every asset registered, zero real privilege, expiring
+    real_privilege_prohibited: true
+    real_user_data_prohibited: true
+    trust_assumptions: [deception_assets_registered, no_real_privilege, no_real_user_data]
+    failure_mode: a trigger fires -> signed evidence + incident routed to alert owner
+    recovery: rotate triggered token; confirm no genuine credential was ever exposed
+    when_unavailable: existing tokens remain inert; no new placements
+    evidence: guardian.deception.*
+
+  - id: data_exfiltration_detection
+    system: Data-Exfiltration Detection Fabric
+    crown: III
+    citadel_wave: 32
+    owner: microsoft/presidio
+    owner_kind: upstream
+    verifier: isolation/egress.py
+    status: partial
+    runtime_enforced: true
+    grants_authority: false
+    grants_production_authority: false
+    function: classify + fingerprint + PII/secret-detect protected data across model/browser/build/evidence egress
+    private_plaintext_structurally_excluded: true
+    trust_assumptions: [classification_tags_present, fingerprints_sound, egress_correlated_to_identity]
+    failure_mode: protected-data movement to untrusted destination -> exfiltration case
+    recovery: revoke short-lived creds on the egress path; quarantine the destination integration
+    when_unavailable: tighten egress to default-deny on classified paths
+    evidence: guardian.exfiltration.*
+
+  - id: defensive_degradation
+    system: Defensive Degradation and Exposure Reduction
+    crown: III
+    citadel_wave: 32
+    owner: containment/adapter.py
+    owner_kind: existing_module
+    verifier: core/twin/assessment.py
+    status: present
+    runtime_enforced: true
+    grants_authority: false
+    grants_production_authority: false
+    function: broker narrowly-scoped reversible protective actions (freeze release, quarantine digest, revoke short-lived cred)
+    every_action_requires: [exact_target, exact_duration, exact_rollback, exact_evidence, policy_decision, capability, post_action_verification]
+    trust_assumptions: [actions_reversible, blast_radius_assessed, policy_gated]
+    failure_mode: action exceeds blast-radius budget -> denied before execution
+    recovery: roll back via the action's recorded rollback_ref; verify post-action state
+    when_unavailable: no protective actions taken; alert and escalate to human
+    evidence: guardian.integrity.*
+
+  # ============================ Crown IV — Resilience, Continuity & Recovery ============================
+  - id: cyber_vault
+    system: Immutable Cyber Vault
+    crown: IV
+    citadel_wave: 36
+    owner: recovery/backup.py
+    owner_kind: existing_module
+    verifier: recovery/drill.py
+    status: partial
+    runtime_enforced: true
+    grants_authority: false
+    grants_production_authority: false
+    function: isolated, immutable, encrypted recovery copies with independent integrity + malware scan + restore testing
+    separate_identity_plane: true
+    no_normal_runtime_write_access: true
+    recovery_evidence_not_written_solely_by_recovered_system: true
+    trust_assumptions: [immutable_retention_holds, recovery_keys_separate, restores_tested]
+    failure_mode: restore drill fails integrity -> recovery point rejected
+    recovery: select last verified snapshot; restore and re-verify chain + identity integrity
+    when_unavailable: read-only vault access for forensic reconstruction only
+    evidence: guardian.vault.*, guardian.restore.*
+
+  - id: chaos_recovery_lab
+    system: Digital-Twin Chaos and Recovery Lab
+    crown: IV
+    citadel_wave: 37
+    owner: core/twin
+    owner_kind: existing_module
+    verifier: resilience/health.py
+    status: partial
+    runtime_enforced: true
+    grants_authority: false
+    grants_production_authority: false
+    function: controlled-replica failure injection; measure detection/decision/containment/recovery time + data loss
+    trust_assumptions: [twin_reflects_production_topology, fault_injection_isolated_to_replica]
+    failure_mode: a scenario exceeds recovery objective -> runbook gap raised
+    recovery: update runbook; re-run scenario until objective met
+    when_unavailable: skip chaos run; rely on last measured recovery profile
+    evidence: guardian.restore.*
+
+  - id: secure_time
+    system: Secure Time and Event Ordering
+    crown: IV
+    citadel_wave: 38
+    owner: chrony+nts
+    owner_kind: upstream
+    verifier: core/event_fabric/stream.py
+    status: partial
+    runtime_enforced: true
+    grants_authority: false
+    grants_production_authority: false
+    function: authenticated time + monotonic sequence + signed checkpoints; suspend sensitive ops on time disagreement
+    suspends_sensitive_operations_on_failure: true
+    trust_assumptions: [multiple_time_sources_agree, monotonic_clock_trustworthy, checkpoints_signed]
+    failure_mode: time disagreement beyond threshold -> signing/release/high-impact execution suspended
+    recovery: re-establish authenticated time; reconcile event order from monotonic offsets
+    when_unavailable: suspend signing, release and high-impact execution (fail closed)
+    evidence: guardian.time.*
+
+  - id: continuity_mode
+    system: Isolated Continuity Mode
+    crown: IV
+    citadel_wave: 37
+    owner: resilience/health.py
+    owner_kind: existing_module
+    verifier: citadel/continuity/reconciliation.py
+    status: partial
+    runtime_enforced: true
+    grants_authority: false
+    grants_production_authority: false
+    function: retain essential defensive capability (local policy/model/evidence queue) when external services fail
+    must_not_weaken: [scope, ownership, policy, evidence, approval, privacy, safeguarding_isolation]
+    trust_assumptions: [local_policy_bundle_signed, deferred_events_reconciled_on_exit]
+    failure_mode: external dependency down -> enter continuity, queue evidence locally
+    recovery: on exit, reconcile every deferred event into the durable plane
+    when_unavailable: fail closed on sensitive actions (resilience/health guard)
+    evidence: guardian.continuity.*
+
+  # ============================ Crown V — Independent Verification & Trust Quorum ============================
+  - id: shadow_federation
+    system: Shadow Guardian Federation
+    crown: V
+    citadel_wave: 38
+    owner: shadow_guardian/verifier.py
+    owner_kind: existing_module
+    verifier: citadel/quorum/signatures.py
+    separate_credentials: true
+    separate_deployment: true
+    separate_signing_key: true
+    may_freeze_capability_issuance: true
+    may_assume_operational_control: false
+    primary_cannot_approve_shadow: true
+    status: present
+    runtime_enforced: true
+    grants_authority: false
+    grants_production_authority: false
+    function: independent verifier that recomputes policy/capability/evidence/build proofs and may freeze issuance
+    trust_assumptions: [separate_credentials, separate_evidence_reads, independent_reimplementation]
+    failure_mode: divergence detected -> capability issuance frozen (one-way latch)
+    recovery: quorum (Sovereign Root) reviews and clears the freeze; primary cannot clear its own
+    when_unavailable: capability issuance refuses (fail closed) — ShadowGate.assert_issuable raises
+    evidence: guardian.shadow.*
+
+  - id: trust_quorum
+    system: Multi-Party Trust Quorum
+    crown: V
+    citadel_wave: 38
+    owner: orchestration/approvals.py
+    owner_kind: existing_module
+    verifier: citadel/quorum/evidence.py
+    min_threshold: 3
+    participants_use_separate_credentials: true
+    status: partial
+    runtime_enforced: true
+    grants_authority: false
+    grants_production_authority: false
+    function: threshold approval for root operations (key/attestation-root rotation, recovery activation, emergency policy)
+    trust_assumptions: [participants_independent, separate_authentication_evidence, threshold_enforced]
+    failure_mode: below-threshold proposal cannot complete
+    recovery: re-collect distinct, unexpired participant votes; record ceremony evidence
+    when_unavailable: root operations cannot proceed (fail closed)
+    evidence: guardian.quorum.*
+
+  - id: control_proof_engine
+    system: Continuous Control Proof Engine
+    crown: V
+    citadel_wave: 39
+    owner: citadel/control_proof/claims.py
+    owner_kind: guardian_native
+    verifier: docs/governance/SECURITY_INVARIANTS.md
+    status: partial
+    runtime_enforced: false
+    grants_authority: false
+    grants_production_authority: false
+    function: continuously test security claims (all images signed, all workers attested, no replayed capability) with fresh evidence
+    trust_assumptions: [claims_query_authoritative_sources, evidence_freshness_enforced]
+    failure_mode: a claim fails or its evidence is stale -> control finding with remediation deadline
+    recovery: remediate the failing control; refresh evidence; record trend
+    when_unavailable: claims marked stale; high-impact promotions gated on fresh proof
+    evidence: guardian.control-proof.*
+
+  - id: integrity_constitution
+    system: Guardian Integrity Constitution
+    crown: V
+    citadel_wave: 39
+    owner: policies/privacy_invariants.yaml
+    owner_kind: existing_module
+    verifier: citadel/constitution/runtime_checker.py
+    status: partial
+    runtime_enforced: true
+    grants_authority: false
+    grants_production_authority: false
+    function: machine-readable permanently-prohibited actions + privacy/safeguarding/authority/evidence/recovery invariants
+    every_component_declares: [clauses_implemented, clauses_depended_on, proving_tests, runtime_evidence]
+    trust_assumptions: [clauses_machine_readable, bindings_complete, runtime_checks_present]
+    failure_mode: a component violates a clause -> blocked + finding
+    recovery: restore compliant configuration; re-validate bindings
+    when_unavailable: enforce the cached constitution (fail closed on prohibited actions)
+    evidence: guardian.constitution.*
+
+# The 30 Wave-20 invariants (encoded as executable checks across the test suite below). Listed here
+# so the catalogue is the single human-readable index; tests/test_citadel_*.py enforce them.
+invariants:
+  - no_citadel_subsystem_grants_authority
+  - no_attestation_service_grants_production_authority
+  - no_model_changes_trusted_boot_baseline
+  - no_model_changes_root_signing_keys
+  - no_model_enrols_new_attestation_root
+  - no_model_promotes_its_own_build
+  - no_model_approves_its_own_remediation
+  - no_capability_before_identity_attestation
+  - no_production_artefact_without_full_provenance_chain
+  - signature_alone_insufficient_without_provenance_or_identity
+  - model_output_never_overrides_invalid_platform_attestation
+  - platform_attestation_never_overrides_invalid_policy_decision
+  - evidence_not_deletable_by_creating_service
+  - primary_cannot_approve_shadow
+  - shadow_cannot_assume_operational_control
+  - quorum_participants_separate_credentials
+  - quorum_participants_separate_evidence_reads
+  - recovery_credentials_outside_runtime_plane
+  - recovery_evidence_not_written_solely_by_recovered_system
+  - private_plaintext_never_enters_citadel_systems
+  - test_or_deception_credentials_never_authenticate_to_production
+  - honeytokens_never_grant_genuine_privilege
+  - untrusted_telemetry_never_becomes_executable_instruction
+  - time_disagreement_suspends_signing_release_execution
+  - crypto_migration_supports_dual_read_before_cutover
+  - post_quantum_migration_not_silently_reduce_classical_security
+  - failed_attestation_denies_capability_issuance
+  - missing_transparency_inclusion_proof_denies_release_promotion
+  - non_reproducible_critical_build_cannot_promote
+  - recovery_incomplete_until_evidence_and_identity_integrity_pass

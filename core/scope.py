@@ -45,6 +45,15 @@ class Scope:
         return self.raw.get("owner", "INVISABLE")
 
     @property
+    def tenant(self) -> str:
+        """Owning tenant id. Absent in pre-tenancy scope files, which resolve to the
+        founding INVISABLE tenant so existing deployments keep working unchanged.
+        See core/tenancy.py and docs/platform/TENANT_AND_AUTHORISED_TARGET_MODEL.md."""
+        from .tenancy import INVISABLE_TENANT_ID
+
+        return self.raw.get("tenant", INVISABLE_TENANT_ID)
+
+    @property
     def allowed_domains(self) -> list[str]:
         return list(self.raw.get("allowed_domains", []))
 

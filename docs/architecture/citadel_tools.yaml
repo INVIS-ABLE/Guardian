@@ -1,0 +1,180 @@
+# Guardian Crown Citadel — open-source tool map (candidate registry).
+#
+# Rule (same as components.yaml): exactly ONE authoritative owner per production function. The
+# remaining tools are independent verifiers, specialist adapters, migration tools or LABORATORY
+# tools — they do NOT run in the same production runtime as the owner, and they never become a
+# second owner of the same function. (tests/test_citadel_tools_manifest.py enforces this.)
+#
+# serves: the Citadel system id (docs/architecture/citadel_capabilities.yaml) this category backs.
+# placement: production | verifier | laboratory | migration | development
+version: 0.1.0
+principle: one_authoritative_owner_per_function
+
+categories:
+  - id: hardware_trust
+    serves: root_of_trust
+    function: hardware trust and measured boot
+    owner: tpm2-software/tpm2-tools
+    placement: production
+    alternatives: [keylime/keylime, linux-ima, integrity-evm, swtpm, spiffe/spire, coreboot, fwupd/fwupd, chipsec/chipsec, aide, dm-verity, fs-verity]
+    capabilities: [platform.inventory, platform.enrol, platform.attest, platform.measurement, platform.drift, platform.revoke, platform.quarantine, firmware.verify, boot.verify, kernel.verify, filesystem.integrity]
+
+  - id: confidential_computing
+    serves: confidential_execution
+    function: confidential / attested execution
+    owner: confidential-containers/confidential-containers
+    placement: production
+    alternatives: [kata-containers/kata-containers, gramineproject/gramine, enarx/enarx, occlum/occlum, openenclave/openenclave, firecracker-microvm/firecracker, cloud-hypervisor/cloud-hypervisor]
+    capabilities: [confidential.worker-create, confidential.attest, confidential.secret-release, confidential.execute, confidential.evidence, confidential.destroy]
+
+  - id: post_quantum_crypto
+    serves: crypto_agility
+    function: post-quantum and cryptographic agility
+    owner: open-quantum-safe/liboqs
+    placement: production
+    alternatives: [open-quantum-safe/oqs-provider, pq-crystals/pqclean, cloudflare/circl, openssl/openssl, signalapp/libsignal, jedisct1/libsodium, hacl-star/hacl-star, FiloSottile/age, sequoia-pgp/sequoia, opendnssec/SoftHSMv2, p11-glue/p11-kit]
+    capabilities: [crypto.inventory, crypto.algorithm-policy, crypto.certificate-inventory, crypto.protocol-inventory, crypto.migration-plan, crypto.hybrid-test, crypto.downgrade-detect, crypto.rotate, crypto.rewrap, crypto.retire, crypto.verify]
+
+  - id: key_custody
+    serves: key_custody
+    function: key custody and threshold trust
+    owner: openbao/openbao
+    placement: production
+    alternatives: [hashicorp/vault, latchset/tang, cossacklabs/themis, opendnssec/SoftHSMv2]
+    capabilities: [key.class, key.custodian, key.threshold, key.ceremony, key.rotate, key.revoke, key.offline-recovery]
+
+  - id: formal_state_verification
+    serves: formal_state_machine
+    function: formal state-machine verification
+    owner: tlaplus/tlaplus
+    placement: laboratory
+    alternatives: [informalsystems/apalache, AlloyTools/org.alloytools.alloy, spinroot/spin, Z3Prover/z3, cvc5/cvc5]
+    capabilities: [model.transitions, model.approvals, model.capabilities, model.recovery, model.quorum, model.key-rotation, model.evidence-ordering]
+
+  - id: protocol_proof
+    serves: protocol_verification
+    function: cryptographic protocol proof
+    owner: tamarin-prover/tamarin-prover
+    placement: laboratory
+    alternatives: [proverif, verifpal/verifpal, EasyCrypt/easycrypt, cryptoverif, cassandra-mu/scyther]
+    capabilities: [proto.authentication, proto.key-exchange, proto.key-transparency, proto.e2ee-device-change, proto.backup-recovery, proto.evidence-signing, proto.attestation-secret-release, proto.pq-hybrid]
+
+  - id: policy_proof
+    serves: verified_policy
+    function: policy proof and compliance as code
+    owner: open-policy-agent/opa
+    placement: production
+    alternatives: [open-policy-agent/conftest, openfga/openfga, open-policy-agent/gatekeeper, kyverno/kyverno, inspec/inspec, goss, kyverno/chainsaw]
+    capabilities: [policy.unit-test, policy.property-test, policy.mutate-test, policy.differential-test, policy.model-check, policy.sign, policy.promote, control.claim, control.prove, control.exception, control.expiry]
+
+  - id: reproducible_builds
+    serves: build_foundry
+    function: reproducible and hermetic builds
+    owner: NixOS/nix
+    placement: production
+    alternatives: [bazelbuild/bazel, chainguard-dev/apko, chainguard-dev/melange, sigstore/cosign, in-toto/in-toto, slsa-framework/slsa, kpcyrd/rebuilderd, reproducible-builds/reprotest, anonscm/diffoscope]
+    capabilities: [build.hermetic, build.reproduce, build.compare, build.sbom, build.provenance, build.sign, build.attest, build.publish, build.promote]
+
+  - id: transparency_logs
+    serves: build_foundry
+    function: transparency and verifiable logs
+    owner: sigstore/rekor
+    placement: production
+    alternatives: [google/trillian, sigsum/sigsum, codenotary/immudb, sigstore/fulcio, sigstore/cosign, transparency-dev/tessera, google/certificate-transparency-go]
+    capabilities: [transparency.append, transparency.inclusion-proof, transparency.consistency-proof, transparency.checkpoint, transparency.gossip, transparency.verify, transparency.recover]
+
+  - id: deception
+    serves: deception_grid
+    function: deception and tripwire systems
+    owner: thinkst/opencanary
+    placement: production
+    alternatives: [thinkst/canarytokens, cowrie/cowrie, telekom-security/tpotce, honeytrap/honeytrap, OISF/suricata, zeek/zeek, wazuh/wazuh, VirusTotal/yara, SigmaHQ/sigma]
+    capabilities: [deception.asset-create, deception.asset-register, deception.asset-rotate, deception.asset-expire, deception.trigger, deception.correlate, deception.case-create, deception.evidence]
+
+  - id: exposure_intelligence
+    serves: exposure_intelligence
+    function: exposure and external asset intelligence
+    owner: lyft/cartography
+    placement: production
+    alternatives: [cloudquery/cloudquery, owasp-amass/amass, smicallef/spiderfoot, turbot/steampipe, prowler-cloud/prowler, projectdiscovery/dnsx, projectdiscovery/httpx, projectdiscovery/subfinder, netbox-community/netbox, OpenCTI-Platform/opencti, MISP/MISP]
+    capabilities: [exposure.domain, exposure.dns, exposure.certificate, exposure.endpoint, exposure.cloud, exposure.registry, exposure.package, exposure.repository, exposure.pwa, exposure.diff, exposure.owner]
+
+  - id: data_governance
+    serves: data_exfiltration_detection
+    function: data governance and exfiltration detection
+    owner: microsoft/presidio
+    placement: production
+    alternatives: [datahub-project/datahub, OpenLineage/OpenLineage, apache/atlas, gitleaks/gitleaks, trufflesecurity/trufflehog, Yelp/detect-secrets, VirusTotal/yara, cilium/tetragon, opensearch-project/security-analytics]
+    capabilities: [data.classify, data.lineage, data.fingerprint, data.pii-detect, data.secret-detect, data.egress-observe, data.destination-score, data.export-check, data.model-io-check, data.browser-io-check, data.incident]
+
+  - id: privacy_analytics
+    serves: control_proof_engine
+    function: privacy-preserving analytics
+    owner: opendp/opendp
+    placement: laboratory
+    alternatives: [IBM/differential-privacy-library, OpenMined/PySyft, openfheorg/openfhe, microsoft/SEAL, OpenMined/TenSEAL, adap/flower]
+    capabilities: [privacy.aggregate, privacy.noise, privacy.budget, privacy.secure-compute, privacy.federated-evaluate, privacy.proof]
+
+  - id: secure_time
+    serves: secure_time
+    function: secure time
+    owner: mlichvar/chrony
+    placement: production
+    alternatives: [ntpsec/ntpsec, cloudflare/roughtime, sigstore/rekor]
+    capabilities: [time.source, time.authenticate, time.compare, time.drift, time.checkpoint, time.suspend, time.recover]
+
+  - id: cyber_vault
+    serves: cyber_vault
+    function: cyber vault and recovery
+    owner: restic/restic
+    placement: production
+    alternatives: [vmware-tanzu/velero, pgbackrest/pgbackrest, borgbackup/borg, kopia/kopia, wal-g/wal-g, minio/minio, openzfs/zfs, Cisco-Talos/clamav, VirusTotal/yara]
+    capabilities: [vault.snapshot, vault.immutable-copy, vault.integrity, vault.malware-scan, vault.restore, vault.verify, vault.exercise, vault.rto, vault.rpo, vault.evidence]
+
+  - id: chaos_resilience
+    serves: chaos_recovery_lab
+    function: chaos and resilience engineering
+    owner: chaos-mesh/chaos-mesh
+    placement: laboratory
+    alternatives: [litmuschaos/litmus, chaostoolkit/chaostoolkit, Shopify/toxiproxy, alexei-led/pumba, krkn-chaos/krkn]
+    capabilities: [chaos.plan, chaos.clone, chaos.inject, chaos.observe, chaos.rollback, chaos.compare, chaos.report, recovery.exercise]
+
+  - id: shadow_verification
+    serves: shadow_federation
+    function: independent shadow verification
+    owner: shadow_guardian/verifier.py
+    placement: verifier
+    alternatives: [core/verifier.py, supplychain/admission.py]
+    capabilities: [shadow.reconstruct, shadow.policy-verify, shadow.capability-verify, shadow.evidence-verify, shadow.build-verify, shadow.freeze, shadow.report]
+
+  - id: trust_quorum
+    serves: trust_quorum
+    function: multi-party trust quorum
+    owner: orchestration/approvals.py
+    placement: production
+    alternatives: [citadel/quorum/threshold.py, citadel/quorum/signatures.py]
+    capabilities: [quorum.propose, quorum.vote, quorum.threshold, quorum.sign, quorum.ceremony, quorum.expiry, quorum.evidence]
+
+  - id: endpoint_integrity
+    serves: root_of_trust
+    function: endpoint and device integrity
+    owner: osquery/osquery
+    placement: production
+    alternatives: [fleetdm/fleet, keylime/keylime, wazuh/wazuh, Velocidex/velociraptor, falcosecurity/falco, aquasecurity/tracee, Yubico/yubikey-manager]
+    capabilities: [device.inventory, device.posture, device.attest, device.patch-state, device.firmware, device.usb-policy, device.identity, device.integrity, device.quarantine-plan]
+
+  - id: network_segmentation
+    serves: data_exfiltration_detection
+    function: network microsegmentation and egress proof
+    owner: cilium/cilium
+    placement: production
+    alternatives: [cilium/hubble, projectcalico/calico, istio/istio, spiffe/spire, cilium/tetragon, OISF/suricata, zeek/zeek]
+    capabilities: [network.identity, network.flow, network.policy, network.egress, network.segment, network.verify, network.drift, network.contain-plan]
+
+  - id: threat_modelling
+    serves: integrity_constitution
+    function: threat modelling and architecture proof
+    owner: Threagile/threagile
+    placement: development
+    alternatives: [OWASP/threat-dragon, izar/pytm, structurizr/lite, mitre-attack/attack-navigator, terrastruct/d2]
+    capabilities: [threatmodel.data-flow, threatmodel.trust-boundary, threatmodel.attack-tree, threatmodel.abuse-case, threatmodel.privacy, threatmodel.safeguarding, threatmodel.diff, threatmodel.verify]

@@ -1,0 +1,33 @@
+# Citadel — Multi-Party Trust Quorum (System 38) + Shadow Guardian (System 37) + Control Proof (39).
+# Owners: orchestration/approvals.py, shadow_guardian/verifier.py, citadel/control_proof/claims.py.
+citadel:
+  enabled: true
+  fail_closed: true
+  quorum:
+    # thresholds: minimum distinct participants per root operation
+    root_key_rotation: 3
+    recovery_activation: 3
+    attestation_root_rotation: 3
+    evidence_root_migration: 3
+    transparency_log_migration: 3
+    emergency_policy_replacement: 4
+    guardian_wide_freeze: 2
+    re_enrolment_after_catastrophic_compromise: 4
+    participants_use_separate_credentials: true     # invariant 16
+    participants_use_separate_evidence_reads: true   # invariant 17
+    recovery_credentials_outside_runtime_plane: true # invariant 18
+    result_fields: [operation, participants, participant_identities, separate_authentication_evidence, submitted_decision, timestamp, policy_digest, target_digest, evidence_digest, threshold, result, signature]
+  shadow:
+    enabled: true
+    separate_credentials: true
+    separate_deployment: true
+    separate_signing_key: true
+    may_freeze_capability_issuance: true
+    may_assume_operational_control: false            # invariant 15
+    primary_cannot_approve_shadow: true              # invariant 14
+    cannot_access_private_message_plaintext: true
+  control_proof:
+    continuous: true
+    claim_freshness_required: true
+    immutable_results: true
+    pwa_visibility: true

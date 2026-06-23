@@ -1,0 +1,14 @@
+# Citadel — Transparency fabric (System 28 / Wave 29). Owner: sigstore/rekor.
+# Independent log: sigsum or trillian. Promotion requires an inclusion proof.
+citadel:
+  enabled: true
+  fail_closed: true
+  transparency:
+    primary_log: sigstore/rekor
+    independent_log: sigsum/sigsum
+    inclusion_proof_required_for_promotion: true   # invariant 28
+    consistency_proof_required: true
+    checkpoint_gossip: true
+    log_disagreement: critical_event
+    recovery_procedure: rebuild_and_verify_against_independent_log
+    deferred_submission_in_continuity: true

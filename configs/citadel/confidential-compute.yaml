@@ -1,0 +1,25 @@
+# Citadel — Confidential Execution Fabric (System 22). Owner: isolation/sandbox.py.
+# Verifier: citadel/confidential/verifier.py.
+citadel:
+  enabled: true
+  fail_closed: true
+  confidential_compute:
+    enabled: true
+    worker_classes: [standard_sandbox, high_isolation_sandbox, confidential_worker, forensic_confidential_worker, recovery_confidential_worker, shadow_verification_worker]
+    profiles:
+      sensitive_analysis: confidential_worker
+      forensic_analysis: forensic_confidential_worker
+      shadow_verification: shadow_verification_worker
+      recovery: recovery_confidential_worker
+      standard_scanning: standard_sandbox
+    requirements:
+      remote_attestation: true
+      attestation_bound_secret_release: true
+      encrypted_memory_where_supported: true
+      signed_worker_image: true
+      measured_workload: true
+      ephemeral_identity: true
+      ephemeral_storage: true
+      evidence_outside_worker_sole_control: true
+    secret_release_bound_to_measurement: true
+    on_failed_attestation: deny_secret_release
