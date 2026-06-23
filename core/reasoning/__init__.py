@@ -34,6 +34,7 @@ from .cases import build_case_from_spec, from_case_store, load_case
 from .causal import CausalReport, Counterfactual, root_cause
 from .council import Case, CouncilVerdict, convene
 from .hunting import HuntResult, run_hunts
+from .incident import IncidentVerdict, investigate
 from .hypothesis import (
     CaseVerdict,
     HypothesisVerdict,
@@ -56,6 +57,8 @@ __all__ = [
     "convene",
     "HuntResult",
     "run_hunts",
+    "IncidentVerdict",
+    "investigate",
     # ACH overlay + case ingestion (Wave 2 #7, complementary view)
     "ACHView",
     "MatrixRow",

@@ -893,5 +893,32 @@ def emulate_gate_cmd(spec_file: str) -> None:
     raise SystemExit(1 if report.has_bypass else 0)
 
 
+@main.command("incident")
+@click.argument("twin_spec", type=click.Path(exists=True))
+@click.argument("stream_spec", type=click.Path(exists=True))
+@click.option("--min-severity", default="high", show_default=True,
+              help="Trigger on events at/above this severity: info|low|medium|high|critical.")
+def incident_cmd(twin_spec: str, stream_spec: str, min_severity: str) -> None:
+    """Runtime-triggered investigation: live signal → causal + council → human-ready verdict."""
+    from .event_fabric import EventSeverity, load_stream
+    from .reasoning import investigate
+    from .twin import load_twin
+
+    twin = load_twin(twin_spec)
+    fabric = load_stream(stream_spec)
+    v = investigate(twin, fabric, min_severity=EventSeverity(min_severity.lower()))
+    if not v.triggered:
+        click.echo("incident: no notable runtime signals.")
+        raise SystemExit(0)
+    click.echo(f"INCIDENT — {v.summary}")
+    click.echo(f"  at risk now: {', '.join(v.at_risk)}")
+    click.echo(f"  decision:    {v.decision.upper().replace('_', ' ')}"
+               f"{'  → ESCALATE TO HUMAN' if v.requires_human else ''}")
+    AuditLog().record("incident", actor="cli", scope=v.target_sink or twin_spec,
+                      decision="denied" if v.requires_human else "allowed",
+                      detail={"decision": v.decision, "at_risk": len(v.at_risk)})
+    raise SystemExit(0)
+
+
 if __name__ == "__main__":  # pragma: no cover
     main()
