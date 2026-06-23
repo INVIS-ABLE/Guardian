@@ -304,12 +304,18 @@ def _embedded_permitted(inp: PolicyInput) -> bool:
 
 
 def _tenancy_enforced() -> bool:
-    """Whether tenant-aware target authorisation is enforced (default: off).
+    """Whether tenant-aware target authorisation is enforced.
 
-    Off by default so the founding INVISABLE deployment behaves exactly as before.
-    Turn on per the migration plan with ``GUARDIAN_TENANCY_ENFORCE=1``.
+    Fail-closed in a *deployed* posture: tenant enforcement is ON automatically in
+    staging/production (the hardened default — a target action must be backed by a valid,
+    signed, tenant-bound grant), and can be forced on in any posture with
+    ``GUARDIAN_TENANCY_ENFORCE=1`` (used to exercise it in development/CI). It is off only in
+    development/ci without that flag, so the founding INVISABLE deployment and the existing
+    unit tests behave exactly as before.
     """
-    return os.environ.get("GUARDIAN_TENANCY_ENFORCE", "").strip().lower() in {"1", "true", "yes"}
+    if os.environ.get("GUARDIAN_TENANCY_ENFORCE", "").strip().lower() in {"1", "true", "yes"}:
+        return True
+    return _guardian_env() in _OPA_REQUIRED_ENVS
 
 
 _TENANT_REGISTRY_CACHE: TenantRegistry | None = None

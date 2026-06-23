@@ -1,0 +1,22 @@
+evidence_timestamp: '2026-06-23T02:17:47Z'
+repo: INVIS-ABLE/Guardian
+default_branch: main
+default_branch_expected: main
+default_branch_ok: true
+origin_head_symref: refs/heads/main
+main_tip_sha: df4d3e355def7ea27f81b864b11ddb1688f9f835
+legacy_branch: claude/laughing-ptolemy-zfeiiu
+legacy_tip_sha: 8f55815841c13d6dc62883b146d08c0e7d881f36
+remote_branch_count: 60
+open_pr_count: 0
+branch_protection_queryable: false
+codeowners: present
+governor_doc: present
+branch_retirement_manifest: present
+blockers:
+- id: ref-deletion-blocked
+  severity: high
+  owner_controlled: true
+  detail: "git proxy returns HTTP 403 on ref deletion and no MCP delete-branch tool exists, so branch\
+    \ retirement (\xA712) must be executed by the owner (command recorded in docs/governance/branch_retirement.yaml)."
+default_branch_flipped_at: '2026-06-23T02:36:00Z'

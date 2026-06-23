@@ -52,6 +52,34 @@ if _HAVE_ED25519:  # pragma: no cover - depends on the runtime backend
 ALGORITHM = "ed25519" if _HAVE_ED25519 else "hmac-sha256"
 
 
+class SigningError(RuntimeError):
+    """The mandatory asymmetric backend is unavailable in a hardened posture. Fail closed."""
+
+
+def require_ed25519() -> bool:
+    """Whether asymmetric (Ed25519) signing is MANDATORY in the current posture (fail closed).
+
+    Staging and production must never silently fall back to the symmetric HMAC primitive
+    (ADR 0002): a deployment that cannot do Ed25519 must refuse to sign rather than issue a
+    weaker capability. ``GUARDIAN_REQUIRE_ED25519=1`` forces the requirement on in any posture
+    (so it can be exercised in development/CI); otherwise it is on for staging/production and
+    off for development/ci — preserving the offline HMAC fallback for tests and local runs.
+    """
+    if os.environ.get("GUARDIAN_REQUIRE_ED25519", "").strip().lower() in {"1", "true", "yes"}:
+        return True
+    return os.environ.get("GUARDIAN_ENV", "development").strip().lower() in {"staging", "production"}
+
+
+def _assert_asymmetric_available() -> None:
+    """Refuse to operate on the HMAC fallback when Ed25519 is mandatory (staging/production)."""
+    if not _HAVE_ED25519 and require_ed25519():
+        raise SigningError(
+            "Ed25519 signing is mandatory in staging/production but its backend is "
+            "unavailable; refusing to fall back to HMAC-SHA256. Install a working "
+            "'cryptography' backend, or run with GUARDIAN_ENV=development for the fallback."
+        )
+
+
 @dataclass(frozen=True)
 class KeyPair:
     """A signing keypair as hex strings. For the HMAC fallback, public == private (symmetric)."""
@@ -61,6 +89,7 @@ class KeyPair:
 
 
 def generate_keypair() -> KeyPair:
+    _assert_asymmetric_available()
     if _HAVE_ED25519:
         sk = Ed25519PrivateKey.generate()
         priv = sk.private_bytes(
@@ -78,6 +107,7 @@ def generate_keypair() -> KeyPair:
 
 
 def sign(private_hex: str, message: bytes) -> str:
+    _assert_asymmetric_available()
     if _HAVE_ED25519:
         sk = Ed25519PrivateKey.from_private_bytes(bytes.fromhex(private_hex))
         return sk.sign(message).hex()
@@ -85,6 +115,10 @@ def sign(private_hex: str, message: bytes) -> str:
 
 
 def verify(public_hex: str, message: bytes, signature_hex: str) -> bool:
+    # Fail closed in a hardened posture: a symmetric HMAC signature is not an acceptable
+    # asymmetric proof in staging/production, so do not validate one there.
+    if not _HAVE_ED25519 and require_ed25519():
+        return False
     if _HAVE_ED25519:
         try:
             pk = Ed25519PublicKey.from_public_bytes(bytes.fromhex(public_hex))

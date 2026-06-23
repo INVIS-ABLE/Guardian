@@ -1,0 +1,24 @@
+# Final Consolidation §3 — PR inventory.
+evidence_timestamp: "2026-06-23T02:24:37Z"
+verified_against_main: "d9377c4d8cb3a3c10931d8540a56d98415ff33a8"
+open_pr_count: 0            # verified via GitHub API list_pull_requests(state=open) == []
+note: >-
+  All prior reconciliation work has merged or closed; there is no second integration
+  branch and no open PR backlog. Merged-PR provenance is preserved in git history and
+  docs/governance/merge_ledger.yaml.
+security_sensitive_branches_awaiting_human_review:
+  - branch: claude/fix-main-ci-rego-zizmor
+    area: OPA reference monitor (policies/opa/*.rego, opa-policy.yml)
+    risk: critical
+    note: likely SUPERSEDED (main CI green); requires 2 independent human reviews to confirm/close
+  - branch: steward/forward-port-citadel-waves
+    area: key custody / threshold-quorum / cryptographic agility / transparency fabric
+    risk: critical
+    note: legitimate unique crypto work (5 commits); 2 human reviews + owner approval before forward-port
+  - branch: claude/keen-euler-4t9vo7
+    area: Group E lab/proof systems (fuzzing, crypto-proof, malware lab, chaos)
+    risk: high
+    note: must pass lab-isolation review (incapable of reaching production assets) before forward-port
+owner_rejected:
+  - branch: wave3/execution-job-bridge
+    note: PR #103 closed without merging by the owner; do not recreate

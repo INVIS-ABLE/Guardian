@@ -17,15 +17,15 @@ A wave is **delivered** only when its acceptance criteria pass with tests. Anyth
 | 28 | Reproducible build foundry | partial | `supplychain/*` (admission/provenance/sbom) |
 | 29 | Transparency fabric | **delivered** | `citadel/foundry/transparency.py` + `promotion.py` + `tests/test_citadel_transparency_runtime.py` |
 | 30 | Exposure intelligence | partial | `ownership/verifier.py`, `core/twin` |
-| 31 | Deception grid | planned | — |
-| 32 | Data-protection & exfiltration | partial | `isolation/egress.py`, gitleaks |
+| 31 | Deception grid | **delivered** | `citadel/deception/` + `tests/test_citadel_deception.py` |
+| 32 | Data-protection & exfiltration | **delivered** | `citadel/data_protection/` + `tests/test_citadel_data_protection.py` |
 | 33 | Device & endpoint integrity | partial | folded into Wave 21 platform inventory |
 | 34 | Fraud & abuse graph | planned | — |
 | 35 | Privacy-preserving analytics | planned | — |
 | 36 | Immutable cyber vault | partial | `recovery/backup.py`, `recovery/drill.py` |
 | 37 | Chaos & continuity | partial | `core/twin`, `resilience/health.py` |
 | 38 | Secure time, Shadow & quorum | partial | `shadow_guardian/verifier.py`, `orchestration/approvals.py` |
-| 39 | Citadel final acceptance | planned | gated by `docs/citadel_acceptance_gate.md` |
+| 39 | Control-proof engine + Constitution | **delivered** | `citadel/control_proof/`, `citadel/constitution/` + tests |
 
 ## Wave 21 — Hardware root of trust (delivered)
 

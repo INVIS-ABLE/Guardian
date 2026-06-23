@@ -1,0 +1,37 @@
+# Cryptographic protocol proof run for the INVISABLE estate.
+#
+# Symbolic verification of the flows that protect users — device enrolment, message key
+# agreement, account recovery — answering "does this keep its security property against an active
+# attacker?". A FALSIFIED critical property is a real protocol break and fails the gate.
+#
+# Run:
+#   guardian crypto-proof      crypto_proof/invisable-protocols.yaml
+#   guardian crypto-proof-gate crypto_proof/invisable-protocols.yaml   # non-zero on any break
+#
+# SYMBOLIC ONLY: every property/trace describes abstract terms. Naming real plaintext or key
+# material is refused — the lab reviews the crypto SYSTEM, never secrets.
+protocols:
+  - { id: "proto:device-enrolment", name: "Device enrolment",     prover: tamarin }
+  - { id: "proto:message-key",      name: "Message key agreement", prover: tamarin }
+  - { id: "proto:account-recovery", name: "Account recovery",     prover: verifpal }
+
+results:
+  - protocol_id: "proto:device-enrolment"
+    status: proved
+    property: { kind: authentication, description: "an enrolling device is authenticated to the directory" }
+  - protocol_id: "proto:message-key"
+    status: proved
+    property: { kind: forward_secrecy, description: "past session keys stay safe after a later key compromise" }
+  - protocol_id: "proto:message-key"
+    status: proved
+    property: { kind: secrecy, description: "the attacker never derives the abstract session secret" }
+  - protocol_id: "proto:account-recovery"
+    status: falsified
+    property: { kind: recovery_soundness, description: "recovery cannot be abused to impersonate a user" }
+    attack_trace:
+      - "attacker initiates recovery for the victim handle"
+      - "weak challenge binding lets the attacker register their own device key"
+      - "attacker's device is admitted as the victim — impersonation"
+  - protocol_id: "proto:account-recovery"
+    status: unknown
+    property: { kind: post_compromise, description: "a recovered account heals after attacker eviction" }

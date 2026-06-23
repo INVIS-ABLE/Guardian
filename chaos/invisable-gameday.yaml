@@ -1,0 +1,46 @@
+# Chaos & recovery game-day for the INVISABLE estate — run against a CLONE of the digital twin.
+#
+# Each scenario injects a failure into the cloned twin and compares the model's PREDICTED blast
+# radius against the ACTUAL observed impact. Mismatches are surprises to learn from:
+#   * unpredicted impact — broke but the model missed it (a map gap to fix — the dangerous one)
+#   * overpredicted impact — the model feared it, a control held (resilience to bank)
+# Plus RTO breaches. 'clone_of' MUST name a clone — pointing at production is refused.
+#
+# Run:
+#   guardian chaos      chaos/invisable-gameday.yaml
+#   guardian chaos-gate chaos/invisable-gameday.yaml   # non-zero on a map gap or RTO breach
+run: "2026-Q2 resilience game-day"
+clone_of: "twin:invisable-clone-2026Q2"
+
+results:
+  # OPA down: the model predicted only the relay degrades; in reality the mailbox DB also stalled
+  # (an UNPREDICTED impact — a dependency the twin map was missing).
+  - scenario:
+      id: s1
+      mode: policy_engine_down
+      target: "svc:messaging-relay"
+      predicted_impact: ["svc:messaging-relay"]
+    actual_impact: ["svc:messaging-relay", "db:mailbox"]
+    recovered: true
+    rto_seconds: 95
+    rto_objective_seconds: 120
+  # Key rotation: the model feared the API would drop; the control held — OVERPREDICTED (good).
+  - scenario:
+      id: s2
+      mode: key_rotation
+      target: "key:signing"
+      predicted_impact: ["img:messaging", "api:messaging"]
+    actual_impact: ["img:messaging"]
+    recovered: true
+    rto_seconds: 30
+    rto_objective_seconds: 60
+  # Region outage: predicted exactly, but recovery blew the RTO objective (a breach).
+  - scenario:
+      id: s3
+      mode: region_outage
+      target: "svc:messaging-relay"
+      predicted_impact: ["svc:messaging-relay", "db:mailbox", "api:messaging"]
+    actual_impact: ["svc:messaging-relay", "db:mailbox", "api:messaging"]
+    recovered: true
+    rto_seconds: 540
+    rto_objective_seconds: 300
