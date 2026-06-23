@@ -1,0 +1,38 @@
+# GENERATED point-in-time discovery snapshot — NOT the governance source of truth.
+# Authoritative governance state lives in docs/governance/.
+schema_version: 1
+observed_at: "2026-06-23T01:49:16Z"
+canonical_branch: main
+main_tip: "fadc3a980a6310ffa340c3cb3f189a92dd04776b"
+github_default_branch: "claude/laughing-ptolemy-zfeiiu"   # owner must move to main (Phase C)
+main_protected: false                                      # no ruleset yet (owner action)
+branch_count_local_basis: 54
+
+enforcement_added_this_pr:
+  check: pr_base_not_canonical
+  mechanism: "scripts/repository_governor.py --fail-on-checks pr_base_not_canonical"
+  workflow_step: ".github/workflows/repository-governor.yml :: Enforce canonical PR base (blocking)"
+  blocking: true
+  scope: "wrong-base only; default-branch-drift intentionally NOT blocking until owner moves default"
+
+open_prs_into_main:
+  - {pr: 103, head: wave3/execution-job-bridge, state: draft}
+  - {pr: 101, head: claude/keen-euler-4t9vo7, state: draft}
+  - {pr: 99,  head: claude/laughing-ptolemy-zfeiiu, state: draft, flag: "wholesale legacy->main; rule 3.2 violation"}
+
+branch_class_tally:
+  canonical: 1
+  active-worker: 1
+  human-decision-required: 1
+  unsafe: 1
+  reconcile: 2
+  retirement-candidate: 48
+
+owner_actions_required:   # section 3.4 — not performable by an agent
+  - "gh repo edit INVIS-ABLE/Guardian --default-branch main"
+  - "apply main ruleset (require PRs, 2 reviews high-risk paths, CODEOWNERS, no force-push, no base != main, full-SHA action refs)"
+  - "retire legacy claude/laughing-ptolemy-zfeiiu after default moves + zero unreconciled work"
+
+deferred_to_runtime_workstream:
+  - reports/final_structure/runtime_call_graph.md
+  - reports/final_structure/resource_risk_inventory.yaml

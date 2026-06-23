@@ -56,3 +56,16 @@ jobs:
           name: repository-governor-report
           path: governor-report.json
           if-no-files-found: warn
+
+      # Rule 3.1: every PR must target the canonical branch. This step is BLOCKING — a PR
+      # whose base is not `main` fails here. Scoped to wrong-base only (not default-branch
+      # drift or hygiene findings), so it is safe to require while the GitHub default branch
+      # is still being moved to `main` by the owner; all other findings stay report-only above.
+      - name: Enforce canonical PR base (blocking)
+        if: github.event_name == 'pull_request'
+        env:
+          PR_BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: |
+          python scripts/repository_governor.py \
+            --pr-base "$PR_BASE_REF" \
+            --fail-on-checks pr_base_not_canonical

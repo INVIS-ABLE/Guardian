@@ -14,7 +14,13 @@ Detectors (all operate on text/paths so they are unit-testable):
 * required governance files missing.
 
 Run ``python scripts/repository_governor.py`` for a JSON report (exit 0, report-only),
-or ``--strict`` to exit non-zero when findings exist (useful locally / in pre-commit).
+or ``--strict`` to exit non-zero when medium+ findings exist (useful locally / in pre-commit).
+
+``--fail-on-checks <names>`` makes the governor *blocking* for a named subset of checks only
+(e.g. ``pr_base_not_canonical``), independent of severity. This is how the
+``Repository Governor`` workflow enforces rule 3.1 — a PR whose base is not ``main`` fails —
+without coupling that enforcement to the current default-branch state or to lower-severity
+hygiene findings. It still detects only; it never merges, changes settings, or deletes.
 """
 
 from __future__ import annotations
@@ -22,6 +28,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
@@ -199,6 +206,11 @@ def build_report(root: Path = REPO_ROOT, pr_base: str | None = None) -> Governor
     return report
 
 
+def blocking_findings(report: GovernorReport, fail_on_checks: frozenset[str]) -> list[Finding]:
+    """The report's findings whose ``check`` is in the blocking allow-list."""
+    return [f for f in report.findings if f.check in fail_on_checks]
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Guardian repository-governor watchdog.")
     parser.add_argument("--pr-base", default=None, help="Base ref of a PR to validate.")
@@ -207,9 +219,28 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Exit non-zero when medium+ findings exist (default: report-only).",
     )
+    parser.add_argument(
+        "--fail-on-checks",
+        default="",
+        help=(
+            "Comma-separated check names that must BLOCK (exit non-zero) when present, "
+            "regardless of severity (e.g. 'pr_base_not_canonical'). Decoupled from --strict."
+        ),
+    )
     args = parser.parse_args(argv)
     report = build_report(pr_base=args.pr_base)
     print(json.dumps(report.to_dict(), indent=2))
+
+    fail_on = frozenset(c.strip() for c in args.fail_on_checks.split(",") if c.strip())
+    if fail_on:
+        blocking = blocking_findings(report, fail_on)
+        if blocking:
+            print(
+                "BLOCKING governance findings: "
+                + ", ".join(sorted({f.check for f in blocking})),
+                file=sys.stderr,
+            )
+            return 1
     if args.strict and not report.ok:
         return 1
     return 0
