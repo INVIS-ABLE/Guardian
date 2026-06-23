@@ -16,8 +16,9 @@ GUARDRAILS.md are enforced uniformly and cannot be bypassed by an individual age
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from connectors import REGISTRY as CONNECTOR_REGISTRY
 from connectors.base import BaseConnector, ConnectorResult
@@ -29,6 +30,9 @@ from .audit import AuditLog
 from .evidence import EvidenceEvent, EvidenceStore, SimulatorResult
 from .guardrails import GuardrailViolation, Guardrails
 from .scope import Scope
+
+if TYPE_CHECKING:  # pragma: no cover - typing only; avoids an import cycle via core.schemas
+    from .schemas import CaseEvent
 
 # Capability → (kind, tool-name). Capabilities are the stable vocabulary the Brain
 # and agents speak; the concrete tool behind each can change without touching agents.
@@ -91,12 +95,16 @@ class ToolRouter:
         guardrails: Guardrails | None = None,
         dry_run: bool = True,
         evidence_store: EvidenceStore | None = None,
+        event_sink: Callable[[CaseEvent], None] | None = None,
     ) -> None:
         self.scope = scope
         self.guardrails = guardrails or Guardrails(scope=scope)
         self.dry_run = dry_run
         self.audit = AuditLog()
         self._evidence_store = evidence_store
+        self._event_sink = event_sink
+        #: Canonical CaseEvents emitted for every routed outcome (newest last).
+        self.events: list[CaseEvent] = []
 
     # --- discovery -------------------------------------------------------------
     @staticmethod
@@ -139,7 +147,37 @@ class ToolRouter:
                 decision="refused",
                 detail={"tool": tool, "reason": str(exc)},
             )
+        self._emit(result)
         return result
+
+    def _emit(self, result: RouteResult) -> CaseEvent:
+        """Lift a routed outcome into a canonical CaseEvent, accumulate it, link it into
+        the tamper-evident audit log, and forward it to the optional event sink.
+
+        Additive by design: callers that ignore ``self.events`` / pass no ``event_sink``
+        see no behaviour change, but every routed outcome now produces a content-addressable
+        event that the case fabric can consume.
+        """
+        # Lazy import breaks the import-time cycle (core.schemas pulls in core.brain.state,
+        # whose package imports the router); by call time every module is fully loaded.
+        from .schemas.adapters import route_result_to_event
+
+        event = route_result_to_event(result)
+        self.events.append(event)
+        self.audit.record(
+            f"router:{result.capability}:event",
+            actor="tool_router",
+            scope=self.scope.asset,
+            decision="allowed" if result.allowed else "refused",
+            detail={
+                "event_id": str(event.event_id),
+                "event_type": event.event_type,
+                "payload_sha256": event.payload_sha256,
+            },
+        )
+        if self._event_sink is not None:
+            self._event_sink(event)
+        return event
 
     # --- contract execution (end-to-end signed path) ---------------------------
     def authorize_capability(
@@ -199,6 +237,7 @@ class ToolRouter:
                 f"router:{capability}:execute_refused", actor="tool_router",
                 scope=self.scope.asset, decision="refused", detail={"tool": tool, "reason": str(exc)},
             )
+        self._emit(result)
         return result
 
     def _record_evidence(self, tool, authorization, argv, exec_result, result_status) -> None:
