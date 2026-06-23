@@ -51,9 +51,14 @@ runtime behaviour without an explicit, separate decision.
 - *Deferred to Phase D:* tenant-partitioning of memory/telemetry/RAG collections and
   their leakage tests (needs the storage layer, not just the contracts).
 
-### Phase D — registries & onboarding
-- Add a `tenant:` column to asset/test-account registries (default `invisable`).
-- Grant issuance + persistence; tenant administrator onboarding; revocation/expiry.
+### Phase D — registries & onboarding (in progress)
+- ✅ `tenant:` column added to `scope/assets.yaml` and `scope/test_accounts.yaml`
+  (default `invisable`); `core/scope.py` enforces scope↔asset tenant matching.
+- ✅ Grant persistence + issuance + revocation via `core/grants.py` (`GrantStore`).
+  Issuance requires the signing key (no self-granted authority); signatures persist
+  and re-verify; lookups are tenant-isolated. (See D-0007.)
+- *Remaining (D-2):* tenant-administrator onboarding API/UI; grant issuance surface;
+  tenant-partitioned memory/telemetry/RAG and their leakage tests.
 
 ### Phase E — INVISABLE as an explicit profile
 - Ship `tenants/invisable.yaml` capturing INVISABLE as a first-class tenant config and
