@@ -30,6 +30,10 @@ class OwnershipEvidence:
     proof: str  # the token matched / owning login observed
     verified_at: float  # epoch seconds the proof was last confirmed
     expires_at: float | None  # epoch seconds; None = never (discouraged)
+    # The tenant this proof was established for. Ownership is only meaningful within a
+    # tenant boundary; the verifier caches per (kind, target, tenant). Defaults to the
+    # founding INVISABLE tenant for backward compatibility. See ownership/verifier.py.
+    tenant: str = "invisable"
 
     def fresh(self, now: float) -> bool:
         """True only while the evidence is still within its validity window."""

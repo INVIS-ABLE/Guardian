@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-23T00:06:09.191314+00:00",
+  "generated_at": "2026-06-23T00:07:31.862058+00:00",
   "wave": 0,
   "summary": {
     "agents": 17,
@@ -8,7 +8,7 @@
     "simulators": 3,
     "router_capabilities": 12,
     "tool_manifest_capabilities": 8,
-    "tests": 77,
+    "tests": 78,
     "source_directories": [
       "agents",
       "attestation",
@@ -615,6 +615,7 @@
     "tests/test_supplychain.py",
     "tests/test_target_trust_ownership.py",
     "tests/test_tenancy.py",
+    "tests/test_tenant_isolation.py",
     "tests/test_tool_manifest.py",
     "tests/test_trust_producers.py",
     "tests/test_twin.py",
