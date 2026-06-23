@@ -752,5 +752,49 @@ def threat_hunt_cmd(twin_spec, identity_spec, lineage_spec, fail_on_high) -> Non
     raise SystemExit(1 if (fail_on_high and high) else 0)
 
 
+@main.command("reason-ach")
+@click.argument("case_file", type=click.Path(exists=True))
+def reason_ach_cmd(case_file: str) -> None:
+    """Competing hypotheses (ACH): rank rival explanations by least-contradicted; seek disproof."""
+    from .reasoning import analyze, load_case
+
+    case = load_case(case_file)
+    view = analyze(case.hypotheses, case.evidence)
+    click.echo(f"Analysis of Competing Hypotheses ({len(case.hypotheses)} hypotheses):")
+    for v in view.ranked:
+        lead = "→" if v.hypothesis_id == view.leading_id else " "
+        click.echo(f" {lead} contradiction {v.contradiction_weight:>4.1f}  support {v.support_weight:>4.1f}  "
+                   f"[{v.status}] {v.statement}")
+    click.echo(f"\ndiagnostic evidence ({len(view.diagnostic_evidence)} discriminating, "
+               f"{len(view.non_diagnostic_evidence)} non-diagnostic):")
+    for d in view.diagnostic_evidence:
+        click.echo(f"  • {d.summary}  (rules against {len(d.inconsistent_with)} hypothesis/es)")
+    click.echo(f"\nverdict: {view.verdict}")
+    if view.next_tests:
+        click.echo("seek disproof — run next:")
+        for t in view.next_tests:
+            click.echo(f"  ? {t.description}")
+    AuditLog().record("reason-ach", actor="cli", scope=case_file,
+                      decision="allowed" if view.decisive else "inconclusive",
+                      detail={"leading": str(view.leading_id), "decisive": view.decisive,
+                              "abstained": view.case.abstained})
+
+
+@main.command("reason-matrix")
+@click.argument("case_file", type=click.Path(exists=True))
+def reason_matrix_cmd(case_file: str) -> None:
+    """Competing hypotheses (ACH): print the hypothesis × evidence consistency matrix."""
+    from .reasoning import ach_matrix, load_case
+
+    case = load_case(case_file)
+    glyph = {"consistent": "+", "inconsistent": "−", "neutral": "·"}
+    for row in ach_matrix(case.hypotheses, case.evidence):
+        click.echo(row.statement)
+        for cell in row.cells:
+            click.echo(f"  {glyph[cell.consistency.value]} (w{cell.weight:g}) {cell.summary}")
+    AuditLog().record("reason-matrix", actor="cli", scope=case_file, decision="allowed",
+                      detail={"hypotheses": len(case.hypotheses)})
+
+
 if __name__ == "__main__":  # pragma: no cover
     main()
