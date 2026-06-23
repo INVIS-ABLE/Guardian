@@ -30,6 +30,7 @@ from .capability import CapabilityToken, TokenStore, hash_args, issue_token
 from .health import ToolHealthTracker
 from .manifest import ToolManifest
 from .registry import RefusalReason, ToolRefusal, ToolRegistry
+from .resolver import CapabilityResolver
 
 
 class RunOutput(BaseModel):
@@ -79,13 +80,18 @@ class ToolExecutor:
 
     def __init__(self, registry: ToolRegistry, *, token_store: TokenStore | None = None,
                  runner: ToolRunner | None = None, roots: RootsOfTrust | None = None,
-                 health: ToolHealthTracker | None = None) -> None:
+                 health: ToolHealthTracker | None = None,
+                 resolver: CapabilityResolver | None = None) -> None:
         self._registry = registry
         self._tokens = token_store or TokenStore()
         self._runner = runner or DryRunRunner()
         self._roots = roots
-        #: Optional health tracker fed by every real execution (router-fabric circuit breaker).
-        self._health = health
+        #: Optional health-aware resolver; when set, resolution picks the healthiest
+        #: verified candidate (router fabric) instead of the single registry manifest.
+        self._resolver = resolver
+        #: Health tracker fed by every real execution. Shared with the resolver when given,
+        #: so recorded outcomes drive the same circuit breaker that selection consults.
+        self._health = health or (resolver.health if resolver is not None else None)
 
     def execute(
         self,
@@ -98,10 +104,19 @@ class ToolExecutor:
         input_artifact_hashes: tuple[str, ...] = (),
         trust: TrustContext | None = None,
     ) -> ToolExecution | ToolRefusal:
-        resolved = self._registry.resolve(capability, environment=environment)
-        if isinstance(resolved, ToolRefusal):
-            return resolved
-        manifest = resolved
+        # Health-aware resolution when a resolver is configured (router fabric): pick the
+        # healthiest verified candidate and skip any whose circuit is open. Otherwise fall
+        # back to the single-candidate registry. Both return a structured refusal, not a raise.
+        if self._resolver is not None:
+            decision = self._resolver.resolve(capability, environment=environment)
+            if isinstance(decision, ToolRefusal):
+                return decision
+            manifest = decision.manifest
+        else:
+            resolved = self._registry.resolve(capability, environment=environment)
+            if isinstance(resolved, ToolRefusal):
+                return resolved
+            manifest = resolved
 
         if manifest.requires_approval and not approved:
             return ToolRefusal(
