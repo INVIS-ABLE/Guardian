@@ -73,11 +73,18 @@ packages = [
     "adaptive.autonomy",
     "adaptive.healing",
     "adaptive.slo",
+    "adaptive.telemetry",
+    "adaptive.controls",
+    "adaptive.prediction",
+    "adaptive.memory",
+    "adaptive.resilience",
+    "adaptive.learning",
     "citadel",
     "citadel.root_of_trust",
     "citadel.confidential",
     "citadel.crypto_agility",
     "citadel.quorum",
+    "citadel.foundry",
 ]
 
 [tool.pytest.ini_options]

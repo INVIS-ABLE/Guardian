@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-23T01:28:45.357599+00:00",
+  "generated_at": "2026-06-23T01:38:01.110429+00:00",
   "wave": 0,
   "summary": {
     "agents": 17,
@@ -8,7 +8,7 @@
     "simulators": 3,
     "router_capabilities": 12,
     "tool_manifest_capabilities": 8,
-    "tests": 100,
+    "tests": 108,
     "source_directories": [
       "agents",
       "attestation",
@@ -563,16 +563,16 @@
     }
   ],
   "components": {
-    "total": 34,
+    "total": 35,
     "by_status": {
       "planned": 31,
-      "present": 3
+      "present": 4
     },
     "by_trust_zone": {
       "detection": 7,
       "edge": 4,
       "evidence": 4,
-      "execution": 3,
+      "execution": 4,
       "identity": 8,
       "management": 7,
       "observability": 1
@@ -580,10 +580,12 @@
     "present": [
       "policy_engine",
       "repo_inventory",
+      "router_fabric",
       "schema_registry"
     ]
   },
   "tests": [
+    "tests/test_adaptive_resilience.py",
     "tests/test_agent_boundary.py",
     "tests/test_ai_gateway.py",
     "tests/test_anti_oscillation.py",
@@ -608,10 +610,12 @@
     "tests/test_citadel_root_of_trust.py",
     "tests/test_citadel_tools_manifest.py",
     "tests/test_citadel_transparency.py",
+    "tests/test_citadel_transparency_runtime.py",
     "tests/test_components_manifest.py",
     "tests/test_connector_contract.py",
     "tests/test_connector_contract_migration.py",
     "tests/test_containment.py",
+    "tests/test_control_effectiveness.py",
     "tests/test_credential_audit.py",
     "tests/test_detection.py",
     "tests/test_emulation.py",
@@ -631,6 +635,7 @@
     "tests/test_healing_runbooks.py",
     "tests/test_identity.py",
     "tests/test_identity_graph.py",
+    "tests/test_immune_memory.py",
     "tests/test_isolation.py",
     "tests/test_lineage.py",
     "tests/test_machine_attestation.py",
@@ -638,9 +643,11 @@
     "tests/test_observability.py",
     "tests/test_opa_parity.py",
     "tests/test_orchestration.py",
+    "tests/test_outcome_learning.py",
     "tests/test_ownership.py",
     "tests/test_policy_gate.py",
     "tests/test_policy_tenancy.py",
+    "tests/test_prediction.py",
     "tests/test_privacy_invariants.py",
     "tests/test_reasoning_ach.py",
     "tests/test_reasoning_calibration.py",
@@ -658,6 +665,7 @@
     "tests/test_router.py",
     "tests/test_router_contract_execution.py",
     "tests/test_router_events.py",
+    "tests/test_router_fabric.py",
     "tests/test_schemas.py",
     "tests/test_scope.py",
     "tests/test_shadow_guardian.py",
@@ -669,6 +677,7 @@
     "tests/test_specialists.py",
     "tests/test_supplychain.py",
     "tests/test_target_trust_ownership.py",
+    "tests/test_telemetry_completeness.py",
     "tests/test_tenancy.py",
     "tests/test_tenant_isolation.py",
     "tests/test_tenant_profiles.py",
