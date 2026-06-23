@@ -14,6 +14,7 @@ from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 
 from agents import REGISTRY as AGENTS
+from citadel.root_of_trust import PlatformInventory, platform_integrity_summary
 from core.audit import AuditLog
 from core.config import REPO_ROOT, load_config
 from core.guardrails import BLOCKED_ACTIONS, GLOBAL_APPROVAL_REQUIRED, check_scope
@@ -21,6 +22,17 @@ from core.scope import load_scope
 from simulators import PLANNED, REGISTRY as SIMULATORS
 
 app = FastAPI(title="INVISABLE Guardian", version="0.1.0")
+
+# Citadel Platform Integrity (Wave 21): the dashboard renders whatever the configured platform
+# inventory holds. Default is an empty inventory — honestly "no platforms enrolled here yet" —
+# replaced by the live root-of-trust inventory in a deployed environment.
+_PLATFORM_INVENTORY = PlatformInventory()
+
+
+def set_platform_inventory(inventory: PlatformInventory) -> None:
+    """Wire a live platform inventory into the Platform Integrity screen."""
+    global _PLATFORM_INVENTORY
+    _PLATFORM_INVENTORY = inventory
 
 SCOPE_DIR = REPO_ROOT / "scope"
 REPORTS_DIR = REPO_ROOT / "reports" / "generated"
@@ -85,6 +97,12 @@ def status() -> dict[str, Any]:
         "scopes": _scopes(),
         "recent_reports": _recent_reports(),
     }
+
+
+@app.get("/api/platform-integrity")
+def platform_integrity() -> dict[str, Any]:
+    """Citadel Platform Integrity (System 21): platform inventory, attestation + drift state."""
+    return platform_integrity_summary(_PLATFORM_INVENTORY)
 
 
 @app.get("/", response_class=HTMLResponse)
