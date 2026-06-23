@@ -73,6 +73,20 @@ programme. Claims here are only made for code that exists and passes tests.
   present, metadata-pending, offensive tools never adopted, single policy authority
   (OPA) preserved.
 
+### Durable grant store + registry tenant column (Phase D, additive)
+- **Decision:** D-0007 (DECISION_LOG.md).
+- **Code:** `core/grants.py` (`GrantStore`: JSON load/save, `issue`/`revoke`/
+  `active_grants`/`authorise`, all fail-closed and tenant-isolated);
+  `AuthorisationGrant.to_dict()/from_dict()`; `tenant` column on `scope/assets.yaml`
+  and `scope/test_accounts.yaml`; `core/scope.py` enforces scope↔asset tenant match.
+- **Defaults:** registry tenant defaults to `invisable`, so existing scopes are valid.
+- **Tests:** `tests/test_grants.py` (issue/persist/load/revoke/authorise round-trip,
+  signature survives serialisation, duplicate-id rejected, tenant isolation, default
+  deny, malformed-store fail-closed) and `tests/test_scope.py` (cross-tenant asset
+  reference denied). Full suite green.
+- **Rollback:** remove the module, (de)serialisers, scope check, and registry columns.
+- **Owner:** Platform architecture. **Review date:** at Phase D-2 (issuance API/UI).
+
 ### Phase 0 platform documentation
 - `docs/platform/`: README, CURRENT_STATE_ASSESSMENT, GUARDIAN_UNIVERSAL_PRODUCT_VISION,
   TENANT_AND_AUTHORISED_TARGET_MODEL, INVISABLE_TO_MULTI_TENANT_MIGRATION,

@@ -199,6 +199,34 @@ class AuthorisationGrant:
             return False
         return signing.verify(public_hex, _canonical(self.signing_payload()), self.signature)
 
+    # --- serialisation (persistence) ---------------------------------------------
+    def to_dict(self) -> dict[str, Any]:
+        """Full serialisable form, including the signature (unlike signing_payload)."""
+        d = self.signing_payload()
+        d["signature"] = self.signature
+        return d
+
+    @classmethod
+    def from_dict(cls, d: dict[str, Any]) -> "AuthorisationGrant":
+        """Reconstruct a grant from :meth:`to_dict`. Fails closed on malformed input."""
+        tw = d.get("test_window")
+        return cls(
+            grant_id=d["grant_id"],
+            tenant_id=d["tenant_id"],
+            asset_ids=tuple(d.get("asset_ids", ())),
+            authorising_identity=d.get("authorising_identity", ""),
+            authority_basis=AuthorityBasis(d["authority_basis"]),
+            evidence=d.get("evidence", ""),
+            permitted_capabilities=frozenset(d.get("permitted_capabilities", ())),
+            prohibited_capabilities=frozenset(d.get("prohibited_capabilities", ())),
+            environments=frozenset(d.get("environments", ())),
+            test_window=(float(tw[0]), float(tw[1])) if tw else None,
+            issued_at=float(d.get("issued_at", 0.0)),
+            expires_at=None if d.get("expires_at") is None else float(d["expires_at"]),
+            revocation_status=RevocationStatus(d.get("revocation_status", "active")),
+            signature=d.get("signature"),
+        )
+
     # --- liveness ----------------------------------------------------------------
     def is_active(self, now: float | None = None) -> bool:
         """True only if the grant is non-revoked, not expired, and in its test window."""
