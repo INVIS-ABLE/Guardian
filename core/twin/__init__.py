@@ -20,6 +20,7 @@ from .assessment import (
 from .cartography import CartographyExportError, from_cartography_export
 from .changemap import resolve_changed_assets
 from .federate import federate
+from .runtime import LiveRisk, RuntimeSignal, apply_runtime, live_risk, runtime_edges
 from .forecast import (
     ChokePoint,
     attack_surface,
@@ -66,4 +67,9 @@ __all__ = [
     "default_sinks",
     "from_cartography_export",
     "CartographyExportError",
+    "LiveRisk",
+    "RuntimeSignal",
+    "live_risk",
+    "runtime_edges",
+    "apply_runtime",
 ]

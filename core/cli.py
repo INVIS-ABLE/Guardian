@@ -535,7 +535,11 @@ def events_verify_cmd(spec_file: str) -> None:
 @click.option("--rules", type=click.Path(exists=True), default=None,
               help="YAML with 'corroboration' and/or 'expected_sequences' for anomaly detection.")
 @click.option("--case", default=None, help="Filter to one case_id / trace_id.")
-def forensics_cmd(log_dir: str | None, rules: str | None, case: str | None) -> None:
+@click.option("--alerts-jsonl", type=click.Path(), default=None,
+              help="Route detected anomalies through the alert router, appending each as a "
+                   "JSON line to this file (for an alert pipeline / log shipper).")
+def forensics_cmd(log_dir: str | None, rules: str | None, case: str | None,
+                  alerts_jsonl: str | None) -> None:
     """Forensic timeline: reconstruct an ordered incident timeline from the audit log and
     flag anomalies (integrity failures, missing events, unsupported successes).
 
@@ -573,9 +577,37 @@ def forensics_cmd(log_dir: str | None, rules: str | None, case: str | None) -> N
             click.echo(f"  ! {a}")
     else:
         click.echo("No anomalies.")
+
+    if alerts_jsonl:
+        routed = _route_forensic_alerts(report, alerts_jsonl)
+        click.echo(f"Routed {routed} alert(s) to {alerts_jsonl}")
+
     audit.record("forensics", actor="cli", decision="denied" if report.anomalies else "allowed",
                  detail={"events": len(report.entries), "anomalies": len(report.anomalies)})
     raise SystemExit(1 if report.anomalies else 0)
+
+
+def _route_forensic_alerts(report, alerts_jsonl: str) -> int:
+    """Route a timeline report's anomalies through the alert router to a JSONL file sink.
+
+    Every severity is routed to one local file channel (no network), so nothing is dropped;
+    each delivered alert is appended as one JSON line. Returns the number of alerts delivered.
+    """
+    import json
+    from pathlib import Path
+
+    from forensics import raise_forensic_alerts
+    from observability.alerts import AlertRouter, Severity
+
+    out = Path(alerts_jsonl)
+
+    def file_sink(alert) -> None:
+        with out.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(alert.as_dict(), sort_keys=True) + "\n")
+
+    router = AlertRouter(routes={Severity.INFO: ("file",)}, sinks={"file": file_sink})
+    delivered = raise_forensic_alerts(report, router)
+    return sum(1 for channels in delivered.values() if channels)
 
 
 def _federate_from_opts(twin_spec, identity_spec, lineage_spec, bridges_spec):
@@ -794,6 +826,71 @@ def reason_matrix_cmd(case_file: str) -> None:
             click.echo(f"  {glyph[cell.consistency.value]} (w{cell.weight:g}) {cell.summary}")
     AuditLog().record("reason-matrix", actor="cli", scope=case_file, decision="allowed",
                       detail={"hypotheses": len(case.hypotheses)})
+
+
+@main.command("twin-live")
+@click.argument("twin_spec", type=click.Path(exists=True))
+@click.argument("stream_spec", type=click.Path(exists=True))
+@click.option("--min-severity", default="high", show_default=True,
+              help="Flag events at/above this severity: info|low|medium|high|critical.")
+def twin_live_cmd(twin_spec: str, stream_spec: str, min_severity: str) -> None:
+    """Runtime fold: overlay the event fabric on the twin — what is at risk right now."""
+    from .event_fabric import EventSeverity, load_stream
+    from .twin import live_risk, load_twin
+
+    twin = load_twin(twin_spec)
+    fabric = load_stream(stream_spec)
+    risk = live_risk(twin, fabric, min_severity=EventSeverity(min_severity.lower()))
+    click.echo(f"Live runtime risk ({len(risk.signals)} notable signal(s), "
+               f"{len(risk.runtime_edges)} observed edge(s)):")
+    for s in risk.signals:
+        oc = s.outcome.value if s.outcome else "-"
+        click.echo(f"  [{s.severity.value:8s} {oc:9s}] {s.action} → {s.asset_id}")
+    click.echo(f"\nAt risk now ({len(risk.at_risk)}): {', '.join(risk.at_risk) or '(none)'}")
+    AuditLog().record("twin-live", actor="cli", scope=twin_spec, decision="allowed",
+                      detail={"signals": len(risk.signals), "at_risk": len(risk.at_risk)})
+
+
+def _emulation_report(spec_file: str):
+    from .emulation import load_operation
+
+    report = load_operation(spec_file)
+    click.echo(f"Operation: {report.operation}  [env: {report.environment}]")
+    glyph = {"blocked": "✓", "detected": "○", "bypass": "✗"}
+    for r in report.results:
+        ev = "" if r.evidence_preserved else "  [no evidence]"
+        via = f" by {r.detected_by}" if r.detected_by else ""
+        click.echo(f"  {glyph[r.verdict.value]} {r.verdict.value:8s} {r.technique.id:11s} "
+                   f"{r.technique.name}{via}{ev}")
+    click.echo(f"\nblocked {report.blocked}  detected {report.detected}  "
+               f"bypass {len(report.bypasses)}  evidence-gaps {len(report.evidence_gaps)}")
+    return report
+
+
+@main.command("emulate")
+@click.argument("spec_file", type=click.Path(exists=True))
+def emulate_cmd(spec_file: str) -> None:
+    """Adversary lab: emulate an ATT&CK operation (lab-only) and mint regressions for gaps."""
+    report = _emulation_report(spec_file)
+    if report.regression_tests:
+        click.echo(f"\nregression tests minted ({len(report.regression_tests)}):")
+        for t in report.regression_tests:
+            click.echo(f"  + [{t.reason.value:12s}] {t.requirement}")
+    AuditLog().record("emulate", actor="cli", scope=spec_file, decision="allowed",
+                      detail={"bypasses": len(report.bypasses),
+                              "regressions": len(report.regression_tests)})
+
+
+@main.command("emulate-gate")
+@click.argument("spec_file", type=click.Path(exists=True))
+def emulate_gate_cmd(spec_file: str) -> None:
+    """Adversary lab: fail (exit non-zero) if any emulated technique bypassed the controls."""
+    report = _emulation_report(spec_file)
+    click.echo(f"\nemulation gate: {'FAIL — bypass found' if report.has_bypass else 'PASS'}")
+    AuditLog().record("emulate-gate", actor="cli", scope=spec_file,
+                      decision="denied" if report.has_bypass else "allowed",
+                      detail={"bypasses": len(report.bypasses)})
+    raise SystemExit(1 if report.has_bypass else 0)
 
 
 if __name__ == "__main__":  # pragma: no cover

@@ -41,6 +41,18 @@ class Alert:
         if not self.dedup_key:
             self.dedup_key = f"{self.source}:{self.title}:{int(self.severity)}"
 
+    def as_dict(self) -> dict[str, object]:
+        """JSON-serialisable view of the alert (for file/JSONL sinks and audit records)."""
+        return {
+            "title": self.title,
+            "severity": self.severity.name,
+            "source": self.source,
+            "detail": self.detail,
+            "correlation_id": self.correlation_id,
+            "dedup_key": self.dedup_key,
+            "ts": self.ts,
+        }
+
 
 Sink = Callable[[Alert], None]
 

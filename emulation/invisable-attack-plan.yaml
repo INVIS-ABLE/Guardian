@@ -1,0 +1,40 @@
+# Adversary-emulation operation for the INVISABLE estate — the "leaked CI token" kill chain
+# replayed against the controls, IN THE DISPOSABLE RANGE ONLY.
+#
+# For each MITRE ATT&CK technique the range records the three questions that matter:
+#   was it PREVENTED?  was it DETECTED by an independent sensor?  was EVIDENCE preserved?
+# A technique that was neither prevented nor detected is a BYPASS — and every bypass (plus every
+# evidence gap) is minted into a permanent regression test so the gap can never silently return.
+#
+# Run:
+#   guardian emulate      emulation/invisable-attack-plan.yaml
+#   guardian emulate-gate emulation/invisable-attack-plan.yaml   # exits non-zero on any bypass
+#
+# 'environment' MUST be a disposable lab (range/lab/test/...). Pointing it at production is
+# refused with a LabOnlyViolation — emulation never touches production.
+operation: "INVISABLE quarterly ATT&CK emulation — leaked CI token"
+environment: range
+
+results:
+  - technique: { id: T1078.004, name: "Valid Accounts: Cloud Accounts", tactic: initial_access }
+    prevented: false
+    detected_by: identity              # the new-ASN session was caught — DETECTED
+    evidence_preserved: true
+  - technique: { id: T1059.004, name: "Command & Scripting Interpreter: Unix Shell", tactic: execution }
+    prevented: false
+    detected_by: falco                 # interactive shell in container — DETECTED
+    evidence_preserved: true
+  - technique: { id: T1567, name: "Exfiltration Over Web Service", tactic: exfiltration }
+    prevented: true                    # cilium blocked the egress — BLOCKED
+    evidence_preserved: true
+  - technique: { id: T1071.001, name: "Application Layer Protocol: Web Protocols", tactic: command_and_control }
+    prevented: true                    # admission/network policy blocked C2 — BLOCKED
+    evidence_preserved: true
+  - technique: { id: T1098, name: "Account Manipulation", tactic: persistence }
+    prevented: false
+    detected_by: null                  # neither prevented nor detected — BYPASS → regression
+    evidence_preserved: true
+  - technique: { id: T1562.001, name: "Impair Defenses: Disable or Modify Tools", tactic: defense_evasion }
+    prevented: false
+    detected_by: null                  # BYPASS …
+    evidence_preserved: false          # … and no evidence captured — EVIDENCE GAP → regression
