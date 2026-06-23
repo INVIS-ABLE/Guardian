@@ -54,9 +54,9 @@ class CryptoAgilityVerifier:
             if not verdict.ok:
                 downgrade_violations.extend(f"{negotiated}: {r}" for r in verdict.reasons)
 
-        ok = not (blocking or migration_violations or downgrade_violations)
         return CryptoAgilityReport(
-            ok=ok, blocking_findings=blocking,
+            ok=not (blocking or migration_violations or downgrade_violations),
+            blocking_findings=blocking,
             migration_violations=tuple(migration_violations),
             downgrade_violations=tuple(downgrade_violations),
         )
