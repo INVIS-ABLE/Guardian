@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from connectors import REGISTRY as CONNECTOR_REGISTRY
 from connectors.base import BaseConnector, ConnectorResult
@@ -29,10 +29,8 @@ from simulators.base import BaseSimulator
 from .audit import AuditLog
 from .evidence import EvidenceEvent, EvidenceStore, SimulatorResult
 from .guardrails import GuardrailViolation, Guardrails
+from .schemas import CaseEvent, route_result_to_event
 from .scope import Scope
-
-if TYPE_CHECKING:  # pragma: no cover - typing only; avoids an import cycle via core.schemas
-    from .schemas import CaseEvent
 
 # Capability → (kind, tool-name). Capabilities are the stable vocabulary the Brain
 # and agents speak; the concrete tool behind each can change without touching agents.
@@ -158,10 +156,6 @@ class ToolRouter:
         see no behaviour change, but every routed outcome now produces a content-addressable
         event that the case fabric can consume.
         """
-        # Lazy import breaks the import-time cycle (core.schemas pulls in core.brain.state,
-        # whose package imports the router); by call time every module is fully loaded.
-        from .schemas.adapters import route_result_to_event
-
         event = route_result_to_event(result)
         self.events.append(event)
         self.audit.record(
