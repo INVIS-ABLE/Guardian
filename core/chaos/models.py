@@ -27,7 +27,9 @@ class FailureMode(str, Enum):
     REGION_OUTAGE = "region_outage"
     IDP_OUTAGE = "idp_outage"
     POLICY_ENGINE_DOWN = "policy_engine_down"   # OPA unavailable
-    SECRETS_STORE_DOWN = "secrets_store_down"   # OpenBao/Vault unavailable
+    # Public scenario id (Vault/OpenBao outage), not a credential — Semgrep flags the
+    # SECRETS_-named member as a hardcoded secret, which is a false positive.
+    SECRETS_STORE_DOWN = "secrets_store_down"  # nosemgrep  # OpenBao/Vault unavailable
     CA_OUTAGE = "ca_outage"
     KEY_ROTATION = "key_rotation"
     QUEUE_BACKLOG = "queue_backlog"
