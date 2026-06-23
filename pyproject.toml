@@ -76,6 +76,7 @@ packages = [
     "citadel",
     "citadel.root_of_trust",
     "citadel.confidential",
+    "citadel.crypto_agility",
 ]
 
 [tool.pytest.ini_options]
