@@ -1,0 +1,11 @@
+# Generated inventory artifacts (python -m core.inventory --write). These must stay byte-for-byte
+# fresh — tests/test_repo_inventory.py enforces it — so they are committed. But every PR that adds
+# a module regenerates them, which makes two concurrent PRs ALWAYS textually conflict here.
+#
+# Resolve that structurally: on merge/rebase, keep "ours" rather than producing a conflict; the
+# files are then regenerated against the merged tree (run `python -m core.inventory --write`, which
+# the freshness test requires anyway). This needs the built-in no-op driver to be registered once
+# per clone — `scripts/setup-merge-drivers.sh` does it, or run:
+#     git config merge.ours.driver true
+reports/audit/current_state.json merge=ours
+reports/audit/current_state.md   merge=ours

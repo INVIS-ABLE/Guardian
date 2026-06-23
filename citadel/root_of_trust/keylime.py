@@ -18,7 +18,8 @@ from .tpm import TpmQuoteSource
 class KeylimeClient(Protocol):
     """Request a fresh, nonce-bound attestation quote for an agent (node)."""
 
-    def get_quote(self, node_id: str, nonce: str) -> tuple[AttestationReport, str]: ...
+    def get_quote(self, node_id: str, nonce: str) -> tuple[AttestationReport, str]:
+        """Request a fresh, nonce-bound attestation quote for an agent (node)."""
 
 
 class StaticKeylimeClient:

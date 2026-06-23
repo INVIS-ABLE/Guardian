@@ -460,7 +460,7 @@ def yaml_str(s: str) -> str:
 def gen_decisions() -> str:
     out = [HEADER.format(fname="decisions.yaml"), "schema_version: 1",
            "# Decision vocabulary: retain | adopt | adapt | integrate | federate | "
-           "isolate | benchmark | reference | defer | reject | self",
+           + "isolate | benchmark | reference | defer | reject | self",
            "category_defaults:"]
     for key, cat in CATEGORIES.items():
         out.append(f"  {key}:")

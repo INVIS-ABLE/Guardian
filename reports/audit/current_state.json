@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-23T00:36:04.310322+00:00",
+  "generated_at": "2026-06-23T00:45:44.700563+00:00",
   "wave": 0,
   "summary": {
     "agents": 17,
@@ -8,7 +8,7 @@
     "simulators": 3,
     "router_capabilities": 12,
     "tool_manifest_capabilities": 8,
-    "tests": 85,
+    "tests": 91,
     "source_directories": [
       "agents",
       "attestation",
@@ -458,6 +458,15 @@
       ]
     },
     {
+      "file": "core/reasoning/cases.py",
+      "markers": [
+        {
+          "line": 85,
+          "marker": "NotImplementedError"
+        }
+      ]
+    },
+    {
       "file": "core/timeline/ingest.py",
       "markers": [
         {
@@ -570,6 +579,7 @@
     "tests/test_citadel_authority_invariants.py",
     "tests/test_citadel_build_reproducibility.py",
     "tests/test_citadel_capabilities_manifest.py",
+    "tests/test_citadel_confidential.py",
     "tests/test_citadel_crypto_agility.py",
     "tests/test_citadel_privacy_invariants.py",
     "tests/test_citadel_quorum_invariants.py",
@@ -589,11 +599,13 @@
     "tests/test_evidence_store.py",
     "tests/test_executor_roots.py",
     "tests/test_failclosed.py",
+    "tests/test_forensic_alerting.py",
     "tests/test_forensic_timeline.py",
     "tests/test_forensics_cli.py",
     "tests/test_grants.py",
     "tests/test_guardrails.py",
     "tests/test_healing_contracts.py",
+    "tests/test_healing_runbooks.py",
     "tests/test_identity.py",
     "tests/test_identity_graph.py",
     "tests/test_isolation.py",
@@ -607,9 +619,12 @@
     "tests/test_policy_gate.py",
     "tests/test_policy_tenancy.py",
     "tests/test_privacy_invariants.py",
+    "tests/test_reasoning_ach.py",
     "tests/test_reasoning_calibration.py",
     "tests/test_reasoning_causal.py",
+    "tests/test_reasoning_council.py",
     "tests/test_reasoning_graph.py",
+    "tests/test_reasoning_hunting.py",
     "tests/test_reasoning_hypothesis.py",
     "tests/test_recovery.py",
     "tests/test_repo_inventory.py",

@@ -15,7 +15,8 @@ from .schemas import RuntimeMeasurement
 class RuntimeSource(Protocol):
     """A source of runtime-integrity measurements (production: IMA/EVM; tests: a stub)."""
 
-    def read_runtime(self, node_id: str) -> RuntimeMeasurement: ...
+    def read_runtime(self, node_id: str) -> RuntimeMeasurement:
+        """Read the platform's current runtime-integrity (IMA/EVM) measurement."""
 
 
 def collect_runtime_measurement(source: RuntimeSource, node_id: str) -> RuntimeMeasurement:

@@ -15,7 +15,8 @@ from .schemas import BootMeasurement
 class BootSource(Protocol):
     """A source of boot measurements (production: TPM event log via Keylime/IMA; tests: a stub)."""
 
-    def read_boot(self, node_id: str) -> BootMeasurement: ...
+    def read_boot(self, node_id: str) -> BootMeasurement:
+        """Read the platform's current boot measurement."""
 
 
 def collect_boot_measurement(source: BootSource, node_id: str) -> BootMeasurement:
