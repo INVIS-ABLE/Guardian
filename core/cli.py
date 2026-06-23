@@ -918,6 +918,149 @@ def incident_cmd(twin_spec: str, stream_spec: str, min_severity: str) -> None:
                       decision="denied" if v.requires_human else "allowed",
                       detail={"decision": v.decision, "at_risk": len(v.at_risk)})
     raise SystemExit(0)
+# --- Wave 3 #14: continuous fuzzing farm -----------------------------------------
+@main.command("fuzz")
+@click.argument("spec_file", type=click.Path(exists=True))
+def fuzz_cmd(spec_file: str) -> None:
+    """Fuzzing farm: dedup a campaign's crashes and mint a regression seed per unique crash."""
+    from .fuzzing import load_campaign
+
+    report = load_campaign(spec_file)
+    click.echo(f"Campaign: {report.campaign}  ({report.observations} raw crashes → "
+               f"{len(report.unique_crashes)} unique)")
+    for c in report.unique_crashes:
+        click.echo(f"  ✗ {c.severity.value:8s} {c.kind.value:10s} {c.target_id}  "
+                   f"×{c.occurrences}  seed {c.seed_hash}")
+    if report.regression_seeds:
+        click.echo(f"\nregression seeds minted ({len(report.regression_seeds)}):")
+        for s in report.regression_seeds:
+            click.echo(f"  + {s.requirement}")
+    AuditLog().record("fuzz", actor="cli", scope=spec_file, decision="allowed",
+                      detail={"unique_crashes": len(report.unique_crashes)})
+
+
+@main.command("fuzz-gate")
+@click.argument("spec_file", type=click.Path(exists=True))
+def fuzz_gate_cmd(spec_file: str) -> None:
+    """Fuzzing farm: fail (exit non-zero) if the campaign found any new unique crash."""
+    from .fuzzing import load_campaign
+
+    report = load_campaign(spec_file)
+    click.echo(f"fuzz gate: {'FAIL — new crash' if report.has_new_crash else 'PASS'} "
+               f"({len(report.unique_crashes)} unique)")
+    AuditLog().record("fuzz-gate", actor="cli", scope=spec_file,
+                      decision="denied" if report.has_new_crash else "allowed",
+                      detail={"unique_crashes": len(report.unique_crashes)})
+    raise SystemExit(1 if report.has_new_crash else 0)
+
+
+# --- Wave 3 #15: cryptographic protocol proof lab --------------------------------
+@main.command("crypto-proof")
+@click.argument("spec_file", type=click.Path(exists=True))
+def crypto_proof_cmd(spec_file: str) -> None:
+    """Crypto-proof lab: symbolic verification of protocol properties (symbolic only)."""
+    from .crypto_proof import ProofStatus, load_proofs
+
+    report = load_proofs(spec_file)
+    glyph = {ProofStatus.PROVED: "✓", ProofStatus.FALSIFIED: "✗", ProofStatus.UNKNOWN: "?"}
+    for r in report.results:
+        crit = "" if r.property.critical else " (non-critical)"
+        click.echo(f"  {glyph[r.status]} {r.status.value:10s} {r.protocol_id}  "
+                   f"{r.property.kind.value}{crit}")
+        for step in r.attack_trace:
+            click.echo(f"        ↪ {step}")
+    click.echo(f"\nproved {report.proved()}  breaks {len(report.breaks)}  "
+               f"unknown {len(report.unknowns)}")
+    AuditLog().record("crypto-proof", actor="cli", scope=spec_file, decision="allowed",
+                      detail={"breaks": len(report.breaks)})
+
+
+@main.command("crypto-proof-gate")
+@click.argument("spec_file", type=click.Path(exists=True))
+def crypto_proof_gate_cmd(spec_file: str) -> None:
+    """Crypto-proof lab: fail (exit non-zero) if any critical property was falsified."""
+    from .crypto_proof import load_proofs
+
+    report = load_proofs(spec_file)
+    click.echo(f"crypto-proof gate: {'FAIL — protocol break' if report.has_break else 'PASS'} "
+               f"({len(report.breaks)} break(s))")
+    AuditLog().record("crypto-proof-gate", actor="cli", scope=spec_file,
+                      decision="denied" if report.has_break else "allowed",
+                      detail={"breaks": len(report.breaks)})
+    raise SystemExit(1 if report.has_break else 0)
+
+
+# --- Wave 3 #16: binary & malware analysis lab -----------------------------------
+@main.command("malware-triage")
+@click.argument("spec_file", type=click.Path(exists=True))
+def malware_triage_cmd(spec_file: str) -> None:
+    """Malware lab: Tier-3 triage; unknown artefacts need a human import approval."""
+    from .malware_lab import load_operation
+
+    report = load_operation(spec_file)
+    click.echo(f"Operation: {report.operation}")
+    for r in report.results:
+        rules = f"  yara={','.join(r.yara_matches)}" if r.yara_matches else ""
+        click.echo(f"  {r.verdict.value:12s} {r.artifact.sha256}  ({r.artifact.kind}){rules}")
+    if report.awaiting_import:
+        click.echo(f"\nawaiting human import approval ({len(report.awaiting_import)}):")
+        for h in report.awaiting_import:
+            click.echo(f"  ⏸ {h}  — unknown artefact, no approval on record")
+    AuditLog().record("malware-triage", actor="cli", scope=spec_file, decision="allowed",
+                      detail={"malicious": len(report.malicious),
+                              "awaiting_import": len(report.awaiting_import)})
+
+
+@main.command("malware-gate")
+@click.argument("spec_file", type=click.Path(exists=True))
+def malware_gate_cmd(spec_file: str) -> None:
+    """Malware lab: fail (exit non-zero) if any analysed artefact is malicious."""
+    from .malware_lab import load_operation
+
+    report = load_operation(spec_file)
+    click.echo(f"malware gate: {'FAIL — malicious artefact' if report.has_malicious else 'PASS'} "
+               f"({len(report.malicious)} malicious)")
+    AuditLog().record("malware-gate", actor="cli", scope=spec_file,
+                      decision="denied" if report.has_malicious else "allowed",
+                      detail={"malicious": len(report.malicious)})
+    raise SystemExit(1 if report.has_malicious else 0)
+
+
+# --- Wave 3 #17: digital-twin chaos & recovery simulator -------------------------
+@main.command("chaos")
+@click.argument("spec_file", type=click.Path(exists=True))
+def chaos_cmd(spec_file: str) -> None:
+    """Chaos sim: compare predicted vs actual impact against a CLONED twin; learn from surprises."""
+    from .chaos import SurpriseKind, load_run
+
+    report = load_run(spec_file)
+    click.echo(f"Run: {report.run}  (clone: {report.clone_of}, "
+               f"model accuracy {report.model_accuracy():.0%})")
+    for r in report.results:
+        rto = "" if r.rto_seconds is None else f"  RTO {r.rto_seconds}s/{r.rto_objective_seconds}s"
+        flag = " ✗RTO" if r.rto_breached else ""
+        click.echo(f"  {r.scenario.mode.value:20s} {r.scenario.target}{rto}{flag}")
+        for s in r.surprises:
+            mark = "‼" if s.kind is SurpriseKind.UNPREDICTED_IMPACT else "·"
+            click.echo(f"        {mark} {s.kind.value}: {s.asset}")
+    AuditLog().record("chaos", actor="cli", scope=spec_file, decision="allowed",
+                      detail={"unpredicted": len(report.unpredicted),
+                              "rto_breaches": len(report.rto_breaches)})
+
+
+@main.command("chaos-gate")
+@click.argument("spec_file", type=click.Path(exists=True))
+def chaos_gate_cmd(spec_file: str) -> None:
+    """Chaos sim: fail (exit non-zero) on a map gap (unpredicted impact) or an RTO breach."""
+    from .chaos import load_run
+
+    report = load_run(spec_file)
+    click.echo(f"chaos gate: {'FAIL' if report.has_gap else 'PASS'} — "
+               f"{len(report.unpredicted)} map gap(s), {len(report.rto_breaches)} RTO breach(es)")
+    AuditLog().record("chaos-gate", actor="cli", scope=spec_file,
+                      decision="denied" if report.has_gap else "allowed",
+                      detail={"unpredicted": len(report.unpredicted)})
+    raise SystemExit(1 if report.has_gap else 0)
 
 
 if __name__ == "__main__":  # pragma: no cover

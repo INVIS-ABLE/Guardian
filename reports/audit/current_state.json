@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-23T01:43:23.662191+00:00",
+  "generated_at": "2026-06-23T02:18:19.331400+00:00",
   "wave": 0,
   "summary": {
     "agents": 17,
@@ -8,7 +8,7 @@
     "simulators": 3,
     "router_capabilities": 12,
     "tool_manifest_capabilities": 8,
-    "tests": 109,
+    "tests": 113,
     "source_directories": [
       "agents",
       "attestation",
@@ -418,6 +418,24 @@
       ]
     },
     {
+      "file": "core/chaos/ingest.py",
+      "markers": [
+        {
+          "line": 63,
+          "marker": "NotImplementedError"
+        }
+      ]
+    },
+    {
+      "file": "core/crypto_proof/ingest.py",
+      "markers": [
+        {
+          "line": 57,
+          "marker": "NotImplementedError"
+        }
+      ]
+    },
+    {
       "file": "core/emulation/ingest.py",
       "markers": [
         {
@@ -449,6 +467,15 @@
       ]
     },
     {
+      "file": "core/fuzzing/ingest.py",
+      "markers": [
+        {
+          "line": 52,
+          "marker": "NotImplementedError"
+        }
+      ]
+    },
+    {
       "file": "core/identity_graph/ingest.py",
       "markers": [
         {
@@ -462,6 +489,15 @@
       "markers": [
         {
           "line": 63,
+          "marker": "NotImplementedError"
+        }
+      ]
+    },
+    {
+      "file": "core/malware_lab/ingest.py",
+      "markers": [
+        {
+          "line": 56,
           "marker": "NotImplementedError"
         }
       ]
@@ -596,6 +632,7 @@
     "tests/test_autonomy_states.py",
     "tests/test_brain.py",
     "tests/test_brain_tools_manifest.py",
+    "tests/test_chaos.py",
     "tests/test_citadel_attestation_invariants.py",
     "tests/test_citadel_authority_invariants.py",
     "tests/test_citadel_build_reproducibility.py",
@@ -617,6 +654,7 @@
     "tests/test_containment.py",
     "tests/test_control_effectiveness.py",
     "tests/test_credential_audit.py",
+    "tests/test_crypto_proof.py",
     "tests/test_detection.py",
     "tests/test_emulation.py",
     "tests/test_endpoint.py",
@@ -628,6 +666,7 @@
     "tests/test_forensic_alerting.py",
     "tests/test_forensic_timeline.py",
     "tests/test_forensics_cli.py",
+    "tests/test_fuzzing.py",
     "tests/test_grants.py",
     "tests/test_guardrails.py",
     "tests/test_healing_contracts.py",
@@ -639,6 +678,7 @@
     "tests/test_isolation.py",
     "tests/test_lineage.py",
     "tests/test_machine_attestation.py",
+    "tests/test_malware_lab.py",
     "tests/test_memory.py",
     "tests/test_observability.py",
     "tests/test_opa_parity.py",
