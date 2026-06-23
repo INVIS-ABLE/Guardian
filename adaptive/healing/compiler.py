@@ -80,7 +80,7 @@ class GateStatus(str, Enum):
 # Each repair action maps to a healing-executor capability (the ExecutionJob it compiles
 # into). The capability is what a one-use token is later bound to at run time.
 ACTION_CAPABILITY: dict[RepairAction, str] = {
-    action: f"heal:{action.value}" for action in RepairAction
+    action: f"heal:{action.value}" for action in RepairAction.__members__.values()
 }
 
 
@@ -215,7 +215,7 @@ def compile_runbook(
             ))
 
     # Order gates by the directive's gate order for stable, readable output.
-    order = list(GateName)
+    order = list(GateName.__members__.values())
     gates.sort(key=lambda g: order.index(g.gate))
 
     deterministic_passed = all(
