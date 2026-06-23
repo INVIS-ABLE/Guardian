@@ -12,10 +12,24 @@ from __future__ import annotations
 import pytest
 
 from core.policy_gate import INVISABLE_TENANT_ID, PolicyInput, evaluate
-from core.tenancy import AuthorisationGrant, AuthorityBasis
+from core.tenancy import (
+    AuthorisationGrant,
+    AuthorityBasis,
+    Tenant,
+    TenantRegistry,
+    TenantStatus,
+)
 
 NOW = 1_000_000.0
 HOUR = 3600.0
+
+
+def _registry(**status) -> TenantRegistry:
+    """A registry with acme + globex active by default (override status per tenant)."""
+    reg = TenantRegistry()
+    reg.add(Tenant("acme", "Acme Ltd", status=status.get("acme", TenantStatus.ACTIVE)))
+    reg.add(Tenant("globex", "Globex", status=status.get("globex", TenantStatus.ACTIVE)))
+    return reg
 
 
 @pytest.fixture
@@ -51,6 +65,7 @@ def _inp(**over) -> PolicyInput:
         ownership_verified=True,
         allowed_modes=["code_review"],
         now=NOW,
+        tenants=_registry(),
     )
     kw.update(over)
     return PolicyInput(**kw)
@@ -73,6 +88,22 @@ def test_default_tenant_is_invisable():
 def test_enforced_allows_with_valid_grant(enforce):
     d = evaluate(_inp(grants=[_grant()]))
     assert d.allow is True
+
+
+def test_enforced_denies_suspended_tenant(enforce):
+    """A valid grant cannot rescue a suspended tenant (registry gate)."""
+    reg = _registry(acme=TenantStatus.SUSPENDED)
+    d = evaluate(_inp(grants=[_grant()], tenants=reg))
+    assert d.allow is False
+    assert any("suspended" in x for x in d.denies)
+
+
+def test_enforced_denies_unknown_tenant(enforce):
+    """A tenant absent from the registry is rejected even with a matching grant."""
+    reg = TenantRegistry()  # only the seeded INVISABLE tenant
+    d = evaluate(_inp(grants=[_grant()], tenants=reg))
+    assert d.allow is False
+    assert any("unknown tenant" in x for x in d.denies)
 
 
 def test_enforced_denies_without_grant(enforce):

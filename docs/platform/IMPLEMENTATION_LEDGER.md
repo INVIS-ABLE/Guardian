@@ -98,6 +98,18 @@ programme. Claims here are only made for code that exists and passes tests.
 - **Rollback:** delete the profile, loaders, and test; the in-code default remains.
 - **Owner:** Platform architecture. **Review date:** at multi-tenant onboarding (D-2).
 
+### Tenant-status enforcement at the policy edge (additive)
+- **Decision:** D-0009 (DECISION_LOG.md).
+- **Code:** `PolicyInput.tenants` (optional `TenantRegistry`); `core/policy_gate.py`
+  `_default_tenant_registry()` (cached load of `tenants/`) and `_tenant_denies` now
+  passes a registry to `authorise_target`, so a suspended/archived/unknown tenant is
+  rejected before grants are considered. Default-off; cache keeps the default path
+  off-disk.
+- **Tests:** `tests/test_policy_tenancy.py` — suspended-tenant denied, unknown-tenant
+  denied, plus the existing matrix updated to declare its tenants. Full suite green.
+- **Rollback:** drop the field, cache, and `tenants=` argument.
+- **Owner:** Platform architecture. **Review date:** at multi-tenant onboarding (D-2).
+
 ### Phase 0 platform documentation
 - `docs/platform/`: README, CURRENT_STATE_ASSESSMENT, GUARDIAN_UNIVERSAL_PRODUCT_VISION,
   TENANT_AND_AUTHORISED_TARGET_MODEL, INVISABLE_TO_MULTI_TENANT_MIGRATION,
