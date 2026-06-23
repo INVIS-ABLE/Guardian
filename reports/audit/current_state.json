@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-23T00:10:55.703449+00:00",
+  "generated_at": "2026-06-23T00:18:58.545523+00:00",
   "wave": 0,
   "summary": {
     "agents": 17,
@@ -8,7 +8,7 @@
     "simulators": 3,
     "router_capabilities": 12,
     "tool_manifest_capabilities": 8,
-    "tests": 82,
+    "tests": 83,
     "source_directories": [
       "agents",
       "attestation",
@@ -611,6 +611,7 @@
     "tests/test_reasoning_hypothesis.py",
     "tests/test_recovery.py",
     "tests/test_repo_inventory.py",
+    "tests/test_repository_catalogue.py",
     "tests/test_repository_governor.py",
     "tests/test_resilience.py",
     "tests/test_roots_of_trust.py",
