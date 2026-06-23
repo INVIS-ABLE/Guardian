@@ -92,3 +92,15 @@ def test_correlation_id_propagates_to_the_alert():
     report = tl.build([_ev("s", "connector", "scan", 1.0, outcome="success")])
     alerts = alerts_from_report(report, correlation_id="trace-xyz")
     assert alerts[0].correlation_id == "trace-xyz"
+
+
+def test_alert_as_dict_is_json_serialisable():
+    alert = anomaly_to_alert("unsupported_success:c1:scan:no_evidence", correlation_id="tr")
+    d = alert.as_dict()
+    assert d["severity"] == "CRITICAL"  # name, not the int
+    assert d["source"] == "forensics.timeline"
+    assert d["correlation_id"] == "tr"
+    assert d["detail"]["missing_source"] == "evidence"
+    # round-trips through JSON without custom encoders.
+    import json
+    assert json.loads(json.dumps(d, sort_keys=True))["dedup_key"] == alert.dedup_key

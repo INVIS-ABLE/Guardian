@@ -52,3 +52,30 @@ def test_case_filter(tmp_path):
     result = CliRunner().invoke(main, ["forensics", "--log-dir", str(tmp_path), "--case", "c1"])
     assert result.exit_code == 0
     assert "x" in result.output and "  y " not in result.output
+
+
+def test_anomalies_routed_to_jsonl_sink(tmp_path):
+    _populate(tmp_path, ("deploy", {"case_id": "c1"}))
+    rules = tmp_path / "rules.yaml"
+    rules.write_text("expected_sequences:\n  deploy:\n    - post_deploy_health\n")
+    alerts = tmp_path / "alerts.jsonl"
+    result = CliRunner().invoke(main, ["forensics", "--log-dir", str(tmp_path),
+                                       "--rules", str(rules), "--alerts-jsonl", str(alerts)])
+    assert result.exit_code == 1
+    assert f"Routed 1 alert(s) to {alerts}" in result.output
+    lines = alerts.read_text().splitlines()
+    assert len(lines) == 1
+    record = json.loads(lines[0])
+    assert record["severity"] == "HIGH"
+    assert record["source"] == "forensics.timeline"
+    assert record["detail"]["missing_action"] == "post_deploy_health"
+
+
+def test_clean_timeline_writes_no_alerts(tmp_path):
+    _populate(tmp_path, ("scan_start", {"case_id": "c1"}), ("scan_finish", {"case_id": "c1"}))
+    alerts = tmp_path / "alerts.jsonl"
+    result = CliRunner().invoke(main, ["forensics", "--log-dir", str(tmp_path),
+                                       "--alerts-jsonl", str(alerts)])
+    assert result.exit_code == 0
+    assert "Routed 0 alert(s)" in result.output
+    assert not alerts.exists()
