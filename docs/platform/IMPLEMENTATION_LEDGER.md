@@ -45,6 +45,21 @@ programme. Claims here are only made for code that exists and passes tests.
 - **Rollback:** unset the flag (instant) or revert the additions. Lossless.
 - **Owner:** Platform architecture. **Review date:** at Phase C start.
 
+### Data-plane tenant scoping (Phase C, additive)
+- **Decision:** D-0005 (DECISION_LOG.md).
+- **Code:** `tenant_id` on `ActionRequest` (bound into `canonical_request`),
+  `EvidenceItem`, `Finding`, and `TargetTrust` (empty tenant fails the target root).
+  `ownership/verifier.py` generalised to per-tenant DNS/repo config with a
+  `(kind, target, tenant)` cache key; `OwnershipEvidence` carries `tenant`.
+- **Defaults:** every new field defaults to `invisable`, so existing callers/tests and
+  stored shapes are unchanged.
+- **Tests:** `tests/test_tenant_isolation.py` — per-tenant ownership config & cache
+  isolation, unconfigured-tenant fail-closed, target-root tenant requirement, signed
+  authorisation bound to tenant (cross-tenant replay rejected), evidence/finding
+  tenant fields. Full suite green.
+- **Rollback:** remove the fields and the verifier's tenant maps/cache key. Lossless.
+- **Owner:** Platform architecture. **Review date:** at Phase D start.
+
 ### Phase 0 platform documentation
 - `docs/platform/`: README, CURRENT_STATE_ASSESSMENT, GUARDIAN_UNIVERSAL_PRODUCT_VISION,
   TENANT_AND_AUTHORISED_TARGET_MODEL, INVISABLE_TO_MULTI_TENANT_MIGRATION,
@@ -55,10 +70,11 @@ programme. Claims here are only made for code that exists and passes tests.
 | Item | Phase | Tracked in |
 |------|-------|-----------|
 | ~~Wire `authorise_target()` ahead of the policy gate (feature-flagged)~~ | B | ✅ shipped (D-0004) |
-| `tenant_id` on `PolicyInput` ✅ / `ActionRequest`, `EvidenceItem` ⏳ | B–C | migration doc |
-| Tenant dimension on the target root of trust | C | migration doc |
-| Generalise `ownership/verifier.py` maps to tenant-scoped | C | migration doc |
-| Cross-tenant leakage tests (cache/telemetry/evidence) | C | migration doc |
+| `tenant_id` on `PolicyInput` ✅ / `ActionRequest` ✅ / `EvidenceItem` ✅ | B–C | ✅ shipped (D-0005) |
+| Tenant dimension on the target root of trust | C | ✅ shipped (D-0005) |
+| Generalise `ownership/verifier.py` maps to tenant-scoped | C | ✅ shipped (D-0005) |
+| Cross-tenant isolation tests (ownership cache / evidence / signed auth) | C | ✅ shipped (D-0005) |
+| Cross-tenant **telemetry/memory** partition tests | D | migration doc |
 | `tenant:` column in asset/test-account registries | D | migration doc |
 | Grant issuance + persistence + revocation API | D | migration doc |
 | `tenants/invisable.yaml` explicit profile | E | migration doc |

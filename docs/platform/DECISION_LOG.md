@@ -5,6 +5,24 @@ Each decision records: context, decision, rationale, and how to reverse it.
 
 ---
 
+## D-0005 — Tenant-scope the data plane additively, defaulting to INVISABLE (Phase C)
+- **Date:** 2026-06-23
+- **Context:** Evidence, findings, connector authorisations, the target root of trust,
+  and the ownership verifier were single-owner. Tenant isolation needs a tenant
+  dimension on each, without breaking existing callers/tests.
+- **Decision:** Add `tenant_id` (default `invisable`) to `ActionRequest`
+  (`connectors/contract.py`, **bound into `canonical_request`** so a signed capability
+  cannot be replayed cross-tenant), `EvidenceItem` and `Finding`
+  (`core/evidence/models.py`), and `TargetTrust` (`core/roots_of_trust.py`, with an
+  empty tenant failing the target root). Generalise `ownership/verifier.py` to
+  per-tenant DNS/repo config and a `(kind, target, tenant)` cache key; the flat maps
+  belong to the configured tenant and an unconfigured tenant fails closed.
+- **Rationale:** Isolation must be structural at the data layer, not just the policy
+  layer. Non-empty defaults keep every existing construction valid; the signature
+  binding and per-tenant cache close concrete cross-tenant replay/leak paths.
+- **Reverse:** Remove the added fields and the verifier's tenant maps/cache key (revert
+  to the 2-tuple). Defaults are `invisable`, so no stored data needs migration.
+
 ## D-0004 — Tenant authorisation is an outer AND over the policy gate (Phase B)
 - **Date:** 2026-06-22
 - **Context:** The action policy (`core/policy_gate.decide`) is mirrored exactly by
