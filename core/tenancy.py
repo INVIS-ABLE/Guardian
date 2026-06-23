@@ -39,6 +39,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from enum import Enum
+from pathlib import Path
 from time import time
 from typing import Any
 
@@ -372,3 +373,59 @@ def authorise_target(
     if saw_tenant_grant:
         return deny(f"no grant for tenant '{tenant_id}' covers asset '{asset_id}'")
     return deny(f"no authorisation grant for tenant '{tenant_id}'")
+
+
+# --- tenant profile loading (Phase E) ------------------------------------------
+class TenantProfileError(TenancyError):
+    """Raised when a tenant profile file is missing or malformed. Fails closed."""
+
+
+def tenant_from_dict(d: dict[str, Any]) -> Tenant:
+    """Build a :class:`Tenant` from a profile mapping. Fails closed on bad input."""
+    try:
+        return Tenant(
+            tenant_id=d["tenant_id"],
+            legal_name=d.get("legal_name", d["tenant_id"]),
+            deployment_mode=DeploymentMode(d.get("deployment_mode", "single_tenant_self_hosted")),
+            region=d.get("region", "unspecified"),
+            data_residency=d.get("data_residency", "unspecified"),
+            encryption_profile=d.get("encryption_profile", "default"),
+            retention_policy=d.get("retention_policy", "default"),
+            administrators=tuple(d.get("administrators", ())),
+            status=TenantStatus(d.get("status", "active")),
+        )
+    except KeyError as exc:
+        raise TenantProfileError(f"tenant profile missing required field: {exc}") from exc
+    except ValueError as exc:  # bad enum value
+        raise TenantProfileError(f"invalid tenant profile: {exc}") from exc
+
+
+def load_tenant(path: str | Path) -> Tenant:
+    """Load a single tenant profile (``tenant:`` mapping) from a YAML file."""
+    import yaml
+
+    p = Path(path)
+    if not p.exists():
+        raise TenantProfileError(f"tenant profile not found: {p}")
+    data = yaml.safe_load(p.read_text(encoding="utf-8"))
+    if not isinstance(data, dict) or "tenant" not in data:
+        raise TenantProfileError(f"tenant profile {p} missing a 'tenant:' mapping")
+    return tenant_from_dict(data["tenant"])
+
+
+def load_tenant_registry(tenants_dir: str | Path | None = None) -> TenantRegistry:
+    """Build a registry from every ``*.yaml`` profile in ``tenants_dir``.
+
+    The founding INVISABLE tenant is always present: if a profile defines it, that
+    profile wins; otherwise the built-in :data:`INVISABLE_TENANT` is used. A malformed
+    profile fails closed (raises) rather than being silently skipped.
+    """
+    from core.config import REPO_ROOT
+
+    d = Path(tenants_dir) if tenants_dir is not None else REPO_ROOT / "tenants"
+    registry = TenantRegistry()  # seeds INVISABLE_TENANT
+    if not d.exists():
+        return registry
+    for profile in sorted(d.glob("*.yaml")):
+        registry.add(load_tenant(profile))
+    return registry

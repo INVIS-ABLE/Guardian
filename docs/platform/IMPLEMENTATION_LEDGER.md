@@ -87,6 +87,17 @@ programme. Claims here are only made for code that exists and passes tests.
 - **Rollback:** remove the module, (de)serialisers, scope check, and registry columns.
 - **Owner:** Platform architecture. **Review date:** at Phase D-2 (issuance API/UI).
 
+### INVISABLE explicit tenant profile (Phase E, additive)
+- **Decision:** D-0008 (DECISION_LOG.md).
+- **Code:** `tenants/invisable.yaml`; `core/tenancy.load_tenant`, `tenant_from_dict`,
+  `load_tenant_registry` (seeds the built-in INVISABLE, loads `tenants/*.yaml`,
+  fails closed on malformed/missing input).
+- **Tests:** `tests/test_tenant_profiles.py` — profile loads as a first-class tenant,
+  registry seeding, extra-tenant load from a dir, and fail-closed on missing profile /
+  missing tenant mapping / unknown deployment mode / missing tenant_id.
+- **Rollback:** delete the profile, loaders, and test; the in-code default remains.
+- **Owner:** Platform architecture. **Review date:** at multi-tenant onboarding (D-2).
+
 ### Phase 0 platform documentation
 - `docs/platform/`: README, CURRENT_STATE_ASSESSMENT, GUARDIAN_UNIVERSAL_PRODUCT_VISION,
   TENANT_AND_AUTHORISED_TARGET_MODEL, INVISABLE_TO_MULTI_TENANT_MIGRATION,

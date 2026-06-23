@@ -60,9 +60,14 @@ runtime behaviour without an explicit, separate decision.
 - *Remaining (D-2):* tenant-administrator onboarding API/UI; grant issuance surface;
   tenant-partitioned memory/telemetry/RAG and their leakage tests.
 
-### Phase E — INVISABLE as an explicit profile
-- Ship `tenants/invisable.yaml` capturing INVISABLE as a first-class tenant config and
-  deployment profile, replacing the implicit default with an explicit, auditable one.
+### Phase E — INVISABLE as an explicit profile (shipped) ✅
+- `tenants/invisable.yaml` captures INVISABLE as a first-class tenant config; loaded by
+  `core/tenancy.load_tenant` / `load_tenant_registry` into a `TenantRegistry`. The
+  in-code `INVISABLE_TENANT` default is retained (and always seeded) so pre-tenancy
+  scopes are unaffected. (See D-0008.)
+- *Next:* pass the loaded registry into `authorise_target` at the enforcement edge so
+  suspended/archived/unknown tenants are rejected end-to-end (the decision function
+  already supports a `tenants=` argument).
 
 ## Rollback
 
