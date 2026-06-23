@@ -1,290 +1,274 @@
-# Branch retirement — authoritative, re-verified manifest.
-#
-# Owner-approved (2026-06-23). Every listed branch has 0 unique commits vs main
-# (cherry-pick aware) — fully merged, recoverable from main history by the recorded SHA.
-#
-# EXECUTION NOTE: the steward could not execute the deletions in its environment —
-# the git proxy returns HTTP 403 on ref deletion and the GitHub MCP exposes no
-# delete-branch tool. Run the one-liner below from a normal clone, or delete via the
-# GitHub UI. Re-verify with: git log --right-only --cherry-pick --oneline origin/main...<branch>
-version: 2
-evidence_timestamp: "2026-06-23T00:20:47Z"
+note: "Final Consolidation \xA712 retirement set. Default branch is now 'main' (verified via GitHub API\
+  \ + origin/HEAD symref), so retirement is authorized. EXECUTION is still blocked in the steward environment:\
+  \ the git proxy returns HTTP 403 on ref deletion and no MCP delete-branch tool exists. Owner must run\
+  \ delete_command from a normal clone."
+evidence_timestamp: '2026-06-23T02:35:30Z'
+verified_against_main: 70c9d80f667c32c362af6f1fe919c29ca44abbcc
+default_branch: main
+default_branch_ok: true
 owner_approved: true
-verified_against_main: 3a3ab131cd8dc7d36f92ef03902a3b9ebbb6e8f7
-execution_blocked_in_steward_env: "git proxy 403 on ref deletion; no MCP delete-branch tool"
 retire:
-  - branch: claude/area11-uv-lockfile
-    final_sha: 1aa9d6fd280d5c388b957f116d557de6026c8c18
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/area2-ownership-verification
-    final_sha: 1a1ad3b3827866f7c80a28432b70672c43fb13c8
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/brain-v2-prereq-fixes
-    final_sha: b00a00c1fc0f15ee93e04c64e786e68c402c9f8d
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/confident-planck-9t1rfs
-    final_sha: d51c6ed9597d7f493893a45069e2bceb61d188fe
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/crypto-ci-fixes
-    final_sha: b7739a3d2828f94b831946a868bac9cd44c0df89
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/digital-twin
-    final_sha: 2bd3f1c332a5da8fb247d28ce3c39c8a1d2b717e
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/drop-eval-extra
-    final_sha: ebbf5b2c485106195b5122d3b435909d847bcb80
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/evidence-classification-restricted
-    final_sha: 26b1b2b14913ef0c9228115d796550a707285854
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/exciting-goldberg-udmve1
-    final_sha: 46e5475fa72ec6a062e3c71a94d83e355fbb007e
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/festive-brahmagupta-ctyiyn
-    final_sha: 808e61debfd15c264bbd9e84c09456d0b354b36f
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/fix-trivy-eval-depgroup
-    final_sha: d084674f8ac1058b8c9436bcbfcaf474f1920859
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/guardian-brain
-    final_sha: f4775e0917971560175b3d71a2e743d9ad0eba0a
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/mobile-and-credential-audit
-    final_sha: 3952a9a7a441741ed4a07327a51b344054bb3463
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/model-gateway
-    final_sha: 2ab794db39750a9f14f8287203aa21ecb4bee261
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/phase-observability
-    final_sha: 73b32fa052e96b6753493bb5ff15282f3033ee21
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/phase0-ci-pinning
-    final_sha: 978345982612f1066300b669cf41f3c1862a635a
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/phase0-hardening
-    final_sha: d3469d5d82331c24a20e500b8c8b7b2aeaa64042
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/phase1-temporal-statemachine
-    final_sha: afebe7760df35e824745aedfcafc53be8c791651
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/phase2-codeql-fixes
-    final_sha: 61802d10100138cc5906b9680b10788128530629
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/phase2-identity-evidence
-    final_sha: 9858778e3ab350d166cef3019dc32236bd4f3db2
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/phase3-isolation
-    final_sha: 9101a74c2d9a2f7522efc06dde6960a9b4615bee
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/phase4-supplychain
-    final_sha: 726072462b942445459436c8621290c7c3e803ac
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/phase6-containment
-    final_sha: 3777eae79d884778efe48c571874756e0687385d
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/phase6-detection-as-code
-    final_sha: b4aa95df492d2b67d9953b443f598d147b740754
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/phase6-resilience-recovery
-    final_sha: 6c29aef9f8d86cf71a0980faa2a13708cfba800a
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/priority-agents
-    final_sha: bf03094f77a80fe19a1ae3f7ff3f57611889f758
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/reasoning-graph
-    final_sha: 77ad0392a3b4a140dbf122a146bc3ba0eb3b72c1
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/security-crypto-layer
-    final_sha: abd35ff401ffb6ddeaa35d473f250db159e59a0f
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/sovereign-ops-plane
-    final_sha: f94b7bf8db073b3e44b9304f65872fe9aa033a0c
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/target-architecture
-    final_sha: 4322b6a6d7941c5b980354cc4f57b5f68af3993b
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/tool-manifest-gateway
-    final_sha: f64cd150e38ed76a7df4a189a3327449f5505f2b
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/twin-blast-gate
-    final_sha: f32ba74bc0ac79152ca090f0f5be7acbf1f4f122
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/twin-ci-gate
-    final_sha: 34fa83ce30b84f5f723108ef6d785177522b3650
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/twin-federation
-    final_sha: e4666a909cb7312427ecd8a662a4b4131044831d
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/vibrant-gates-8qmfxc
-    final_sha: 3ad98b51293961ed9b2b7ed04d201b8edf770c82
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: claude/wave2-reasoning
-    final_sha: 5fa77a1a4e82bfe6bac7e28b4831eeabd639d1c8
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: steward/57-merge-governor-baseline
-    final_sha: 68b8736f017477c52899fff59eca19584c229d2b
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: steward/57-reconcile-wave0
-    final_sha: 7b0ac3e6f42d54511219dbe010f07800e45be266
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: steward/63-governor-ci-fix
-    final_sha: b63c3c25a2e61ec51d784a9a2e0adf0cc45051f7
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: steward/64-governor-ci-green
-    final_sha: 56261342728435d0e40a7651d3bd6c53c2f372e5
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: steward/72-inventory-robust
-    final_sha: 5dfcc9936269ee99b3edad28f02240b40c167e48
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: wave1/exec-decision-models
-    final_sha: 339c61282e2d248b3c8a5b13720e987f3fbb0d6a
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-  - branch: wave1/schemas
-    final_sha: ee80cdbc2f53ff8d3eff5808840fcd73c59ad7a8
-    state: merged_into_main
-    unique_commits_vs_main: 0
-    owner_approved: true
-protected_retained:
-  - branch: main
-    reason: canonical_integration_branch
-  - branch: claude/laughing-ptolemy-zfeiiu
-    reason: github_default_branch (retire only after default moves to main)
-    final_sha: 5cb948f65ac2c2b8a563cd3ba4056ec5a99b0844
-  - branch: claude/fix-main-ci-rego-zizmor
-    reason: unique_work (HIGH-risk OPA/rego change — needs human security review)
-  - branch: claude/keen-bohr-eqhtrq
-    reason: open_pr_82 (mis-targeted at legacy base — retarget to main)
-  - branch: claude/keen-euler-4t9vo7
-    reason: open_pr_81
-  - branch: claude/wave2-council-hunting
-    reason: open_pr_80
-delete_command: |
-  for b in \
-    claude/area11-uv-lockfile \
-    claude/area2-ownership-verification \
-    claude/brain-v2-prereq-fixes \
-    claude/confident-planck-9t1rfs \
-    claude/crypto-ci-fixes \
-    claude/digital-twin \
-    claude/drop-eval-extra \
-    claude/evidence-classification-restricted \
-    claude/exciting-goldberg-udmve1 \
-    claude/festive-brahmagupta-ctyiyn \
-    claude/fix-trivy-eval-depgroup \
-    claude/guardian-brain \
-    claude/mobile-and-credential-audit \
-    claude/model-gateway \
-    claude/phase-observability \
-    claude/phase0-ci-pinning \
-    claude/phase0-hardening \
-    claude/phase1-temporal-statemachine \
-    claude/phase2-codeql-fixes \
-    claude/phase2-identity-evidence \
-    claude/phase3-isolation \
-    claude/phase4-supplychain \
-    claude/phase6-containment \
-    claude/phase6-detection-as-code \
-    claude/phase6-resilience-recovery \
-    claude/priority-agents \
-    claude/reasoning-graph \
-    claude/security-crypto-layer \
-    claude/sovereign-ops-plane \
-    claude/target-architecture \
-    claude/tool-manifest-gateway \
-    claude/twin-blast-gate \
-    claude/twin-ci-gate \
-    claude/twin-federation \
-    claude/vibrant-gates-8qmfxc \
-    claude/wave2-reasoning \
-    steward/57-merge-governor-baseline \
-    steward/57-reconcile-wave0 \
-    steward/63-governor-ci-fix \
-    steward/64-governor-ci-green \
-    steward/72-inventory-robust \
-    wave1/exec-decision-models \
-    wave1/schemas \
-    ; do git push origin --delete "$b"; done
+- branch: claude/area11-uv-lockfile
+  final_sha: 1aa9d6fd280d5c388b957f116d557de6026c8c18
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/area2-ownership-verification
+  final_sha: 1a1ad3b3827866f7c80a28432b70672c43fb13c8
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/brain-v2-prereq-fixes
+  final_sha: b00a00c1fc0f15ee93e04c64e786e68c402c9f8d
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/confident-planck-9t1rfs
+  final_sha: d51c6ed9597d7f493893a45069e2bceb61d188fe
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/crypto-ci-fixes
+  final_sha: b7739a3d2828f94b831946a868bac9cd44c0df89
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/digital-twin
+  final_sha: 2bd3f1c332a5da8fb247d28ce3c39c8a1d2b717e
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/drop-eval-extra
+  final_sha: ebbf5b2c485106195b5122d3b435909d847bcb80
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/endpoint-runtime-fold
+  final_sha: 699006786041ccc6d57ff8c2cffbf510165a027d
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/evidence-classification-restricted
+  final_sha: 26b1b2b14913ef0c9228115d796550a707285854
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/exciting-goldberg-udmve1
+  final_sha: 6e756a2bdf32705f36986f725e5ec7a0cf028888
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/festive-brahmagupta-ctyiyn
+  final_sha: 808e61debfd15c264bbd9e84c09456d0b354b36f
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/fix-trivy-eval-depgroup
+  final_sha: d084674f8ac1058b8c9436bcbfcaf474f1920859
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/guardian-brain
+  final_sha: f4775e0917971560175b3d71a2e743d9ad0eba0a
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/inventory-merge-driver
+  final_sha: a97713553b59481c5ae8f37185eb40a713f3ccc4
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/keen-bohr-eqhtrq
+  final_sha: 6ef6690b5d147d76e4aa7f351c616e0dbef2f6d3
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/laughing-ptolemy-zfeiiu
+  final_sha: 8f55815841c13d6dc62883b146d08c0e7d881f36
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/mobile-and-credential-audit
+  final_sha: 3952a9a7a441741ed4a07327a51b344054bb3463
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/model-gateway
+  final_sha: 2ab794db39750a9f14f8287203aa21ecb4bee261
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/phase-observability
+  final_sha: 73b32fa052e96b6753493bb5ff15282f3033ee21
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/phase0-ci-pinning
+  final_sha: 978345982612f1066300b669cf41f3c1862a635a
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/phase0-hardening
+  final_sha: d3469d5d82331c24a20e500b8c8b7b2aeaa64042
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/phase1-temporal-statemachine
+  final_sha: afebe7760df35e824745aedfcafc53be8c791651
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/phase2-codeql-fixes
+  final_sha: 61802d10100138cc5906b9680b10788128530629
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/phase2-identity-evidence
+  final_sha: 9858778e3ab350d166cef3019dc32236bd4f3db2
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/phase3-isolation
+  final_sha: 9101a74c2d9a2f7522efc06dde6960a9b4615bee
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/phase4-supplychain
+  final_sha: 726072462b942445459436c8621290c7c3e803ac
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/phase6-containment
+  final_sha: 3777eae79d884778efe48c571874756e0687385d
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/phase6-detection-as-code
+  final_sha: b4aa95df492d2b67d9953b443f598d147b740754
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/phase6-resilience-recovery
+  final_sha: 6c29aef9f8d86cf71a0980faa2a13708cfba800a
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/priority-agents
+  final_sha: bf03094f77a80fe19a1ae3f7ff3f57611889f758
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/reasoning-graph
+  final_sha: 77ad0392a3b4a140dbf122a146bc3ba0eb3b72c1
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/security-crypto-layer
+  final_sha: abd35ff401ffb6ddeaa35d473f250db159e59a0f
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/sovereign-ops-plane
+  final_sha: f94b7bf8db073b3e44b9304f65872fe9aa033a0c
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/target-architecture
+  final_sha: 4322b6a6d7941c5b980354cc4f57b5f68af3993b
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/tool-manifest-gateway
+  final_sha: f64cd150e38ed76a7df4a189a3327449f5505f2b
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/twin-blast-gate
+  final_sha: f32ba74bc0ac79152ca090f0f5be7acbf1f4f122
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/twin-ci-gate
+  final_sha: 34fa83ce30b84f5f723108ef6d785177522b3650
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/twin-federation
+  final_sha: e4666a909cb7312427ecd8a662a4b4131044831d
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/twin-runtime-fold
+  final_sha: c3d9e7d563ed9b207046950dacba3502fe3d5d7e
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/vibrant-gates-8qmfxc
+  final_sha: 617e96d60bf9421091ea62ec32c4864d72fdb24f
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/wave2-council-hunting
+  final_sha: 6f6807209f18b66ed2e00874b209c21b7fedc039
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: claude/wave2-reasoning
+  final_sha: 5fa77a1a4e82bfe6bac7e28b4831eeabd639d1c8
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: steward/57-merge-governor-baseline
+  final_sha: 68b8736f017477c52899fff59eca19584c229d2b
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: steward/57-reconcile-wave0
+  final_sha: 7b0ac3e6f42d54511219dbe010f07800e45be266
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: steward/63-governor-ci-fix
+  final_sha: b63c3c25a2e61ec51d784a9a2e0adf0cc45051f7
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: steward/64-governor-ci-green
+  final_sha: 56261342728435d0e40a7651d3bd6c53c2f372e5
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: steward/72-inventory-robust
+  final_sha: 5dfcc9936269ee99b3edad28f02240b40c167e48
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: steward/consolidation-live-state
+  final_sha: 0ce58074cd3bd676d0dc873a2ec4d9aee1084826
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 1
+- branch: steward/consolidation-records
+  final_sha: 6b607d9de564c1f75513bf9b257e4e8b2d88adea
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: steward/final-structure-pr1-governor-enforcement
+  final_sha: 1b3bb3faae6600b2d6bed4059f0416d6d9ec1dc8
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: steward/forward-port-legacy-phase-d
+  final_sha: 053e926894feb6a1be16479f6bc2d40a91ae41e3
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: steward/retire-manifest
+  final_sha: 6980b8088afcb86354ad77aa10c75f697869afe0
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: wave1/event-emission
+  final_sha: afde61db08a7760d4a17d37d33f2ab160682669c
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: wave1/exec-decision-models
+  final_sha: 339c61282e2d248b3c8a5b13720e987f3fbb0d6a
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: wave1/schemas
+  final_sha: ee80cdbc2f53ff8d3eff5808840fcd73c59ad7a8
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: wave2/executor-resolver
+  final_sha: d8362ae8dd1a89bdb140d2692c8f3d51cb8a63f9
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: wave2/router-fabric
+  final_sha: f93d128c8f83a4d566a820a60e9fbedd6cafd450
+  classification: ALREADY_IN_MAIN
+  unique_commits_vs_main: 0
+- branch: wave3/execution-job-bridge
+  final_sha: b1ebeb8b2d3541c331d8405ee91654829496f4ea
+  classification: SUPERSEDED
+  unique_commits_vs_main: 1
+do_not_retire_pending_human_review:
+- branch: claude/fix-main-ci-rego-zizmor
+  classification: CONFLICTING_SECURITY_MODEL
+  reason: "human_security_review (OPA reference monitor; likely SUPERSEDED \u2014 main CI green; 2 reviews\
+    \ required)"
+- branch: claude/keen-euler-4t9vo7
+  classification: HUMAN_DECISION_REQUIRED
+  reason: 'lab_isolation_review (Group E: fuzzing/crypto-proof/malware/chaos; must be incapable of reaching
+    prod)'
+- branch: steward/forward-port-citadel-waves
+  classification: CONFLICTING_SECURITY_MODEL
+  reason: human_review_critical (key custody/quorum/crypto-agility; 2 reviews + owner approval)
+delete_command: "for b in \\\n  claude/area11-uv-lockfile \\\n  claude/area2-ownership-verification \\\
+  \n  claude/brain-v2-prereq-fixes \\\n  claude/confident-planck-9t1rfs \\\n  claude/crypto-ci-fixes \\\
+  \n  claude/digital-twin \\\n  claude/drop-eval-extra \\\n  claude/endpoint-runtime-fold \\\n  claude/evidence-classification-restricted\
+  \ \\\n  claude/exciting-goldberg-udmve1 \\\n  claude/festive-brahmagupta-ctyiyn \\\n  claude/fix-trivy-eval-depgroup\
+  \ \\\n  claude/guardian-brain \\\n  claude/inventory-merge-driver \\\n  claude/keen-bohr-eqhtrq \\\n\
+  \  claude/laughing-ptolemy-zfeiiu \\\n  claude/mobile-and-credential-audit \\\n  claude/model-gateway\
+  \ \\\n  claude/phase-observability \\\n  claude/phase0-ci-pinning \\\n  claude/phase0-hardening \\\n\
+  \  claude/phase1-temporal-statemachine \\\n  claude/phase2-codeql-fixes \\\n  claude/phase2-identity-evidence\
+  \ \\\n  claude/phase3-isolation \\\n  claude/phase4-supplychain \\\n  claude/phase6-containment \\\n\
+  \  claude/phase6-detection-as-code \\\n  claude/phase6-resilience-recovery \\\n  claude/priority-agents\
+  \ \\\n  claude/reasoning-graph \\\n  claude/security-crypto-layer \\\n  claude/sovereign-ops-plane \\\
+  \n  claude/target-architecture \\\n  claude/tool-manifest-gateway \\\n  claude/twin-blast-gate \\\n\
+  \  claude/twin-ci-gate \\\n  claude/twin-federation \\\n  claude/twin-runtime-fold \\\n  claude/vibrant-gates-8qmfxc\
+  \ \\\n  claude/wave2-council-hunting \\\n  claude/wave2-reasoning \\\n  steward/57-merge-governor-baseline\
+  \ \\\n  steward/57-reconcile-wave0 \\\n  steward/63-governor-ci-fix \\\n  steward/64-governor-ci-green\
+  \ \\\n  steward/72-inventory-robust \\\n  steward/consolidation-live-state \\\n  steward/consolidation-records\
+  \ \\\n  steward/final-structure-pr1-governor-enforcement \\\n  steward/forward-port-legacy-phase-d \\\
+  \n  steward/retire-manifest \\\n  wave1/event-emission \\\n  wave1/exec-decision-models \\\n  wave1/schemas\
+  \ \\\n  wave2/executor-resolver \\\n  wave2/router-fabric \\\n  wave3/execution-job-bridge \\\n  ; do\
+  \ git push origin --delete \"$b\"; done"
