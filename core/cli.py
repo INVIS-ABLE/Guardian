@@ -796,5 +796,28 @@ def reason_matrix_cmd(case_file: str) -> None:
                       detail={"hypotheses": len(case.hypotheses)})
 
 
+@main.command("twin-live")
+@click.argument("twin_spec", type=click.Path(exists=True))
+@click.argument("stream_spec", type=click.Path(exists=True))
+@click.option("--min-severity", default="high", show_default=True,
+              help="Flag events at/above this severity: info|low|medium|high|critical.")
+def twin_live_cmd(twin_spec: str, stream_spec: str, min_severity: str) -> None:
+    """Runtime fold: overlay the event fabric on the twin — what is at risk right now."""
+    from .event_fabric import EventSeverity, load_stream
+    from .twin import live_risk, load_twin
+
+    twin = load_twin(twin_spec)
+    fabric = load_stream(stream_spec)
+    risk = live_risk(twin, fabric, min_severity=EventSeverity(min_severity.lower()))
+    click.echo(f"Live runtime risk ({len(risk.signals)} notable signal(s), "
+               f"{len(risk.runtime_edges)} observed edge(s)):")
+    for s in risk.signals:
+        oc = s.outcome.value if s.outcome else "-"
+        click.echo(f"  [{s.severity.value:8s} {oc:9s}] {s.action} → {s.asset_id}")
+    click.echo(f"\nAt risk now ({len(risk.at_risk)}): {', '.join(risk.at_risk) or '(none)'}")
+    AuditLog().record("twin-live", actor="cli", scope=twin_spec, decision="allowed",
+                      detail={"signals": len(risk.signals), "at_risk": len(risk.at_risk)})
+
+
 if __name__ == "__main__":  # pragma: no cover
     main()

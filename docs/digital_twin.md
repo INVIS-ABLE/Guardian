@@ -136,6 +136,34 @@ labels become `cloud_resource` and unknown edges `can_access` (conservative), an
 relationship **fails closed** (an incomplete export must not silently drop edges). The live
 `from_cartography()` service seam remains fail-closed until provisioned.
 
+## Runtime fold — reachability that reflects live state
+
+The twin is *declared* topology; reality drifts. [`core/twin/runtime.py`](../core/twin/runtime.py)
+overlays the real-time **event fabric** ([`core/event_fabric/`](../core/event_fabric), Sovereign
+#5) onto the twin so blast radius reflects **current** state:
+
+- **runtime edges** — observed `actor → target` interactions (a Cilium flow, a force-push, a DB
+  read) become ephemeral graph edges, so reachability includes connections that *actually
+  happened*, not only the ones on paper;
+- **active-risk signals** — notable events (≥ a severity threshold, or a denied/blocked/failed
+  outcome) flag the asset they touch; the live blast radius is what's at risk *right now*.
+
+```bash
+guardian twin-live twin/invisable-sample.yaml event_fabric/invisable-stream.yaml
+# [critical detected ] runtime.shell_in_container → svc:messaging-relay
+# [high     blocked  ] network.unexpected_egress  → svc:messaging-relay
+# At risk now (6): api:messaging, data:ciphertext, db:mailbox, img:messaging, repo:guardian, svc:messaging-relay
+```
+
+A live shell + blocked egress on the messaging service is shown propagating, *now*, to the
+encrypted mailbox store and its ciphertext. This composes straight into Wave 2: feed a flagged
+asset and a sensitive sink to `reason-causal`, or the live-at-risk set into the council. The event
+fabric is metadata-only, so the overlay is too; `apply_runtime` returns a new twin (inputs
+untouched) and the whole fold is read-only — it explains current exposure, it changes nothing.
+
+*(Endpoint fabric (#4) host-integrity signals fold in the same way via a machine-identity asset —
+a natural next increment.)*
+
 ## The production path
 
 In production the twin is **continuously populated from Cartography / CloudQuery and persisted in

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-23T00:40:49.681685+00:00",
+  "generated_at": "2026-06-23T00:45:25.123124+00:00",
   "wave": 0,
   "summary": {
     "agents": 17,
@@ -8,7 +8,7 @@
     "simulators": 3,
     "router_capabilities": 12,
     "tool_manifest_capabilities": 8,
-    "tests": 90,
+    "tests": 92,
     "source_directories": [
       "agents",
       "attestation",
@@ -527,6 +527,15 @@
       ]
     },
     {
+      "file": "core/twin/runtime.py",
+      "markers": [
+        {
+          "line": 110,
+          "marker": "placeholder"
+        }
+      ]
+    },
+    {
       "file": "identity/credentials.py",
       "markers": [
         {
@@ -633,6 +642,7 @@
     "tests/test_roots_of_trust.py",
     "tests/test_router.py",
     "tests/test_router_contract_execution.py",
+    "tests/test_router_events.py",
     "tests/test_schemas.py",
     "tests/test_scope.py",
     "tests/test_shadow_guardian.py",
@@ -654,6 +664,7 @@
     "tests/test_twin_changemap.py",
     "tests/test_twin_federate.py",
     "tests/test_twin_forecast.py",
+    "tests/test_twin_runtime.py",
     "tests/test_typed_state.py",
     "tests/test_verifier.py"
   ]
