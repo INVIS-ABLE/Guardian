@@ -535,7 +535,11 @@ def events_verify_cmd(spec_file: str) -> None:
 @click.option("--rules", type=click.Path(exists=True), default=None,
               help="YAML with 'corroboration' and/or 'expected_sequences' for anomaly detection.")
 @click.option("--case", default=None, help="Filter to one case_id / trace_id.")
-def forensics_cmd(log_dir: str | None, rules: str | None, case: str | None) -> None:
+@click.option("--alerts-jsonl", type=click.Path(), default=None,
+              help="Route detected anomalies through the alert router, appending each as a "
+                   "JSON line to this file (for an alert pipeline / log shipper).")
+def forensics_cmd(log_dir: str | None, rules: str | None, case: str | None,
+                  alerts_jsonl: str | None) -> None:
     """Forensic timeline: reconstruct an ordered incident timeline from the audit log and
     flag anomalies (integrity failures, missing events, unsupported successes).
 
@@ -573,9 +577,37 @@ def forensics_cmd(log_dir: str | None, rules: str | None, case: str | None) -> N
             click.echo(f"  ! {a}")
     else:
         click.echo("No anomalies.")
+
+    if alerts_jsonl:
+        routed = _route_forensic_alerts(report, alerts_jsonl)
+        click.echo(f"Routed {routed} alert(s) to {alerts_jsonl}")
+
     audit.record("forensics", actor="cli", decision="denied" if report.anomalies else "allowed",
                  detail={"events": len(report.entries), "anomalies": len(report.anomalies)})
     raise SystemExit(1 if report.anomalies else 0)
+
+
+def _route_forensic_alerts(report, alerts_jsonl: str) -> int:
+    """Route a timeline report's anomalies through the alert router to a JSONL file sink.
+
+    Every severity is routed to one local file channel (no network), so nothing is dropped;
+    each delivered alert is appended as one JSON line. Returns the number of alerts delivered.
+    """
+    import json
+    from pathlib import Path
+
+    from forensics import raise_forensic_alerts
+    from observability.alerts import AlertRouter, Severity
+
+    out = Path(alerts_jsonl)
+
+    def file_sink(alert) -> None:
+        with out.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(alert.as_dict(), sort_keys=True) + "\n")
+
+    router = AlertRouter(routes={Severity.INFO: ("file",)}, sinks={"file": file_sink})
+    delivered = raise_forensic_alerts(report, router)
+    return sum(1 for channels in delivered.values() if channels)
 
 
 def _federate_from_opts(twin_spec, identity_spec, lineage_spec, bridges_spec):
