@@ -1,11 +1,12 @@
 # zizmor configuration — GitHub Actions security audit (blueprint area 10).
 #
-# `unpinned-uses` (pin Actions to a full commit SHA) is enforced by Renovate
-# (renovate.json: helpers:pinGitHubActionDigests). Until Renovate's first pin PR lands,
-# it is downgraded here so the rest of zizmor's audits can gate without a chicken-and-egg
-# block. Once Actions are SHA-pinned, remove this override to make it an error again.
+# Every Action is now pinned to a full commit SHA (resolved via git ls-remote; Renovate
+# keeps them current — renovate.json: helpers:pinGitHubActionDigests). The `unpinned-uses`
+# policy is therefore set to `hash-pin`: zizmor FAILS if any `uses:` is not pinned to an
+# immutable 40-hex commit SHA. (The semgrep container image is digest-pinned by Renovate's
+# docker:pinDigests and carries an explicit `zizmor: ignore[unpinned-images]` until then.)
 rules:
   unpinned-uses:
     config:
       policies:
-        "*": ref-pin   # require a pinned ref (tag/sha); upgrade to hash-pin after Renovate
+        "*": hash-pin   # require an immutable commit-SHA pin for every Action
