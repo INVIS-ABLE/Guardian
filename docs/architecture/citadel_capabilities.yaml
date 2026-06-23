@@ -93,8 +93,8 @@ systems:
     owner: citadel/crypto_agility/inventory.py
     owner_kind: guardian_native
     verifier: citadel/crypto_agility/downgrade.py
-    status: planned
-    runtime_enforced: false
+    status: present          # Wave 23: inventory + allow-list, migration (dual-read), downgrade
+    runtime_enforced: true   # detection, hybrid-PQ check, composed CryptoAgilityVerifier
     grants_authority: false
     grants_production_authority: false
     function: inventory every algorithm/cert/key/protocol; controlled migration; downgrade detection; PQ readiness
@@ -115,8 +115,8 @@ systems:
     owner_kind: upstream
     verifier: citadel/quorum/threshold.py
     requires_quorum: true
-    status: planned
-    runtime_enforced: false
+    status: partial          # Wave 24: threshold gate, ceremonies, key classes delivered;
+    runtime_enforced: true   # OpenBao secret/key backend is the production custody store (planned)
     grants_authority: false
     grants_production_authority: false
     function: split high-value authority across custodians; quorum for root operations; offline recovery material
@@ -395,8 +395,8 @@ systems:
     verifier: citadel/quorum/evidence.py
     min_threshold: 3
     participants_use_separate_credentials: true
-    status: partial
-    runtime_enforced: true
+    status: present          # Wave 24: citadel/quorum threshold + signed ceremony evidence +
+    runtime_enforced: true   # independent re-verification, over orchestration/approvals.py
     grants_authority: false
     grants_production_authority: false
     function: threshold approval for root operations (key/attestation-root rotation, recovery activation, emergency policy)

@@ -1,0 +1,21 @@
+# tenants/invisable.yaml
+# INVISABLE as a first-class tenant profile.
+#
+# This makes the historical implicit default — "INVISABLE owns everything" — an
+# explicit, auditable, version-controlled record. Loaded by core.tenancy.load_tenant /
+# load_tenant_registry into a Tenant. INVISABLE remains the founding organisation, the
+# first deployment profile, and a protected tenant. See:
+#   - docs/platform/TENANT_AND_AUTHORISED_TARGET_MODEL.md
+#   - docs/platform/INVISABLE_TO_MULTI_TENANT_MIGRATION.md  (Phase E)
+schema_version: 1
+tenant:
+  tenant_id: invisable
+  legal_name: INVISABLE
+  deployment_mode: single_tenant_self_hosted
+  region: uk
+  data_residency: uk
+  encryption_profile: default
+  retention_policy: default
+  administrators:
+    - id:human-security-lead
+  status: active

@@ -5,6 +5,21 @@ Each decision records: context, decision, rationale, and how to reverse it.
 
 ---
 
+## D-0008 — INVISABLE becomes an explicit tenant profile (Phase E)
+- **Date:** 2026-06-23
+- **Context:** INVISABLE was the *implicit* default tenant (a code constant). The
+  migration's Phase E calls for replacing the implicit default with an explicit,
+  auditable, version-controlled record.
+- **Decision:** Add `tenants/invisable.yaml` (a first-class tenant profile) and
+  `core/tenancy.load_tenant` / `tenant_from_dict` / `load_tenant_registry` to build a
+  `TenantRegistry` from YAML profiles. The built-in `INVISABLE_TENANT` is always
+  seeded; a committed profile for it wins. Malformed/missing profiles fail closed.
+- **Rationale:** Makes the founding tenant auditable and lets additional tenants be
+  declared as data, not code — without changing the in-code default that keeps
+  pre-tenancy scopes working.
+- **Reverse:** Delete `tenants/invisable.yaml`, the three loader functions, and the
+  test. The in-code `INVISABLE_TENANT` default remains, so nothing breaks.
+
 ## D-0007 — Durable, signed grant store + registry tenant column (Phase D)
 - **Date:** 2026-06-23
 - **Context:** Grants were in-memory only (Phase A). Tenant authority needs a managed,
