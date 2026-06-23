@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-23T02:18:19.331400+00:00",
+  "generated_at": "2026-06-23T02:25:22.108824+00:00",
   "wave": 0,
   "summary": {
     "agents": 17,
@@ -8,7 +8,7 @@
     "simulators": 3,
     "router_capabilities": 12,
     "tool_manifest_capabilities": 8,
-    "tests": 113,
+    "tests": 114,
     "source_directories": [
       "agents",
       "attestation",
@@ -661,6 +661,7 @@
     "tests/test_event_fabric.py",
     "tests/test_event_sources.py",
     "tests/test_evidence_store.py",
+    "tests/test_execution_job_bridge.py",
     "tests/test_executor_roots.py",
     "tests/test_failclosed.py",
     "tests/test_forensic_alerting.py",
