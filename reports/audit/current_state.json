@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-06-23T02:52:30.485413+00:00",
+  "generated_at": "2026-06-23T03:08:19.448781+00:00",
   "wave": 0,
   "summary": {
     "agents": 17,
@@ -8,7 +8,7 @@
     "simulators": 3,
     "router_capabilities": 12,
     "tool_manifest_capabilities": 8,
-    "tests": 120,
+    "tests": 122,
     "source_directories": [
       "agents",
       "attestation",
@@ -680,6 +680,7 @@
     "tests/test_identity.py",
     "tests/test_identity_graph.py",
     "tests/test_immune_memory.py",
+    "tests/test_integrations_contracts.py",
     "tests/test_isolation.py",
     "tests/test_lineage.py",
     "tests/test_machine_attestation.py",
@@ -736,6 +737,7 @@
     "tests/test_twin_assessment.py",
     "tests/test_twin_cartography.py",
     "tests/test_twin_changemap.py",
+    "tests/test_twin_chaos.py",
     "tests/test_twin_federate.py",
     "tests/test_twin_forecast.py",
     "tests/test_twin_runtime.py",

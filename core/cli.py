@@ -1063,5 +1063,54 @@ def chaos_gate_cmd(spec_file: str) -> None:
     raise SystemExit(1 if report.has_gap else 0)
 
 
+def _twin_chaos_report(twin_spec: str, gameday_spec: str):
+    from .twin import load_gameday
+
+    report = load_gameday(twin_spec, gameday_spec)
+    click.echo(f"Run: {report.run}  (clone: {report.clone_of})")
+    for r in report.results:
+        rto = ("" if r.scenario.rto_seconds is None
+               else f"  RTO {r.scenario.rto_seconds}s/{r.scenario.rto_objective_seconds}s")
+        flag = " ✗RTO" if r.rto_breached else ""
+        degraded = f"  [controls down: {', '.join(r.scenario.degraded_controls)}]" if r.scenario.degraded_controls else ""
+        verdict = "CONTAINED" if r.fully_contained else f"{len(r.actual_impact)} impacted"
+        click.echo(f"  {r.scenario.id:32s} fail {r.scenario.target} → {verdict}{degraded}{rto}{flag}")
+        if r.controls_engaged:
+            click.echo(f"        ✓ controls held: {', '.join(r.controls_engaged)} "
+                       f"(saved {len(r.contained_by_controls)})")
+        if r.actual_impact:
+            click.echo(f"        ✗ uncontained: {', '.join(r.actual_impact)}")
+    worked = report.controls_that_worked()
+    if worked:
+        click.echo("\ncontrols that actually worked: "
+                   + ", ".join(f"{c}×{n}" for c, n in sorted(worked.items())))
+    return report
+
+
+@main.command("twin-chaos")
+@click.argument("twin_spec", type=click.Path(exists=True))
+@click.argument("gameday_spec", type=click.Path(exists=True))
+def twin_chaos_cmd(twin_spec: str, gameday_spec: str) -> None:
+    """Twin chaos: compute predicted vs actual blast radius from the REAL twin; show which controls held."""
+    report = _twin_chaos_report(twin_spec, gameday_spec)
+    AuditLog().record("twin-chaos", actor="cli", scope=gameday_spec, decision="allowed",
+                      detail={"scenarios": len(report.results),
+                              "rto_breaches": len(report.rto_breaches)})
+
+
+@main.command("twin-chaos-gate")
+@click.argument("twin_spec", type=click.Path(exists=True))
+@click.argument("gameday_spec", type=click.Path(exists=True))
+def twin_chaos_gate_cmd(twin_spec: str, gameday_spec: str) -> None:
+    """Twin chaos: fail (exit non-zero) on any RTO breach in the game-day."""
+    report = _twin_chaos_report(twin_spec, gameday_spec)
+    click.echo(f"\ntwin-chaos gate: {'FAIL' if report.has_finding else 'PASS'} — "
+               f"{len(report.rto_breaches)} RTO breach(es), {len(report.uncontained)} uncontained")
+    AuditLog().record("twin-chaos-gate", actor="cli", scope=gameday_spec,
+                      decision="denied" if report.has_finding else "allowed",
+                      detail={"rto_breaches": len(report.rto_breaches)})
+    raise SystemExit(1 if report.has_finding else 0)
+
+
 if __name__ == "__main__":  # pragma: no cover
     main()

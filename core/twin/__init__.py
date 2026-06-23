@@ -28,6 +28,16 @@ from .forecast import (
     default_sinks,
     default_sources,
 )
+from .chaos import (
+    TwinChaosReport,
+    TwinChaosResult,
+    TwinChaosScenario,
+    build_gameday_from_spec,
+    load_gameday,
+    run_gameday,
+    simulate_failure,
+    working_protections,
+)
 from .ingest import build_from_spec, from_cartography, load_twin, production_source_required
 from .models import (
     AssetKind,
@@ -72,4 +82,13 @@ __all__ = [
     "live_risk",
     "runtime_edges",
     "apply_runtime",
+    # twin-driven chaos & recovery (#17, real engine)
+    "TwinChaosScenario",
+    "TwinChaosResult",
+    "TwinChaosReport",
+    "simulate_failure",
+    "run_gameday",
+    "working_protections",
+    "build_gameday_from_spec",
+    "load_gameday",
 ]

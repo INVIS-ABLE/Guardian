@@ -1,0 +1,40 @@
+# Twin-driven chaos game-day for the INVISABLE estate.
+#
+# Unlike a hand-written scenario list, this declares ONLY what fails (and which controls are also
+# down). Predicted and actual blast radius are COMPUTED from the real digital twin
+# (twin/invisable-sample.yaml): predicted = twin.blast_radius(target); actual = the same
+# propagation with working SECURITY_CONTROL/PROTECTS edges as firebreaks. The difference is
+# exactly "which controls actually worked".
+#
+# Run (loads the twin + this game-day, computes everything):
+#   guardian twin-chaos twin/invisable-sample.yaml chaos/invisable-twin-gameday.yaml
+#
+# 'clone_of' MUST name a clone — the run is refused against the production twin.
+run: "2026-Q2 twin game-day"
+clone_of: "twin:invisable-clone-2026Q2"
+
+scenarios:
+  # Compromise the repo with Sigstore admission working: the control should firebreak the whole
+  # downstream (a malicious build can't be admitted) → fully contained.
+  - id: s1-repo-compromise
+    mode: region_outage
+    target: "repo:guardian"
+    rto_seconds: 60
+    rto_objective_seconds: 120
+
+  # The SAME compromise, but Sigstore is ALSO down (the chaos injection): the firebreak is gone,
+  # so the full blast reaches the service, DB and message ciphertext. Shows the control's value.
+  - id: s2-repo-compromise-control-down
+    mode: region_outage
+    target: "repo:guardian"
+    degraded_controls: ["ctrl:sigstore"]
+    rto_seconds: 90
+    rto_objective_seconds: 120
+
+  # A direct service outage downstream of the control: nothing protects the API/DB/ciphertext, so
+  # the failure is uncontained — and recovery blows the RTO objective (a recovery finding).
+  - id: s3-service-outage
+    mode: database_failover
+    target: "svc:messaging-relay"
+    rto_seconds: 540
+    rto_objective_seconds: 300
